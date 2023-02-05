@@ -49,10 +49,10 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
-    Label         Label[]
     Cient         Client[]
     Technic       Technic[]
     Assignment    Assignment[]
+    Service       Service[]
 }
 
 model VerificationToken {
@@ -63,7 +63,7 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
-model Label {
+model Service {
     id        String    @id @default(cuid())
     name      String
     createdAt DateTime  @default(now())
