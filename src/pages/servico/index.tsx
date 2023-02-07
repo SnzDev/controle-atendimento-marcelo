@@ -7,7 +7,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CgSpinnerTwo } from "react-icons/cg";
 import { api } from "../../utils/api";
-
+import { useSession } from "next-auth/react";
+import Router from "next/router";
 const Service: NextPage = () => {
   const schemaValidation = z.object({
     name: z
@@ -24,14 +25,31 @@ const Service: NextPage = () => {
     resolver: zodResolver(schemaValidation),
   });
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    createLabel.mutate(data);
+    create.mutate(data);
   };
-  const createLabel = api.label.create.useMutation({
+  const create = api.service.create.useMutation({
     onSuccess: () => {
       alert("sucesso");
     },
   });
-
+  const { data: sessionData } = useSession();
+  console.log(sessionData);
+  if (!sessionData)
+    return (
+      <>
+        <Head>
+          <title>Não encontrado</title>
+          <meta name="description" content="Não encontrado" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+          <div className="flex flex-col items-center justify-center">
+            <h1 className="text-4xl font-bold text-white">Não encontrado</h1>
+            <p className="text-lg text-white"></p>
+          </div>
+        </main>
+      </>
+    );
   return (
     <>
       <Head>
@@ -64,9 +82,8 @@ const Service: NextPage = () => {
 };
 
 const ListService: React.FC = () => {
-  const data = api.label.getAll.useQuery();
-  const inativate = api.label.inativate.useMutation({});
-  const activate = api.label.activate.useMutation({});
+  const inativate = api.service.inativate.useMutation();
+  const activate = api.service.activate.useMutation();
   return (
     <div className="flex flex-col gap-4 rounded-md bg-slate-400 p-10">
       {data.data?.map((item) => (

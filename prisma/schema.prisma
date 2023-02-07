@@ -100,6 +100,7 @@ model Assignment {
     LabelId      String
     informations String?
     dayActivity  DateTime
+    position     Int
     status       AssignmentStatus
     createdAt    DateTime         @default(now())
     updatedAt    DateTime         @updatedAt
