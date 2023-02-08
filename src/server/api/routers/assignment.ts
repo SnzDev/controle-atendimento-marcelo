@@ -3,41 +3,47 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
 export const clientRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.client.findMany();
-  }),
-  findOne: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.prisma.client.findUnique({ where: { id: input.id } });
-    }),
   create: protectedProcedure
-    .input(z.object({ name: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.client.create({ data: { name: input.name } });
-    }),
-  update: protectedProcedure
-    .input(z.object({ name: z.string(), id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.client.update({
-        where: { id: input.id },
-        data: { name: input.name },
+    .input(
+      z.object({
+        clientId: z.string(),
+        dateActivity: z.date(),
+        labelId: z.string(),
+        technicId: z.string(),
+        shopId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const lastPosition = await ctx.prisma.assignment.findMany({
+        where: {
+          technicId: input.technicId,
+          shopId: input.shopId,
+          dateActivity: input.dateActivity,
+        },
+        orderBy: {
+          position: "desc",
+        },
+      });
+      const position = (lastPosition?.[0]?.position ?? 0) + 1;
+
+      return ctx.prisma.assignment.create({
+        data: {
+          clientId: input.clientId,
+          dateActivity: input.dateActivity,
+          labelId: input.labelId,
+          position,
+          technicId: input.technicId,
+          status: "PENDING",
+          shopId: input.shopId,
+        },
       });
     }),
-  inativate: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.client.update({
-        where: { id: input.id },
-        data: { deletedAt: new Date(), deletedBy: ctx.session.user.id },
-      });
-    }),
-  activate: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.client.update({
-        where: { id: input.id },
-        data: { deletedAt: null, deletedBy: null },
+  getAssignments: protectedProcedure
+    .input(z.object({ shopId: z.string(), dayActivity: z.date() }))
+    .query(({ ctx, input }) => {
+      return ctx.prisma.assignment.findMany({
+        where: { dateActivity: input.dayActivity, shopId: input.shopId },
+        orderBy: { position: "asc" },
       });
     }),
 });
