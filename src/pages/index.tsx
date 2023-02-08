@@ -14,7 +14,6 @@ type FieldValues = z.infer<typeof schemaValidation>
 
 const Login: NextPage = () => {
 
-
   return (
     <>
       <Head>
@@ -30,25 +29,37 @@ const Login: NextPage = () => {
         <form>
           <div>
             <p className="text-stone-100 font-semibold text-base pt-8">Endereço de e-mail</p>
-            <input
-              className="rounded p-2 my-2 w-80"
-              type="email"
-              placeholder="exemplo@exemplo.com.br"
-            />
+            <span className="flex row items-center">
+              <Image src="/icons/EnvelopeSimple.svg" className="items-end" width={24} height={24} alt="Logo AcesseNet" />
+              <input
+                className="rounded p-2 my-2 w-80 bg-stone-900"
+                type="email"
+                placeholder="exemplo@exemplo.com.br"
+              />
+            </span>
           </div>
 
           <p className="text-stone-100 font-semibold text-base pt-6">Sua senha</p>
-          <input className="rounded p-2 my-2 w-80" type="password" placeholder="**************" />
+          <span className="flex row items-center">
+            <Image src="/icons/Lock.svg" className="" width={24} height={24} alt="Logo AcesseNet" />
+            <input
+              className="rounded p-2 my-2 w-80 bg-stone-900"
+              type="password"
+              placeholder="**************"
+            />
+          </span>
           <br />
-          <button className="p-2 mt-6 rounded w-80 font-semibold text-base bg-blue-800 hover:bg-blue-500" >Entrar na plataforma</button>
+
+          <button className="p-2 mt-6 rounded w-80 font-semibold text-base bg-blue-500 hover:bg-blue-300" >Entrar na plataforma</button>
           <p className="text-stone-500 font-semibold text-base  my-4 text-center">ou</p>
-          <button className="bg-white p-2 rounded w-80 font-semibold text-base" >Entrar com Google</button>
+          <span className="flex row items-center">
+            <Image src="/icons/Google.svg" className="" width={24} height={24} alt="Logo AcesseNet" />
+            <button className="bg-white p-2 rounded w-80 font-semibold text-base" >Entrar com Google</button>
+          </span>
           <p className="text-stone-500 font-semibold text-base  my-4 text-center underline underline-offset-1">Esqueceu sua senha?</p>
         </form>
-
       </main>
     </>
-
   )
 }
 
