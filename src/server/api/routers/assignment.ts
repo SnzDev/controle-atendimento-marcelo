@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
-export const clientRouter = createTRPCRouter({
+export const assignmentRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
