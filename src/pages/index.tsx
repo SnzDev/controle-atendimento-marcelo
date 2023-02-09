@@ -26,13 +26,13 @@ const Login: NextPage = () => {
         <h1 className="text-stone-50 font-bold text-3xl"> AcesseNet</h1>
         <h3 className="text-stone-500 font-semibold text-lg">Faça login e comece a usar!</h3>
 
-        <form>
+        <form className="flex flex-col justify-items-center">
           <div>
             <p className="text-stone-100 font-semibold text-base pt-8">Endereço de e-mail</p>
-            <span className="flex row items-center">
-              <Image src="/icons/EnvelopeSimple.svg" className="items-end" width={24} height={24} alt="Logo AcesseNet" />
+            <span className="flex row items-center pl-1.5">
+              <Image src="/icons/EnvelopeSimple.svg" className="mr-[-32px] z-10" width={24} height={24} alt="Logo AcesseNet" />
               <input
-                className="rounded p-2 my-2 w-80 bg-stone-900"
+                className="rounded p-2 pl-10 items-center my-2 w-80 text-stone-100 bg-stone-900"
                 type="email"
                 placeholder="exemplo@exemplo.com.br"
               />
@@ -40,22 +40,23 @@ const Login: NextPage = () => {
           </div>
 
           <p className="text-stone-100 font-semibold text-base pt-6">Sua senha</p>
-          <span className="flex row items-center">
-            <Image src="/icons/Lock.svg" className="" width={24} height={24} alt="Logo AcesseNet" />
+          <span className="flex row items-center pl-1.5">
+            <Image src="/icons/Lock.svg" className="mr-[-32px] z-10" width={24} height={24} alt="Logo AcesseNet" />
             <input
-              className="rounded p-2 my-2 w-80 bg-stone-900"
+              className="rounded p-2 pl-10 items-center my-2 w-80 text-stone-100 bg-stone-900"
               type="password"
               placeholder="**************"
             />
           </span>
           <br />
-
-          <button className="p-2 mt-6 rounded w-80 font-semibold text-base bg-blue-500 hover:bg-blue-300" >Entrar na plataforma</button>
+          <button className="p-2 mt-4 rounded w-80 font-semibold text-base bg-blue-500 hover:bg-blue-300" >Entrar na plataforma</button>
           <p className="text-stone-500 font-semibold text-base  my-4 text-center">ou</p>
-          <span className="flex row items-center">
-            <Image src="/icons/Google.svg" className="" width={24} height={24} alt="Logo AcesseNet" />
-            <button className="bg-white p-2 rounded w-80 font-semibold text-base" >Entrar com Google</button>
-          </span>
+
+          <button className="bg-white p-2 pl-16 rounded w-82 font-semibold text-base flex row items-center gap-2" >
+            <Image src="/icons/Google.svg" className="z-10" width={24} height={24} alt="Logo AcesseNet" />
+            Entrar com Google
+          </button>
+
           <p className="text-stone-500 font-semibold text-base  my-4 text-center underline underline-offset-1">Esqueceu sua senha?</p>
         </form>
       </main>
