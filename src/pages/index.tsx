@@ -1,22 +1,26 @@
-import { type NextPage } from "next";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import { getServerSession } from "next-auth";
+import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { z } from "zod";
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
-import { getCsrfToken } from "next-auth/react";
+import { authOptions } from "../server/auth";
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const session = await getServerSession(context.req, context.res, authOptions);
+
+  const providers = await getProviders();
+  if (session) {
+    return { redirect: { destination: "/" } };
+  }
   return {
-    props: {
-      csrfToken: await getCsrfToken(context),
-    },
+    props: { providers: providers ?? [] },
   };
-}
+};
 const Login = ({
-  csrfToken,
+  providers,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const schemaValidation = z.object({
     email: z.string().email("E-mail inválido"),
@@ -24,6 +28,7 @@ const Login = ({
   });
 
   type FieldValues = z.infer<typeof schemaValidation>;
+
   return (
     <>
       <Head>
@@ -38,11 +43,8 @@ const Login = ({
           Faça login e comece a usar!
         </h3>
 
-        <form
-          className="flex flex-col justify-items-center"
-          action="/api/auth/callback/credentials"
-        >
-          <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+        <form className="flex flex-col justify-items-center">
+          {/* <input name="csrfToken" type="hidden" defaultValue={csrfToken} /> */}
           <div>
             <p className="pt-8 text-base font-semibold text-stone-100">
               Endereço de e-mail
@@ -91,6 +93,19 @@ const Login = ({
             ou
           </p>
 
+          {Object.values(providers).map((provider) => (
+            <button
+              type="button"
+              key={provider.id}
+              onClick={() =>
+                signIn(provider.id, {
+                  // callbackUrl: `${window.location.origin}`,
+                })
+              }
+            >
+              asdasd
+            </button>
+          ))}
           <button className="w-82 row flex items-center gap-2 rounded bg-white p-2 pl-16 text-base font-semibold">
             <Image
               src="/icons/Google.svg"
