@@ -53,6 +53,7 @@ model User {
     Technic       Technic[]
     Assignment    Assignment[]
     Service       Service[]
+    Shop          Shop[]
 }
 
 model VerificationToken {
@@ -93,19 +94,34 @@ model Technic {
     user      User?     @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
 }
 
+model Shop {
+    id         String       @id @default(cuid())
+    name       String
+    city       String
+    createdAt  DateTime     @default(now())
+    updatedAt  DateTime     @updatedAt
+    deletedAt  DateTime?
+    deletedBy  String?
+    user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+    Assignment Assignment[]
+}
+
 model Assignment {
     id           String           @id @default(cuid())
+    shopId       String
     clientId     String
     technicId    String
-    LabelId      String
+    labelId      String
     informations String?
-    dayActivity  DateTime
+    dateActivity DateTime
+    position     Int
     status       AssignmentStatus
     createdAt    DateTime         @default(now())
     updatedAt    DateTime         @updatedAt
     deletedAt    DateTime?
     deletedBy    String?
     user         User?            @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+    shop         Shop             @relation(fields: [shopId], references: [id], onDelete: Cascade)
 }
 
 enum AssignmentStatus {
