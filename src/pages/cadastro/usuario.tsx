@@ -1,17 +1,42 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { TRPCErrorResponse } from "@trpc/server/rpc";
 import Head from "next/head";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form/dist/types";
+import Swal from "sweetalert2";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler } from "react-hook-form/dist/types";
 import { api } from "../../utils/api";
 
 function Usuario() {
-  const schemaValidation = z.object({
-    name: z
-      .string({ required_error: "Obrigatório" })
-      .min(3, "No minímo 3 caracteres"),
-  });
+  const router = useRouter();
+  const schemaValidation = z
+    .object({
+      name: z
+        .string({ required_error: "Obrigatório" })
+        .min(3, "No minímo 3 caracteres"),
+      email: z
+        .string({ required_error: "Obrigatório" })
+        .email("Email inválido"),
+      password: z
+        .string({ required_error: "Obrigatório" })
+        .min(8, "No minímo 8 caracteres"),
+      confirmPassword: z
+        .string({ required_error: "Obrigatório" })
+        .min(8, "No minímo 8 caracteres"),
+    })
+    .superRefine((input, ctx) => {
+      const { password, confirmPassword } = input;
+
+      if (password !== confirmPassword) {
+        ctx.addIssue({
+          path: ["confirmPassword"],
+          message: "As senhas não conferem",
+          code: "custom",
+        });
+      }
+    });
   type FieldValues = z.infer<typeof schemaValidation>;
   const {
     register,
@@ -23,7 +48,27 @@ function Usuario() {
     },
     resolver: zodResolver(schemaValidation),
   });
-  const onSubmit: SubmitHandler<FieldValues> = (data) => console.log(data);
+  const create = api.user.create.useMutation();
+  const onSubmit: SubmitHandler<FieldValues> = ({ confirmPassword, ...data }) =>
+    create
+      .mutateAsync(data)
+      .then(async () => {
+        await Swal.fire({
+          icon: "success",
+          title: "Usuário criado com sucesso!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        await router.push("/atendimento");
+      })
+      .catch((error: TRPCErrorResponse) =>
+        Swal.fire({
+          icon: "error",
+          title: error ?? "Algo deu errado!",
+          showConfirmButton: false,
+          timer: 1500,
+        })
+      );
   return (
     <>
       <Head>
@@ -38,7 +83,7 @@ function Usuario() {
           Cadastro de usuário
         </h3>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit, (error) => console.log(error))}>
           <div className="row flex items-center gap-6">
             <div>
               <p className="pt-8 text-base font-semibold text-stone-100">
@@ -59,6 +104,11 @@ function Usuario() {
                   placeholder="Maria José de Sousa Sauro"
                 />
               </span>
+              {errors.name && (
+                <p className="text-base font-semibold text-red-500">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
             <div>
@@ -74,11 +124,17 @@ function Usuario() {
                   alt="Logo AcesseNet"
                 />
                 <input
+                  {...register("email")}
                   className="my-2 w-80 rounded bg-stone-900 p-2 pl-10 text-stone-100"
                   type="email"
                   placeholder="exemplo@exemplo.com.br"
                 />
               </span>
+              {errors.email && (
+                <p className="text-base font-semibold text-red-500">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -96,11 +152,17 @@ function Usuario() {
                   alt="Logo AcesseNet"
                 />
                 <input
+                  {...register("password")}
                   className="my-2 w-80 rounded bg-stone-900 p-2 pl-10 text-stone-100"
                   type="password"
                   placeholder="*****************"
                 />
               </span>
+              {errors.password && (
+                <p className="text-base font-semibold text-red-500">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <div>
@@ -116,11 +178,17 @@ function Usuario() {
                   alt="Logo AcesseNet"
                 />
                 <input
+                  {...register("confirmPassword")}
                   className="my-2 w-80 rounded bg-stone-900 p-2 pl-10 text-stone-100"
                   type="password"
                   placeholder="*****************"
                 />
               </span>
+              {errors.confirmPassword && (
+                <p className="text-base font-semibold text-red-500">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
           </div>
           <div className="row flex justify-center">

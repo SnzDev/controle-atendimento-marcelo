@@ -1,8 +1,12 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { getServerSession } from "next-auth";
-import { getProviders, signIn } from "next-auth/react";
+import { getProviders, signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { authOptions } from "../server/auth";
 
@@ -13,7 +17,7 @@ export const getServerSideProps = async (
 
   const providers = await getProviders();
   if (session) {
-    return { redirect: { destination: "/" } };
+    return { redirect: { destination: "/atendimento" } };
   }
   return {
     props: { providers: providers ?? [] },
@@ -22,13 +26,38 @@ export const getServerSideProps = async (
 const Login = ({
   providers,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const { query, push } = useRouter();
+  const loginError = query?.error;
   const schemaValidation = z.object({
-    email: z.string().email("E-mail inválido"),
-    password: z.string().min(2, "Minimo 2 caracteres"),
+    email: z.string({ required_error: "Obrigatório" }).email("E-mail inválido"),
+    password: z
+      .string({ required_error: "Obrigatório" })
+      .min(8, "Mínimo 8 caracteres"),
   });
 
   type FieldValues = z.infer<typeof schemaValidation>;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FieldValues>({
+    resolver: zodResolver(schemaValidation),
+  });
+  const onSubmit: SubmitHandler<FieldValues> = async ({ email, password }) => {
+    await signIn("credentials", {
+      redirect: true,
+      callbackUrl: "/atendimento",
+      email,
+      password,
+    });
+  };
 
+  // const session = useSession();
+  // useEffect(() => {
+  //   if (session) {
+  //     void push("/atendimento");
+  //   }
+  // }, [session]);
   return (
     <>
       <Head>
@@ -42,8 +71,16 @@ const Login = ({
         <h3 className="text-lg font-semibold text-stone-500">
           Faça login e comece a usar!
         </h3>
+        {!!loginError && (
+          <p className="mt-4 rounded-md bg-red-500 p-2 text-gray-100 ">
+            E-mail ou senha incorreta!
+          </p>
+        )}
 
-        <form className="flex flex-col justify-items-center">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col justify-items-center"
+        >
           {/* <input name="csrfToken" type="hidden" defaultValue={csrfToken} /> */}
           <div>
             <p className="pt-8 text-base font-semibold text-stone-100">
@@ -58,11 +95,15 @@ const Login = ({
                 alt="Logo AcesseNet"
               />
               <input
+                {...register("email")}
                 className="my-2 w-80 items-center rounded bg-stone-900 p-2 pl-10 text-stone-100"
                 type="email"
                 placeholder="exemplo@exemplo.com.br"
               />
             </span>
+            {errors.email && (
+              <p className=" text-red-500 ">{errors.email.message}</p>
+            )}
           </div>
 
           <p className="pt-6 text-base font-semibold text-stone-100">
@@ -77,11 +118,15 @@ const Login = ({
               alt="Logo AcesseNet"
             />
             <input
+              {...register("password")}
               className="my-2 w-80 items-center rounded bg-stone-900 p-2 pl-10 text-stone-100"
               type="password"
               placeholder="**************"
             />
           </span>
+          {errors.password && (
+            <p className=" text-red-500 ">{errors.password.message}</p>
+          )}
           <br />
           <button
             type="submit"
@@ -93,29 +138,32 @@ const Login = ({
             ou
           </p>
 
-          {Object.values(providers).map((provider) => (
-            <button
-              type="button"
-              key={provider.id}
-              onClick={() =>
-                signIn(provider.id, {
-                  // callbackUrl: `${window.location.origin}`,
-                })
-              }
-            >
-              asdasd
-            </button>
-          ))}
-          <button className="w-82 row flex items-center gap-2 rounded bg-white p-2 pl-16 text-base font-semibold">
-            <Image
-              src="/icons/Google.svg"
-              className="z-10"
-              width={24}
-              height={24}
-              alt="Logo AcesseNet"
-            />
-            Entrar com Google
-          </button>
+          {Object.values(providers).map(
+            (provider) =>
+              provider.name !== "credentials" && (
+                <>
+                  <button
+                    key={provider.id}
+                    type="button"
+                    onClick={() =>
+                      signIn(provider.id, {
+                        // callbackUrl: `${window.location.origin}`,
+                      })
+                    }
+                    className="w-82 row flex items-center gap-2 rounded bg-white p-2 pl-16 text-base font-semibold"
+                  >
+                    <Image
+                      src="/icons/Google.svg"
+                      className="z-10"
+                      width={24}
+                      height={24}
+                      alt="Logo AcesseNet"
+                    />
+                    Entrar com {provider.name}
+                  </button>
+                </>
+              )
+          )}
 
           <p className="my-4 text-center text-base  font-semibold text-stone-500 underline underline-offset-1">
             Esqueceu sua senha?

@@ -6,7 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form/dist/types";
 import { api } from "../../utils/api";
 import Swal from "sweetalert2";
+import { useRouter } from "next/router";
+import type { TRPCErrorResponse } from "@trpc/server/rpc";
 function Technic() {
+  const { push } = useRouter();
   const schemaValidation = z.object({
     name: z
       .string({ required_error: "Obrigatório" })
@@ -15,7 +18,6 @@ function Technic() {
   type FieldValues = z.infer<typeof schemaValidation>;
   const {
     register,
-    reset,
     handleSubmit,
     formState: { errors },
   } = useForm<FieldValues>({
@@ -27,10 +29,25 @@ function Technic() {
   const create = api.technic.create.useMutation();
 
   const onSubmit: SubmitHandler<FieldValues> = (data) =>
-    create.mutateAsync(data).then(async () => {
-      await Swal.fire("Cliente cadastrado com sucesso!");
-      reset();
-    });
+    create
+      .mutateAsync(data)
+      .then(async () => {
+        await Swal.fire({
+          icon: "success",
+          title: "Técnico criado com sucesso!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        await push("/atendimento");
+      })
+      .catch((error: TRPCErrorResponse) =>
+        Swal.fire({
+          icon: "error",
+          title: error ?? "Algo deu errado!",
+          showConfirmButton: false,
+          timer: 1500,
+        })
+      );
   return (
     <>
       <Head>

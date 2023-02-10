@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form/dist/types";
 import { api } from "../../utils/api";
 import Swal from "sweetalert2";
+import { useRouter } from "next/router";
+import type { TRPCErrorResponse } from "@trpc/server/rpc";
 function Service() {
   const schemaValidation = z.object({
     name: z
@@ -13,9 +15,9 @@ function Service() {
       .min(3, "No minímo 3 caracteres"),
   });
   type FieldValues = z.infer<typeof schemaValidation>;
+  const { push } = useRouter();
   const {
     register,
-    reset,
     handleSubmit,
     formState: { errors },
   } = useForm<FieldValues>({
@@ -27,22 +29,37 @@ function Service() {
   const create = api.service.create.useMutation();
 
   const onSubmit: SubmitHandler<FieldValues> = (data) =>
-    create.mutateAsync(data).then(async () => {
-      await Swal.fire("Cliente cadastrado com sucesso!");
-      reset();
-    });
+    create
+      .mutateAsync(data)
+      .then(async () => {
+        await Swal.fire({
+          icon: "success",
+          title: "Serviço criado com sucesso!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        await push("/atendimento");
+      })
+      .catch((error: TRPCErrorResponse) =>
+        Swal.fire({
+          icon: "error",
+          title: error ?? "Algo deu errado!",
+          showConfirmButton: false,
+          timer: 1500,
+        })
+      );
   return (
     <>
       <Head>
-        <title>Serviço</title>
-        <meta name="description" content="cadastro de serviços" />
+        <title>Cadastro de serviço</title>
+        <meta name="description" content="Cadastro de serviços" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-black">
         <Image src="/Logo.png" width={95} height={95} alt="Logo AcesseNet" />
         <h1 className="text-3xl font-bold text-stone-50"> AcesseNet</h1>
         <h3 className="text-lg font-semibold text-stone-500">
-          Cadastro de serviço
+          Cadastro de Serviço
         </h3>
 
         <form

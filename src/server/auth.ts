@@ -8,7 +8,7 @@ import {
 import CredentialsProvider from "next-auth/providers/credentials";
 import DiscordProvider from "next-auth/providers/discord";
 import GoogleProvider from "next-auth/providers/google";
-
+import * as bcrypt from "bcrypt";
 import { env } from "../env/server.mjs";
 import { prisma } from "./db";
 
@@ -52,10 +52,10 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: PrismaAdapter(prisma),
   providers: [
-    // GoogleProvider({
-    //   clientId: env.GOOGLE_CLIENT_ID,
-    //   clientSecret: env.GOOGLE_CLIENT_SECRET,
-    // }),
+    GoogleProvider({
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    }),
     // DiscordProvider({
     //   clientId: env.DISCORD_CLIENT_ID,
     //   clientSecret: env.DISCORD_CLIENT_SECRET,
@@ -78,15 +78,19 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
-        if (user) {
+        if (user && user.password && credentials?.password) {
+          const passwordMatch = bcrypt.compareSync(
+            credentials.password,
+            user.password
+          );
           // Any object returned will be saved in `user` property of the JWT
-          return user;
-        } else {
-          // If you return null then an error will be displayed advising the user to check their details.
+          if (passwordMatch) return user;
           return null;
-
-          // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
         }
+        // If you return null then an error will be displayed advising the user to check their details.
+        return null;
+
+        // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
       },
     }),
 
@@ -102,6 +106,7 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: "/",
+    signOut: "/auth/desconectar",
   },
 };
 
