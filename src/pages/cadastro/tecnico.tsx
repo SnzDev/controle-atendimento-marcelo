@@ -13,7 +13,7 @@ function tecnico() {
       <main className="flex min-h-screen flex-col items-center justify-center bg-black">
         <Image src="/Logo.png" width={95} height={95} alt="Logo AcesseNet" />
         <h1 className="text-stone-50 font-bold text-3xl">AcesseNet</h1>
-        <h3 className="text-stone-500 font-semibold text-lg">Cadastro de técnicos</h3>
+        <h3 className="text-stone-500 font-semibold text-lg">Cadastro do técnico</h3>
 
         <form className="flex flex-col justify-items-center">
           <div>

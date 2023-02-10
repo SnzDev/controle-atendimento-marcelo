@@ -13,7 +13,6 @@ function servico() {
         <Image src="/Logo.png" width={95} height={95} alt="Logo AcesseNet" />
         <h1 className="text-stone-50 font-bold text-3xl"> AcesseNet</h1>
         <h3 className="text-stone-500 font-semibold text-lg">Cadastro de serviço</h3>
-
         <form className="flex flex-col justify-items-center">
           <div>
             <p className="text-stone-100 font-semibold text-base pt-8">Descrição do serviço</p>
@@ -29,8 +28,8 @@ function servico() {
           <div className="flex row justify-center">
             <button className="p-2 mt-8 rounded w-80 font-semibold bg-blue-500 hover:bg-blue-300" >Cadastrar</button>
           </div>
-
         </form>
+
       </main>
     </>
   )
