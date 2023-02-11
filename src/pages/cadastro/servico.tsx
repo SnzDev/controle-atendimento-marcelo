@@ -59,13 +59,9 @@ function Service() {
         <Image src="/Logo.png" width={95} height={95} alt="Logo AcesseNet" />
         <h1 className="text-3xl font-bold text-stone-50"> AcesseNet</h1>
         <h3 className="text-lg font-semibold text-stone-500">
-          Cadastro de Serviço
+          Cadastro de serviço
         </h3>
-
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col justify-items-center"
-        >
+        <form className="flex flex-col justify-items-center">
           <div>
             <p className="pt-8 text-base font-semibold text-stone-100">
               Descrição do serviço

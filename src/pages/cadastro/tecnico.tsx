@@ -59,7 +59,7 @@ function Technic() {
         <Image src="/Logo.png" width={95} height={95} alt="Logo AcesseNet" />
         <h1 className="text-3xl font-bold text-stone-50">AcesseNet</h1>
         <h3 className="text-lg font-semibold text-stone-500">
-          Cadastro de técnicos
+          Cadastro do técnico
         </h3>
 
         <form
