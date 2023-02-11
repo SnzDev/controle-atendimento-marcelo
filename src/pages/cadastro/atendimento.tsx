@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Autocomplete, TextField } from "@mui/material";
 import type { TRPCErrorResponse } from "@trpc/server/rpc";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form/dist/types";
 import Swal from "sweetalert2";
 import { z } from "zod";
@@ -12,26 +13,80 @@ import { api } from "../../utils/api";
 function Assignment() {
   const { push } = useRouter();
   const schemaValidation = z.object({
-    clientId: z.string({ required_error: "Obrigatório" }),
-    technicId: z.string({ required_error: "Obrigatório" }),
-    shopId: z.string({ required_error: "Obrigatório" }),
-    serviceId: z.string({ required_error: "Obrigatório" }),
-    dayActivity: z.date(),
+    client: z.object({
+      id: z.string({ required_error: "Obrigatório" }),
+      label: z.string().optional(),
+    }),
+    technic: z.object({
+      id: z.string({ required_error: "Obrigatório" }),
+      label: z.string().optional(),
+    }),
+    shop: z.object({
+      id: z.string({ required_error: "Obrigatório" }),
+      label: z.string().optional(),
+    }),
+    service: z.object({
+      id: z.string({ required_error: "Obrigatório" }),
+      label: z.string().optional(),
+    }),
+    dateActivity: z.date(),
   });
   type FieldValues = z.infer<typeof schemaValidation>;
   const {
-    register,
+    control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FieldValues>({
     resolver: zodResolver(schemaValidation),
+    defaultValues: {
+      client: {
+        id: "",
+        label: "",
+      },
+      technic: {
+        id: "",
+        label: "",
+      },
+      shop: {
+        id: "",
+        label: "",
+      },
+      service: {
+        id: "",
+        label: "",
+      },
+      dateActivity: new Date(),
+    },
   });
-  const create = api.client.create.useMutation();
+  const queryCtx = api.useContext();
 
-  const listClients = api.client.getAll.useQuery();
-  const listTechnic = api.technic.getAll.useQuery();
-  const listShop = api.shop.getAll.useQuery();
-  const listService = api.service.getAll.useQuery();
+  const create = api.assignment.create.useMutation({
+    onSuccess: () => {
+      void queryCtx.assignment.getAssignments.invalidate();
+      void Swal.fire({
+        icon: "success",
+        title: "Atendimento cadastrado com sucesso!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      reset();
+    },
+    onError: () => {
+      void Swal.fire({
+        icon: "error",
+        title: "Falha ao cadastrar atendimento!",
+        text: "Algo deu errado",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    },
+  });
+
+  const listClients = api.clients.getAll.useQuery({});
+  const listTechnic = api.technic.getAll.useQuery({});
+  const listShop = api.shop.getAll.useQuery({});
+  const listService = api.service.getAll.useQuery({});
 
   const onSubmit: SubmitHandler<FieldValues> = (data) =>
     create
@@ -71,140 +126,204 @@ function Assignment() {
           className="flex flex-col items-center justify-items-center"
           onSubmit={handleSubmit(onSubmit)}
         >
-          <div>
-            <p className=" text-base font-semibold text-stone-100">Cliente</p>
-            <span className="row flex items-center pl-1.5">
-              <Image
-                src="/icons/User.svg"
-                className="z-10 mr-[-32px]"
-                width={24}
-                height={24}
-                alt="Logo AcesseNet"
+          <Controller
+            control={control}
+            name="client"
+            render={({ field: { onChange, ...field } }) => (
+              <Autocomplete
+                {...field}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(_e, v) => onChange(v)}
+                disablePortal
+                id="combo-box-demo"
+                style={{ color: "black" }}
+                options={
+                  listClients.data?.map(({ id, name }) => {
+                    return { id, label: name };
+                  }) ?? []
+                }
+                renderInput={(params) => (
+                  <div ref={params.InputProps.ref}>
+                    <p className=" text-base font-semibold text-stone-100">
+                      Cliente
+                    </p>
+                    <span className="flex flex-row items-center pl-1.5">
+                      <Image
+                        src="/icons/User.svg"
+                        className="z-10 mr-[-32px]"
+                        width={24}
+                        height={24}
+                        alt="Logo AcesseNet"
+                      />
+                      <input
+                        type="text"
+                        {...params.inputProps}
+                        className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
+                      />
+                      <button className="ml-2 rounded-md bg-blue-500 py-2 px-4 transition-colors hover:bg-blue-600">
+                        +
+                      </button>
+                    </span>
+                    {errors.technic && (
+                      <p className="text-sm font-semibold text-red-500">
+                        {errors.technic.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+                noOptionsText="Não encontrado"
               />
-              <select
-                {...register("clientId")}
-                className={`my-2 w-80 items-center rounded bg-stone-900 p-2 pl-10 text-stone-100 ${
-                  !!errors.clientId ? "border-2 border-red-50" : ""
-                }`}
-                placeholder="Selecione uma cidade"
-              >
-                {listClients?.data?.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
-                  </option>
-                ))}
-              </select>
-              <button className="ml-2 rounded-md bg-blue-500 py-2 px-4 transition-colors hover:bg-blue-600">
-                +
-              </button>
-            </span>
-            {errors.clientId && (
-              <p className="text-sm font-semibold text-red-500">
-                {errors.clientId.message}
-              </p>
             )}
-          </div>
-          <div>
-            <p className=" text-base font-semibold text-stone-100">Técnico</p>
-            <span className="row flex items-center pl-1.5">
-              <Image
-                src="/icons/User.svg"
-                className="z-10 mr-[-32px]"
-                width={24}
-                height={24}
-                alt="Logo AcesseNet"
+          />
+
+          <Controller
+            control={control}
+            name="technic"
+            render={({ field: { onChange, ...field } }) => (
+              <Autocomplete
+                {...field}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(_e, v) => onChange(v)}
+                disablePortal
+                id="combo-box-demo"
+                style={{ color: "black" }}
+                options={
+                  listTechnic.data?.map(({ id, name }) => {
+                    return { id, label: name };
+                  }) ?? []
+                }
+                renderInput={(params) => (
+                  <div ref={params.InputProps.ref}>
+                    <p className=" text-base font-semibold text-stone-100">
+                      Técnico
+                    </p>
+                    <span className="flex flex-row items-center pl-1.5">
+                      <Image
+                        src="/icons/User.svg"
+                        className="z-10 mr-[-32px]"
+                        width={24}
+                        height={24}
+                        alt="Logo AcesseNet"
+                      />
+                      <input
+                        type="text"
+                        {...params.inputProps}
+                        className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
+                      />
+                      <button className="ml-2 rounded-md bg-blue-500 py-2 px-4 transition-colors hover:bg-blue-600">
+                        +
+                      </button>
+                    </span>
+                    {errors.technic && (
+                      <p className="text-sm font-semibold text-red-500">
+                        {errors.technic.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+                noOptionsText="Não encontrado"
               />
-              <select
-                {...register("technicId")}
-                className={`my-2 w-80 items-center rounded bg-stone-900 p-2 pl-10 text-stone-100 ${
-                  !!errors.technicId ? "border-2 border-red-50" : ""
-                }`}
-                placeholder="Selecione um técnico"
-              >
-                {listTechnic?.data?.map((technic) => (
-                  <option key={technic.id} value={technic.id}>
-                    {technic.name}
-                  </option>
-                ))}
-              </select>
-              <button className="ml-2 rounded-md bg-blue-500 py-2 px-4 transition-colors hover:bg-blue-600">
-                +
-              </button>
-            </span>
-            {errors.technicId && (
-              <p className="text-sm font-semibold text-red-500">
-                {errors.technicId.message}
-              </p>
             )}
-          </div>
-          <div>
-            <p className=" text-base font-semibold text-stone-100">
-              Tipo de Serviço
-            </p>
-            <span className="row flex items-center pl-1.5">
-              <Image
-                src="/icons/User.svg"
-                className="z-10 mr-[-32px]"
-                width={24}
-                height={24}
-                alt="Logo AcesseNet"
+          />
+
+          <Controller
+            control={control}
+            name="service"
+            render={({ field: { onChange, ...field } }) => (
+              <Autocomplete
+                {...field}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(_e, v) => onChange(v)}
+                disablePortal
+                id="combo-box-demo"
+                style={{ color: "black" }}
+                options={
+                  listService.data?.map(({ id, name }) => {
+                    return { id, label: name };
+                  }) ?? []
+                }
+                renderInput={(params) => (
+                  <div ref={params.InputProps.ref}>
+                    <p className=" text-base font-semibold text-stone-100">
+                      Tipo de Serviço
+                    </p>
+                    <span className="flex flex-row items-center pl-1.5">
+                      <Image
+                        src="/icons/User.svg"
+                        className="z-10 mr-[-32px]"
+                        width={24}
+                        height={24}
+                        alt="Logo AcesseNet"
+                      />
+                      <input
+                        type="text"
+                        {...params.inputProps}
+                        className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
+                      />
+                      <button className="ml-2 rounded-md bg-blue-500 py-2 px-4 transition-colors hover:bg-blue-600">
+                        +
+                      </button>
+                    </span>
+                    {errors.technic && (
+                      <p className="text-sm font-semibold text-red-500">
+                        {errors.technic.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+                noOptionsText="Não encontrado"
               />
-              <select
-                {...register("serviceId")}
-                className={`my-2 w-80 items-center rounded bg-stone-900 p-2 pl-10 text-stone-100 ${
-                  !!errors.serviceId ? "border-2 border-red-50" : ""
-                }`}
-                placeholder="Selecione o tipo"
-              >
-                {listService?.data?.map((service) => (
-                  <option key={service.id} value={service.id}>
-                    {service.name}
-                  </option>
-                ))}
-              </select>
-              <button className="ml-2 rounded-md bg-blue-500 py-2 px-4 transition-colors hover:bg-blue-600">
-                +
-              </button>
-            </span>
-            {errors.serviceId && (
-              <p className="text-sm font-semibold text-red-500">
-                {errors.serviceId.message}
-              </p>
             )}
-          </div>
-          <div>
-            <p className="text-base font-semibold text-stone-100">Loja</p>
-            <span className="row flex items-center pl-1.5">
-              <Image
-                src="/icons/User.svg"
-                className="z-10 mr-[-32px]"
-                width={24}
-                height={24}
-                alt="Logo AcesseNet"
+          />
+          <Controller
+            control={control}
+            name="shop"
+            render={({ field: { onChange, ...field } }) => (
+              <Autocomplete
+                {...field}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(_e, v) => onChange(v)}
+                disablePortal
+                id="combo-box-demo"
+                style={{ color: "black" }}
+                options={
+                  listShop.data?.map(({ id, name, city }) => {
+                    return { id, label: `${name} - ${city}` };
+                  }) ?? []
+                }
+                renderInput={(params) => (
+                  <div ref={params.InputProps.ref}>
+                    <p className=" text-base font-semibold text-stone-100">
+                      Loja
+                    </p>
+                    <span className="flex flex-row items-center pl-1.5">
+                      <Image
+                        src="/icons/User.svg"
+                        className="z-10 mr-[-32px]"
+                        width={24}
+                        height={24}
+                        alt="Logo AcesseNet"
+                      />
+                      <input
+                        type="text"
+                        {...params.inputProps}
+                        className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
+                      />
+                      <button className="ml-2 rounded-md bg-blue-500 py-2 px-4 transition-colors hover:bg-blue-600">
+                        +
+                      </button>
+                    </span>
+                    {errors.technic && (
+                      <p className="text-sm font-semibold text-red-500">
+                        {errors.technic.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+                noOptionsText="Não encontrado"
               />
-              <select
-                {...register("shopId")}
-                className={`my-2 w-80 items-center rounded bg-stone-900 p-2 pl-10 text-stone-100 ${
-                  !!errors.shopId ? "border-2 border-red-50" : ""
-                }`}
-                placeholder="Selecione a loja"
-              >
-                {listShop?.data?.map((shop) => (
-                  <option key={shop.id} value={shop.id}>
-                    {shop.name}
-                  </option>
-                ))}
-              </select>
-              <button className="ml-2 rounded-md bg-blue-500 py-2 px-4 transition-colors hover:bg-blue-600">
-                +
-              </button>
-            </span>
-            {errors.shopId && (
-              <p className="text-sm font-semibold text-red-500">
-                {errors.shopId.message}
-              </p>
             )}
-          </div>
+          />
           <div className="row flex justify-center">
             <button
               type="submit"

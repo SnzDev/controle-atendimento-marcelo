@@ -79,6 +79,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (user && user.password && credentials?.password) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           const passwordMatch = bcrypt.compareSync(
             credentials.password,
             user.password

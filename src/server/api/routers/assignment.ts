@@ -6,18 +6,30 @@ export const assignmentRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        clientId: z.string(),
+        client: z.object({
+          id: z.string({ required_error: "Obrigatório" }),
+          label: z.string().optional(),
+        }),
+        technic: z.object({
+          id: z.string({ required_error: "Obrigatório" }),
+          label: z.string().optional(),
+        }),
+        shop: z.object({
+          id: z.string({ required_error: "Obrigatório" }),
+          label: z.string().optional(),
+        }),
+        service: z.object({
+          id: z.string({ required_error: "Obrigatório" }),
+          label: z.string().optional(),
+        }),
         dateActivity: z.date(),
-        labelId: z.string(),
-        technicId: z.string(),
-        shopId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const lastPosition = await ctx.prisma.assignment.findMany({
         where: {
-          technicId: input.technicId,
-          shopId: input.shopId,
+          technicId: input.technic.id,
+          shopId: input.shop.id,
           dateActivity: input.dateActivity,
         },
         orderBy: {
@@ -28,13 +40,13 @@ export const assignmentRouter = createTRPCRouter({
 
       return ctx.prisma.assignment.create({
         data: {
-          clientId: input.clientId,
+          clientId: input.client.id,
           dateActivity: input.dateActivity,
-          labelId: input.labelId,
+          serviceId: input.service.id,
           position,
-          technicId: input.technicId,
+          technicId: input.technic.id,
           status: "PENDING",
-          shopId: input.shopId,
+          shopId: input.shop.id,
         },
       });
     }),

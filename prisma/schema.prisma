@@ -73,33 +73,36 @@ model VerificationToken {
 }
 
 model Service {
-  id        String    @id @default(cuid())
-  name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  deletedBy String?
-  user      User?     @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  id         String       @id @default(cuid())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  deletedBy  String?
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  Assignment Assignment[]
 }
 
 model Client {
-  id        String    @id @default(cuid())
-  name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  deletedBy String?
-  user      User?     @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  id         String       @id @default(cuid())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  deletedBy  String?
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  Assignment Assignment[]
 }
 
 model Technic {
-  id        String    @id @default(cuid())
-  name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  deletedBy String?
-  user      User?     @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  id         String       @id @default(cuid())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  deletedBy  String?
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  Assignment Assignment[]
 }
 
 model Shop {
@@ -119,7 +122,7 @@ model Assignment {
   shopId       String
   clientId     String
   technicId    String
-  labelId      String
+  serviceId    String
   informations String?
   dateActivity DateTime
   position     Int
@@ -130,6 +133,9 @@ model Assignment {
   deletedBy    String?
   user         User?            @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
   shop         Shop             @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  client       Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service      Service          @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  technic      Technic          @relation(fields: [technicId], references: [id], onDelete: Cascade)
 }
 
 enum AssignmentStatus {

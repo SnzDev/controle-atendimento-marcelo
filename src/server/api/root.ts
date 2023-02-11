@@ -15,7 +15,7 @@ export const appRouter = createTRPCRouter({
   service: serviceRouter,
   technic: technicRouter,
   shop: shopRouter,
-  client: clientRouter,
+  clients: clientRouter,
   assignment: assignmentRouter,
   user: userRouter,
 });

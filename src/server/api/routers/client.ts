@@ -3,9 +3,17 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
 export const clientRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.client.findMany();
-  }),
+  getAll: protectedProcedure
+    .input(z.object({ name: z.string().optional() }))
+    .query(({ ctx, input }) => {
+      return ctx.prisma.client.findMany({
+        where: {
+          name: {
+            contains: input.name,
+          },
+        },
+      });
+    }),
   findOne: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(({ ctx, input }) => {
