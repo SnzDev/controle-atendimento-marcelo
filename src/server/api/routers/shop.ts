@@ -20,10 +20,10 @@ export const shopRouter = createTRPCRouter({
       return ctx.prisma.shop.findUnique({ where: { id: input.id } });
     }),
   create: protectedProcedure
-    .input(z.object({ name: z.string(), city: z.string() }))
+    .input(z.object({ name: z.string() }))
     .mutation(({ ctx, input }) => {
       return ctx.prisma.shop.create({
-        data: { name: input.name, city: input.city },
+        data: { name: input.name },
       });
     }),
   update: protectedProcedure
@@ -31,13 +31,12 @@ export const shopRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         id: z.string(),
-        city: z.string(),
       })
     )
     .mutation(({ ctx, input }) => {
       return ctx.prisma.shop.update({
         where: { id: input.id },
-        data: { name: input.name, city: input.city },
+        data: { name: input.name },
       });
     }),
   inativate: protectedProcedure

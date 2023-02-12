@@ -12,7 +12,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Chip } from "@mui/material";
+import { Chip, Collapse } from "@mui/material";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form/dist/types";
 import Swal from "sweetalert2";
@@ -26,9 +26,6 @@ function Loja() {
   const schemaValidation = z.object({
     id: z.string().optional(),
     name: z
-      .string({ required_error: "Obrigatório" })
-      .min(3, "No minímo 3 caracteres"),
-    city: z
       .string({ required_error: "Obrigatório" })
       .min(3, "No minímo 3 caracteres"),
   });
@@ -51,7 +48,7 @@ function Loja() {
       void queryCtx.shop.getAll.invalidate();
       void Swal.fire({
         icon: "success",
-        title: "Loja cadastrado com sucesso!",
+        title: "Loja cadastrada com sucesso!",
         showConfirmButton: false,
         timer: 1500,
       });
@@ -73,7 +70,7 @@ function Loja() {
       void queryCtx.shop.getAll.invalidate();
       void Swal.fire({
         icon: "success",
-        title: "Loja atualizado com sucesso!",
+        title: "Loja atualizada com sucesso!",
         showConfirmButton: false,
         timer: 1500,
       });
@@ -97,7 +94,6 @@ function Loja() {
       onSuccess: (data) => {
         setValue("id", data?.id);
         setValue("name", data?.name ?? "");
-        setValue("city", data?.city ?? "");
       },
     }
   );
@@ -107,7 +103,7 @@ function Loja() {
       void queryCtx.shop.getAll.invalidate();
       void Swal.fire({
         icon: "success",
-        title: "Loja inativado com sucesso!",
+        title: "Loja inativada com sucesso!",
         showConfirmButton: false,
         timer: 1500,
       });
@@ -127,7 +123,7 @@ function Loja() {
       void queryCtx.shop.getAll.invalidate();
       void Swal.fire({
         icon: "success",
-        title: "Loja ativar com sucesso!",
+        title: "Loja ativada com sucesso!",
         showConfirmButton: false,
         timer: 1500,
       });
@@ -143,10 +139,10 @@ function Loja() {
     },
   });
 
-  const onSubmit: SubmitHandler<FieldValues> = ({ id, name, city }) => {
-    if (id) return update.mutate({ id, name, city });
+  const onSubmit: SubmitHandler<FieldValues> = ({ id, name }) => {
+    if (id) return update.mutate({ id, name });
 
-    create.mutate({ name, city });
+    create.mutate({ name });
   };
 
   return (
@@ -159,11 +155,11 @@ function Loja() {
       <main className="flex min-h-screen flex-col items-center justify-center bg-black">
         <Image src="/Logo.png" width={95} height={95} alt="Logo AcesseNet" />
         <h1 className="text-3xl font-bold text-stone-50"> AcesseNet</h1>
-        <h3 className="text-lg font-semibold text-stone-500">
+        <h3 className="text-center text-lg font-semibold text-slate-100">
           Cadastro de loja
         </h3>
-        <div className="max-w-screen-lg justify-center py-3">
-          <div className="flex justify-center gap-10">
+        <div className="max-w-screen-lg justify-center  py-3  ">
+          <div className="flex flex-col justify-center rounded bg-slate-800 p-2">
             <div className="flex items-center justify-between gap-10">
               <form
                 onSubmit={handleSubmit(onSubmit)}
@@ -171,7 +167,7 @@ function Loja() {
               >
                 <div>
                   <p className="text-base font-semibold text-stone-100">
-                    Nome da loja
+                    Revenda
                   </p>
                   <span className="row flex items-center pl-1.5">
                     <Image
@@ -185,35 +181,12 @@ function Loja() {
                       {...register("name")}
                       className="my-2  w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
                       type="text"
+                      placeholder="Ex: Piripiri"
                     />
                   </span>
                   {errors.name && (
                     <p className="text-sm font-semibold text-red-500">
                       {errors.name.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-stone-100">
-                    Cidade da loja
-                  </p>
-                  <span className="row flex items-center pl-1.5">
-                    <Image
-                      src="/icons/User.svg"
-                      className="z-10 mr-[-32px]"
-                      width={24}
-                      height={24}
-                      alt="icone usuário"
-                    />
-                    <input
-                      {...register("city")}
-                      className="my-2  w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
-                      type="text"
-                    />
-                  </span>
-                  {errors.city && (
-                    <p className="text-sm font-semibold text-red-500">
-                      {errors.city.message}
                     </p>
                   )}
                 </div>
@@ -233,18 +206,12 @@ function Loja() {
               </form>
             </div>
           </div>
-          <TableContainer
-            component={Paper}
-            className="mt-4 border-r-8 border-l-8 bg-stone-900 text-stone-100"
-          >
-            <Table aria-label="simple table">
-              <TableHead>
+          <TableContainer className="relative mt-4 h-[500px] w-full overflow-y-scroll  bg-slate-800 shadow">
+            <Table className="relative" aria-label="simple table">
+              <TableHead className="sticky top-1 bg-slate-800">
                 <TableRow>
                   <TableCell className="text-lg font-bold text-stone-100">
-                    Nome da loja
-                  </TableCell>
-                  <TableCell className="text-lg font-bold text-stone-100">
-                    Cidade
+                    Lojas
                   </TableCell>
                   <TableCell className="text-stone-100" width="10%">
                     <span className="row flex items-center pl-1.5 ">
@@ -292,12 +259,6 @@ function Loja() {
                             color="error"
                           />
                         )}
-                      </TableCell>
-                      <TableCell
-                        className="text-md capitalize text-stone-100"
-                        scope="row"
-                      >
-                        {item.city.toLowerCase()}
                       </TableCell>
                       <TableCell className=" text-stone-100">
                         <div className="flex justify-end gap-4">

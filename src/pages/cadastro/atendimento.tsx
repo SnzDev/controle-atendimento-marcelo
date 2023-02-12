@@ -287,8 +287,8 @@ function Assignment() {
                 id="combo-box-demo"
                 style={{ color: "black" }}
                 options={
-                  listShop.data?.map(({ id, name, city }) => {
-                    return { id, label: `${name} - ${city}` };
+                  listShop.data?.map(({ id, name }) => {
+                    return { id, label: `${name}` };
                   }) ?? []
                 }
                 renderInput={(params) => (

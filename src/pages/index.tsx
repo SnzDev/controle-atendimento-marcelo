@@ -141,7 +141,6 @@ const Login = ({
           {Object.values(providers).map(
             (provider) =>
               provider.name !== "credentials" && (
-                <>
                   <button
                     key={provider.id}
                     type="button"
@@ -161,7 +160,6 @@ const Login = ({
                     />
                     Entrar com {provider.name}
                   </button>
-                </>
               )
           )}
 

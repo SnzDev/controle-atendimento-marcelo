@@ -155,11 +155,11 @@ function Service() {
       <main className="flex min-h-screen flex-col items-center justify-center bg-black">
         <Image src="/Logo.png" width={95} height={95} alt="Logo AcesseNet" />
         <h1 className="text-3xl font-bold text-stone-50"> AcesseNet</h1>
-        <h3 className="text-lg font-semibold text-stone-500">
+        <h3 className="text-lg font-semibold text-slate-100">
           Cadastro de serviço
         </h3>
         <div className="max-w-screen-lg justify-center py-3">
-          <div className="flex justify-center gap-10">
+          <div className="flex flex-col justify-center rounded bg-slate-800 p-2">
             <div className="flex items-center justify-between gap-10">
               <form
                 onSubmit={handleSubmit(onSubmit)}
@@ -167,20 +167,21 @@ function Service() {
               >
                 <div>
                   <p className="text-base font-semibold text-stone-100">
-                    Nome do serviço
+                    Tipo de serviço
                   </p>
                   <span className="row flex items-center pl-1.5">
                     <Image
-                      src="/icons/User.svg"
+                      src="/icons/Service.svg"
                       className="z-10 mr-[-32px]"
                       width={24}
                       height={24}
-                      alt="icone usuário"
+                      alt="servico_icon"
                     />
                     <input
                       {...register("name")}
                       className="my-2  w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
                       type="text"
+                      placeholder="Ex: Instalação Fibra"
                     />
                   </span>
                   {errors.name && (
@@ -205,12 +206,9 @@ function Service() {
               </form>
             </div>
           </div>
-          <TableContainer
-            component={Paper}
-            className="mt-4 border-r-8 border-l-8 bg-stone-900 text-stone-100"
-          >
-            <Table aria-label="simple table">
-              <TableHead>
+          <TableContainer className="relative mt-4 h-[500px] w-full overflow-y-scroll  bg-slate-800 shadow">
+            <Table className="relative" aria-label="simple table">
+              <TableHead className="sticky top-1 bg-slate-800">
                 <TableRow>
                   <TableCell className="text-lg font-bold text-stone-100">
                     Nome do serviço

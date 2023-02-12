@@ -205,9 +205,9 @@ function Cliente() {
               </form>
             </div>
           </div>
-          <TableContainer className="mt-4 border-r-8 border-l-8 bg-stone-900 text-stone-100">
-            <Table aria-label="simple table">
-              <TableHead>
+          <TableContainer className="relative mt-4 h-[500px] w-full overflow-y-scroll bg-slate-800 shadow">
+            <Table className="relative" aria-label="simple table">
+              <TableHead className="sticky top-1 bg-slate-800">
                 <TableRow>
                   <TableCell className="text-lg font-bold text-stone-100">
                     Atendimentos
