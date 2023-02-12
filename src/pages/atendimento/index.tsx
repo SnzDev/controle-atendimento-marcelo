@@ -1,4 +1,5 @@
-import { Paper } from "@mui/material";
+import { Button, IconButton, Paper } from "@mui/material";
+import Chip from "@mui/material/Chip/Chip";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,16 +8,26 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Head from "next/head";
 import Image from "next/image";
-
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import { api } from "../../utils/api";
 export default function Assignments() {
+  const shopId = "cle0947h3000av5k41d3wxmmk";
+  const dateActivity = "2023-11-02";
+  const listAssignments = api.assignment.getAssignments.useQuery({
+    shopId,
+    dateActivity,
+  });
+
   return (
     <>
       <Head>
         <title>Atendimentos</title>
         <meta name="description" content="Lista de Atendimentos" />
         <link rel="icon" href="/favicon.ico" />
+        <style></style>
       </Head>
-      <main className="flex min-h-screen flex-col items-center bg-black">
+      <main className="flex min-h-screen flex-1 flex-col items-center bg-black">
         <div className="flex h-20 w-full flex-row justify-between bg-slate-800">
           <div className="flex flex-row items-center gap-2">
             <Image
@@ -28,30 +39,76 @@ export default function Assignments() {
             <h1 className="text-3xl font-bold text-stone-50"> AcesseNet</h1>
           </div>
         </div>
-        <div className="flex flex-1 flex-row">
-          <TableContainer
-            component={Paper}
-            className="mt-4 border-r-8 border-l-8 bg-stone-900 text-stone-100"
-          >
-            <Table aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell className="text-lg font-bold text-stone-100">
-                    Nome do cliente
-                  </TableCell>
-                  <TableCell className="text-stone-100" width="10%">
-                    HEllo
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Oi</TableCell>
-                  <TableCell>Olá</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <div className="flex w-full flex-1 flex-row gap-4 px-4">
+          {listAssignments.data?.map(({ techId, assignments }) => (
+            <TableContainer
+              key={techId}
+              component={Paper}
+              className="mt-4 h-[500px] w-[400px] overflow-y-scroll bg-slate-800 shadow"
+            >
+              <Table className="" aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell
+                      align="center"
+                      className="border-none text-lg font-bold text-stone-100"
+                    >
+                      {assignments[0]?.technic.name}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {assignments.map((assignment) => (
+                    <TableRow key={assignment.id}>
+                      <TableCell className=" border-none ">
+                        <div className="rounded bg-slate-700 p-2 drop-shadow-md">
+                          <div className="flex flex-row justify-between">
+                            <span className="overflow-ellipsis text-lg font-bold text-slate-50 ">
+                              {assignment.client.name}
+                            </span>
+                            <div className="flex flex-row gap-1">
+                              <Button
+                                className="bg-yellow-600 hover:bg-yellow-700"
+                                size="small"
+                                variant="contained"
+                              >
+                                {assignment.status === "PENDING" && "PENDENTE"}
+                                {assignment.status === "CANCELED" &&
+                                  "CANCELADO"}
+                                {assignment.status === "IN_PROGRESS" &&
+                                  "ANDAMENTO"}
+                                {assignment.status === "FINALIZED" &&
+                                  "FINALIZADO"}
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex flex-row items-center justify-between font-bold text-blue-500">
+                            {assignment.service.name}
+
+                            <div className="flex flex-row gap-3">
+                              <IconButton
+                                className="text-blue-500"
+                                component="label"
+                              >
+                                <ArrowUpwardIcon />
+                              </IconButton>
+                              <IconButton
+                                color="primary"
+                                className="text-blue-500"
+                                component="label"
+                              >
+                                <ArrowDownwardIcon />
+                              </IconButton>
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ))}
         </div>
       </main>
     </>
