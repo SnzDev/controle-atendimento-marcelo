@@ -88,7 +88,7 @@ export const assignmentRouter = createTRPCRouter({
 
       return data;
     }),
-  positionUp: protectedProcedure
-    .input(z.object({id: z.string()}))
-    .
+  // positionUp: protectedProcedure
+  //   .input(z.object({id: z.string()}))
+  //   .
 });
