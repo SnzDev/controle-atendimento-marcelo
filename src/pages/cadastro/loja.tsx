@@ -169,10 +169,10 @@ function Loja() {
                   <p className="text-base font-semibold text-stone-100">
                     Revenda
                   </p>
-                  <span className="row flex items-center pl-1.5">
+                  <span className="row flex items-center pl-1.5 text-slate-400">
                     <Image
-                      src="/icons/User.svg"
-                      className="z-10 mr-[-32px]"
+                      src="/icons/MapPin.svg"
+                      className="z-10 mr-[-32px] text-slate-100"
                       width={24}
                       height={24}
                       alt="icone usuário"
