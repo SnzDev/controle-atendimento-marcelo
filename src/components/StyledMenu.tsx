@@ -33,7 +33,7 @@ export const StyledMenu = styled((props: MenuProps) => (
     "& .MuiMenuItem-root": {
       "& .MuiSvgIcon-root": {
         fontSize: 18,
-        color: theme.palette.text.secondary,
+        color: "#FFF",
         marginRight: theme.spacing(1.5),
       },
       "&:active": {

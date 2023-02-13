@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const technicRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -21,31 +21,69 @@ export const technicRouter = createTRPCRouter({
     }),
   create: protectedProcedure
     .input(z.object({ name: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.technic.create({ data: { name: input.name } });
+    .mutation(async ({ ctx, input }) => {
+      const created = await ctx.prisma.technic.create({
+        data: { name: input.name },
+      });
+      if (created)
+        await ctx.prisma.history.create({
+          data: {
+            description: `Criou o tecnico de Id: ${created.id}!`,
+            flag: "SUCCESS",
+            userId: ctx.session.user.id,
+          },
+        });
+      return created;
     }),
   update: protectedProcedure
     .input(z.object({ name: z.string(), id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.technic.update({
+    .mutation(async ({ ctx, input }) => {
+      const update = await ctx.prisma.technic.update({
         where: { id: input.id },
         data: { name: input.name },
       });
+      if (update)
+        await ctx.prisma.history.create({
+          data: {
+            description: `Atualizou o tecnico de Id: ${update.id}!`,
+            flag: "SUCCESS",
+            userId: ctx.session.user.id,
+          },
+        });
+      return update;
     }),
   inativate: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.technic.update({
+    .mutation(async ({ ctx, input }) => {
+      const inactivate = await ctx.prisma.technic.update({
         where: { id: input.id },
         data: { deletedAt: new Date(), deletedBy: ctx.session.user.id },
       });
+      if (inactivate)
+        await ctx.prisma.history.create({
+          data: {
+            description: `Inativou o tecnico de Id: ${inactivate.id}!`,
+            flag: "SUCCESS",
+            userId: ctx.session.user.id,
+          },
+        });
+      return inactivate;
     }),
-  activate: publicProcedure
+  activate: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.technic.update({
+    .mutation(async ({ ctx, input }) => {
+      const activate = await ctx.prisma.technic.update({
         where: { id: input.id },
         data: { deletedAt: null, deletedBy: null },
       });
+      if (activate)
+        await ctx.prisma.history.create({
+          data: {
+            description: `Ativou o tecnico de Id: ${activate.id}!`,
+            flag: "SUCCESS",
+            userId: ctx.session.user.id,
+          },
+        });
+      return activate;
     }),
 });

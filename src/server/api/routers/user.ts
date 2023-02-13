@@ -40,25 +40,52 @@ export const userRouter = createTRPCRouter({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       const encryptedPassword = bcrypt.hashSync(password, saltRounds);
 
-      return ctx.prisma.user.create({
+      const created = await ctx.prisma.user.create({
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data: { password: encryptedPassword, ...input },
       });
+      if (created)
+        await ctx.prisma.history.create({
+          data: {
+            description: `Criou o usuario de Id: ${created.id}!`,
+            flag: "SUCCESS",
+            userId: ctx.session.user.id,
+          },
+        });
+      return created;
     }),
   inativate: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.user.update({
+    .mutation(async ({ ctx, input }) => {
+      const inactivate = await ctx.prisma.user.update({
         where: { id: input.id },
         data: { deletedAt: new Date(), deletedBy: ctx.session.user.id },
       });
+      if (inactivate)
+        await ctx.prisma.history.create({
+          data: {
+            description: `Inativou o usuario de Id: ${inactivate.id}!`,
+            flag: "SUCCESS",
+            userId: ctx.session.user.id,
+          },
+        });
+      return inactivate;
     }),
-  activate: publicProcedure
+  activate: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.user.update({
+    .mutation(async ({ ctx, input }) => {
+      const activate = await ctx.prisma.user.update({
         where: { id: input.id },
         data: { deletedAt: null, deletedBy: null },
       });
+      if (activate)
+        await ctx.prisma.history.create({
+          data: {
+            description: `Ativou o usuario de Id: ${activate.id}!`,
+            flag: "SUCCESS",
+            userId: ctx.session.user.id,
+          },
+        });
+      return activate;
     }),
 });

@@ -18,6 +18,7 @@ import { useState } from "react";
 import { StyledMenu } from "../../components/StyledMenu";
 import { api } from "../../utils/api";
 import { AssignmentStatus } from "@prisma/client";
+import { ResponsiveAppBar } from "../../components/AppBar";
 
 interface MenuChangeStatus {
   anchor: null | HTMLElement;
@@ -38,7 +39,7 @@ export default function Assignments() {
   const shopId = "cle0947h3000av5k41d3wxmmk";
   const dateActivity = "2023-11-02";
   const queryClient = api.useContext();
-  const [parent, enableAnimations] = useAutoAnimate(/* optional config */);
+  const [parent] = useAutoAnimate(/* optional config */);
   const [anchorEl, setAnchorEl] = useState<MenuChangeStatus>({
     anchor: null,
     id: null,
@@ -84,18 +85,8 @@ export default function Assignments() {
         <link rel="icon" href="/favicon.ico" />
         <style></style>
       </Head>
+      <ResponsiveAppBar />
       <main className="flex min-h-screen flex-1 flex-col items-center bg-black">
-        <div className="flex h-20 w-full flex-row justify-between bg-slate-800">
-          <div className="flex flex-row items-center gap-2">
-            <Image
-              src="/Logo.png"
-              width={95}
-              height={95}
-              alt="Logo AcesseNet"
-            />
-            <h1 className="text-3xl font-bold text-stone-50"> AcesseNet</h1>
-          </div>
-        </div>
         <div className="flex h-full w-full flex-1 flex-row  gap-4 overflow-x-scroll px-4">
           {listAssignments.data?.map(({ techId, assignments }) => (
             <TableContainer
@@ -227,54 +218,54 @@ export default function Assignments() {
             </TableContainer>
           ))}
         </div>
+        <StyledMenu
+          id="fade-menu"
+          MenuListProps={{
+            "aria-labelledby": "fade-button",
+          }}
+          anchorEl={anchorEl.anchor}
+          open={open}
+          onClose={handleCloseMenu}
+          TransitionComponent={Fade}
+        >
+          {anchorEl.status !== "PENDING" && (
+            <MenuItem
+              onClick={() =>
+                handleChangeStatus({ id: anchorEl.id, status: "PENDING" })
+              }
+            >
+              PENDENTE
+            </MenuItem>
+          )}
+          {anchorEl.status !== "IN_PROGRESS" && (
+            <MenuItem
+              onClick={() =>
+                handleChangeStatus({ id: anchorEl.id, status: "IN_PROGRESS" })
+              }
+            >
+              ANDAMENTO
+            </MenuItem>
+          )}
+          {anchorEl.status !== "FINALIZED" && (
+            <MenuItem
+              onClick={() =>
+                handleChangeStatus({ id: anchorEl.id, status: "FINALIZED" })
+              }
+            >
+              FINALIZADO
+            </MenuItem>
+          )}
+          {anchorEl.status !== "CANCELED" && (
+            <MenuItem
+              onClick={() =>
+                handleChangeStatus({ id: anchorEl.id, status: "CANCELED" })
+              }
+            >
+              CANCELADO
+            </MenuItem>
+          )}
+        </StyledMenu>
       </main>
-      <StyledMenu
-        id="fade-menu"
-        MenuListProps={{
-          "aria-labelledby": "fade-button",
-        }}
-        anchorEl={anchorEl.anchor}
-        open={open}
-        onClose={handleCloseMenu}
-        TransitionComponent={Fade}
-      >
-        {anchorEl.status !== "PENDING" && (
-          <MenuItem
-            onClick={() =>
-              handleChangeStatus({ id: anchorEl.id, status: "PENDING" })
-            }
-          >
-            PENDENTE
-          </MenuItem>
-        )}
-        {anchorEl.status !== "IN_PROGRESS" && (
-          <MenuItem
-            onClick={() =>
-              handleChangeStatus({ id: anchorEl.id, status: "IN_PROGRESS" })
-            }
-          >
-            ANDAMENTO
-          </MenuItem>
-        )}
-        {anchorEl.status !== "FINALIZED" && (
-          <MenuItem
-            onClick={() =>
-              handleChangeStatus({ id: anchorEl.id, status: "FINALIZED" })
-            }
-          >
-            FINALIZADO
-          </MenuItem>
-        )}
-        {anchorEl.status !== "CANCELED" && (
-          <MenuItem
-            onClick={() =>
-              handleChangeStatus({ id: anchorEl.id, status: "CANCELED" })
-            }
-          >
-            CANCELADO
-          </MenuItem>
-        )}
-      </StyledMenu>
     </>
   );
 }

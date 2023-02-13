@@ -71,27 +71,31 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Add logic here to look up the user from the credentials supplied
         const user = await prisma.user.findFirst({
           where: {
             email: credentials?.email,
           },
         });
-
         if (user && user.password && credentials?.password) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           const passwordMatch = bcrypt.compareSync(
             credentials.password,
             user.password
           );
-          // Any object returned will be saved in `user` property of the JWT
-          if (passwordMatch) return user;
+          if (passwordMatch) {
+            //SALVAR NO HISTÒRICO
+            await prisma.history.create({
+              data: {
+                description: "Usuário logado com sucesso!",
+                flag: "SUCCESS",
+                userId: user.id,
+              },
+            });
+            return user;
+          }
           return null;
         }
-        // If you return null then an error will be displayed advising the user to check their details.
         return null;
-
-        // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
       },
     }),
 

@@ -48,6 +48,7 @@ model User {
   password      String?
   emailVerified DateTime?
   image         String?
+  role          UserRole     @default(USER)
   accounts      Account[]
   sessions      Session[]
   Cient         Client[]
@@ -56,12 +57,14 @@ model User {
   Service       Service[]
   Shop          Shop[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  deletedBy String?
-  user      User?     @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  User      User[]    @relation("DeletedBy")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  deletedBy        String?
+  user             User?     @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  User             User[]    @relation("DeletedBy")
+  HistoryAction    History[] @relation("UserAction")
+  HistoryDeletedBy History[] @relation("UserDeletedBy")
 }
 
 model VerificationToken {
@@ -135,6 +138,21 @@ model Assignment {
   client       Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
   service      Service          @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   technic      Technic          @relation(fields: [technicId], references: [id], onDelete: Cascade)
+  History      History?         @relation(fields: [historyId], references: [id])
+  historyId    String?
+}
+
+model History {
+  id            String       @id @default(cuid())
+  userId        String
+  flag          HistoryFlag
+  description   String
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+  userDeletedBy User?        @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  userAction    User         @relation("UserAction", fields: [userId], references: [id], onDelete: Cascade)
+  Assignment    Assignment[]
 }
 
 enum AssignmentStatus {
@@ -142,4 +160,16 @@ enum AssignmentStatus {
   IN_PROGRESS
   FINALIZED
   CANCELED
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  VIEWER
+}
+
+enum HistoryFlag {
+  ACCESS_DENIED
+  ERROR
+  SUCCESS
 }
