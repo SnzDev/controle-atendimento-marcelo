@@ -123,7 +123,7 @@ model Assignment {
   technicId    String
   serviceId    String
   informations String?
-  dateActivity DateTime
+  dateActivity DateTime         @db.Date
   position     Int
   status       AssignmentStatus
   createdAt    DateTime         @default(now())
