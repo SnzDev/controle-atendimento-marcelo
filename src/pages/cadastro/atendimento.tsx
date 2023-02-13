@@ -9,6 +9,7 @@ import type { SubmitHandler } from "react-hook-form/dist/types";
 import Swal from "sweetalert2";
 import { z } from "zod";
 import { api } from "../../utils/api";
+import moment from "moment";
 
 function Assignment() {
   const { push } = useRouter();
@@ -56,7 +57,7 @@ function Assignment() {
         id: "",
         label: "",
       },
-      dateActivity: new Date(),
+      dateActivity: new Date(moment().format("YYYY-MM-DD")),
     },
   });
   const queryCtx = api.useContext();

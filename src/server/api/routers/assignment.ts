@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { AssignmentStatus } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
@@ -30,7 +32,7 @@ export const assignmentRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const lastPosition = await ctx.prisma.assignment.findMany({
+      const lastPosition = await ctx.prisma.assignment.findFirst({
         where: {
           technicId: input.technic.id,
           shopId: input.shop.id,
@@ -40,7 +42,7 @@ export const assignmentRouter = createTRPCRouter({
           position: "desc",
         },
       });
-      const position = (lastPosition?.[0]?.position ?? 0) + 1;
+      const position = (lastPosition?.position ?? 0) + 1;
 
       return ctx.prisma.assignment.create({
         data: {
@@ -68,6 +70,9 @@ export const assignmentRouter = createTRPCRouter({
           service: true,
           client: true,
         },
+        orderBy: {
+          position: "asc",
+        },
       });
       const data: {
         techId: string;
@@ -88,7 +93,94 @@ export const assignmentRouter = createTRPCRouter({
 
       return data;
     }),
-  // positionUp: protectedProcedure
-  //   .input(z.object({id: z.string()}))
-  //   .
+  positionUp: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const assignment = await ctx.prisma.assignment.findUnique({
+        where: { id: input.id },
+      });
+      if (!assignment)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Atendimento não encontrado",
+        });
+
+      const assignmentUp = await ctx.prisma.assignment.findFirst({
+        where: {
+          technicId: assignment.technicId,
+          shopId: assignment.shopId,
+          dateActivity: assignment.dateActivity,
+          position: assignment.position - 1,
+        },
+      });
+      if (!assignmentUp)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Atendimento já encontra-se em primeiro",
+        });
+      await ctx.prisma.assignment.update({
+        where: { id: assignmentUp.id },
+        data: {
+          position: assignmentUp.position + 1,
+        },
+      });
+      return await ctx.prisma.assignment.update({
+        where: { id: assignment.id },
+        data: {
+          position: assignment.position - 1,
+        },
+      });
+    }),
+  positionDown: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const assignment = await ctx.prisma.assignment.findUnique({
+        where: { id: input.id },
+      });
+
+      if (!assignment)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Atendimento não encontrado",
+        });
+
+      const assignmentDown = await ctx.prisma.assignment.findFirst({
+        where: {
+          technicId: assignment.technicId,
+          shopId: assignment.shopId,
+          dateActivity: assignment.dateActivity,
+          position: assignment.position + 1,
+        },
+      });
+      if (!assignmentDown)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Atendimento já encontra-se em ultimo",
+        });
+      await ctx.prisma.assignment.update({
+        where: { id: assignmentDown.id },
+        data: {
+          position: assignmentDown.position - 1,
+        },
+      });
+      return await ctx.prisma.assignment.update({
+        where: { id: assignment.id },
+        data: {
+          position: assignment.position + 1,
+        },
+      });
+    }),
+  changeStatus: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        status: z.enum(["PENDING", "IN_PROGRESS", "FINALIZED", "CANCELED"]),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.assignment.update({
+        where: { id: input.id },
+        data: { status: input.status },
+      });
+    }),
 });

@@ -1,5 +1,7 @@
-import { Button, IconButton, Paper } from "@mui/material";
-import Chip from "@mui/material/Chip/Chip";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import { IconButton } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -8,17 +10,72 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Head from "next/head";
 import Image from "next/image";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+
+import {} from "@formkit/auto-animate";
+import Fade from "@mui/material/Fade";
+import MenuItem from "@mui/material/MenuItem";
+import { useState } from "react";
+import { StyledMenu } from "../../components/StyledMenu";
 import { api } from "../../utils/api";
+import { AssignmentStatus } from "@prisma/client";
+
+interface MenuChangeStatus {
+  anchor: null | HTMLElement;
+  id: string | null;
+  status: AssignmentStatus | null;
+}
+interface HandleOpenMenuProps {
+  event: React.MouseEvent<HTMLButtonElement>;
+  id: string;
+  status: AssignmentStatus | null;
+}
+interface HandleChangeStatusProps {
+  status: AssignmentStatus | null;
+  id: string | null;
+}
+
 export default function Assignments() {
   const shopId = "cle0947h3000av5k41d3wxmmk";
   const dateActivity = "2023-11-02";
+  const queryClient = api.useContext();
+  const [parent, enableAnimations] = useAutoAnimate(/* optional config */);
+  const [anchorEl, setAnchorEl] = useState<MenuChangeStatus>({
+    anchor: null,
+    id: null,
+    status: null,
+  });
+  const open = Boolean(anchorEl.anchor);
+  const handleOpenMenu = ({
+    status,
+    event: { currentTarget: anchor },
+    id,
+  }: HandleOpenMenuProps) => {
+    setAnchorEl({ anchor, id, status });
+  };
+  const handleCloseMenu = () => {
+    setAnchorEl({ anchor: null, id: null, status: null });
+  };
   const listAssignments = api.assignment.getAssignments.useQuery({
     shopId,
     dateActivity,
   });
 
+  const positionUp = api.assignment.positionUp.useMutation({
+    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
+  });
+  const positionDown = api.assignment.positionDown.useMutation({
+    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
+  });
+
+  const changeStatus = api.assignment.changeStatus.useMutation({
+    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
+  });
+  const handleChangeStatus = ({ id, status }: HandleChangeStatusProps) => {
+    if (!id || !status) return handleCloseMenu();
+
+    changeStatus.mutate({ id, status });
+    handleCloseMenu();
+  };
   return (
     <>
       <Head>
@@ -39,19 +96,36 @@ export default function Assignments() {
             <h1 className="text-3xl font-bold text-stone-50"> AcesseNet</h1>
           </div>
         </div>
-        <div className="flex w-full flex-1 flex-row gap-4 px-4">
+        <div className="flex h-full w-full flex-1 flex-row  gap-4 overflow-x-scroll px-4">
           {listAssignments.data?.map(({ techId, assignments }) => (
             <TableContainer
               key={techId}
-              component={Paper}
-              className="relative mt-4 h-[500px] w-[400px] overflow-y-scroll bg-slate-800 shadow"
+              sx={{
+                overflowY: "scroll",
+                position: "relative",
+                marginTop: "16px",
+                maxHeight: "600px",
+                width: "400px",
+                backgroundColor: "rgb(30 41 59)",
+              }}
+              className="rounded-lg shadow"
             >
               <Table aria-label="simple table">
                 <TableHead className="sticky top-0 z-10 bg-slate-800">
                   <TableRow>
                     <TableCell
                       align="center"
-                      className="flex flex-row items-center justify-center gap-4 border-none text-lg font-bold text-stone-100"
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 16,
+                        fontWeight: "bold",
+                        fontSize: 24,
+                        color: "rgb(248 250 252)",
+                        border: "none",
+                      }}
                     >
                       <Image
                         alt="technical_icon"
@@ -63,20 +137,52 @@ export default function Assignments() {
                     </TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody ref={parent}>
                   {assignments.map((assignment) => (
                     <TableRow key={assignment.id}>
-                      <TableCell className=" border-none ">
+                      <TableCell
+                        sx={{
+                          border: "none",
+                          padding: 1,
+                        }}
+                      >
                         <div className="rounded bg-slate-700 p-2 drop-shadow-md">
                           <div className="flex flex-row justify-between">
-                            <span className="overflow-ellipsis text-lg font-bold text-slate-50 ">
+                            <span className="overflow-ellipsis text-lg font-bold capitalize text-slate-50 ">
                               {assignment.client.name}
                             </span>
                             <div className="flex flex-row gap-1">
-                              <Button
-                                className="bg-yellow-600 hover:bg-yellow-700"
-                                size="small"
-                                variant="contained"
+                              <button
+                                aria-label="fade-button"
+                                onClick={(event) =>
+                                  handleOpenMenu({
+                                    status: assignment.status,
+                                    event,
+                                    id: assignment.id,
+                                  })
+                                }
+                                className={`rounded  p-2 text-slate-50  
+                                ${
+                                  assignment.status === "PENDING"
+                                    ? "bg-yellow-600 hover:bg-yellow-700"
+                                    : ""
+                                }
+                                ${
+                                  assignment.status === "IN_PROGRESS"
+                                    ? "bg-blue-600 hover:bg-blue-700"
+                                    : ""
+                                }
+                                ${
+                                  assignment.status === "FINALIZED"
+                                    ? "bg-green-600 hover:bg-green-700"
+                                    : ""
+                                }
+                                ${
+                                  assignment.status === "CANCELED"
+                                    ? "bg-red-600 hover:bg-red-700"
+                                    : ""
+                                }
+                                `}
                               >
                                 {assignment.status === "PENDING" && "PENDENTE"}
                                 {assignment.status === "CANCELED" &&
@@ -85,7 +191,7 @@ export default function Assignments() {
                                   "ANDAMENTO"}
                                 {assignment.status === "FINALIZED" &&
                                   "FINALIZADO"}
-                              </Button>
+                              </button>
                             </div>
                           </div>
                           <div className="flex flex-row items-center justify-between font-bold text-blue-500">
@@ -93,108 +199,19 @@ export default function Assignments() {
 
                             <div className="flex flex-row gap-3">
                               <IconButton
-                                className="text-blue-500"
+                                onClick={() =>
+                                  positionUp.mutate({ id: assignment.id })
+                                }
+                                color="primary"
                                 component="label"
                               >
                                 <ArrowUpwardIcon />
                               </IconButton>
                               <IconButton
+                                onClick={() =>
+                                  positionDown.mutate({ id: assignment.id })
+                                }
                                 color="primary"
-                                className="text-blue-500"
-                                component="label"
-                              >
-                                <ArrowDownwardIcon />
-                              </IconButton>
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {assignments.map((assignment) => (
-                    <TableRow key={assignment.id}>
-                      <TableCell className=" border-none ">
-                        <div className="rounded bg-slate-700 p-2 drop-shadow-md">
-                          <div className="flex flex-row justify-between">
-                            <span className="overflow-ellipsis text-lg font-bold text-slate-50 ">
-                              {assignment.client.name}
-                            </span>
-                            <div className="flex flex-row gap-1">
-                              <Button
-                                className="bg-yellow-600 hover:bg-yellow-700"
-                                size="small"
-                                variant="contained"
-                              >
-                                {assignment.status === "PENDING" && "PENDENTE"}
-                                {assignment.status === "CANCELED" &&
-                                  "CANCELADO"}
-                                {assignment.status === "IN_PROGRESS" &&
-                                  "ANDAMENTO"}
-                                {assignment.status === "FINALIZED" &&
-                                  "FINALIZADO"}
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex flex-row items-center justify-between font-bold text-blue-500">
-                            {assignment.service.name}
-
-                            <div className="flex flex-row gap-3">
-                              <IconButton
-                                className="text-blue-500"
-                                component="label"
-                              >
-                                <ArrowUpwardIcon />
-                              </IconButton>
-                              <IconButton
-                                color="primary"
-                                className="text-blue-500"
-                                component="label"
-                              >
-                                <ArrowDownwardIcon />
-                              </IconButton>
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {assignments.map((assignment) => (
-                    <TableRow key={assignment.id}>
-                      <TableCell className=" border-none ">
-                        <div className="rounded bg-slate-700 p-2 drop-shadow-md">
-                          <div className="flex flex-row justify-between">
-                            <span className="overflow-ellipsis text-lg font-bold text-slate-50 ">
-                              {assignment.client.name}
-                            </span>
-                            <div className="flex flex-row gap-1">
-                              <Button
-                                className="bg-yellow-600 hover:bg-yellow-700"
-                                size="small"
-                                variant="contained"
-                              >
-                                {assignment.status === "PENDING" && "PENDENTE"}
-                                {assignment.status === "CANCELED" &&
-                                  "CANCELADO"}
-                                {assignment.status === "IN_PROGRESS" &&
-                                  "ANDAMENTO"}
-                                {assignment.status === "FINALIZED" &&
-                                  "FINALIZADO"}
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex flex-row items-center justify-between font-bold text-blue-500">
-                            {assignment.service.name}
-
-                            <div className="flex flex-row gap-3">
-                              <IconButton
-                                className="text-blue-500"
-                                component="label"
-                              >
-                                <ArrowUpwardIcon />
-                              </IconButton>
-                              <IconButton
-                                color="primary"
-                                className="text-blue-500"
                                 component="label"
                               >
                                 <ArrowDownwardIcon />
@@ -211,6 +228,53 @@ export default function Assignments() {
           ))}
         </div>
       </main>
+      <StyledMenu
+        id="fade-menu"
+        MenuListProps={{
+          "aria-labelledby": "fade-button",
+        }}
+        anchorEl={anchorEl.anchor}
+        open={open}
+        onClose={handleCloseMenu}
+        TransitionComponent={Fade}
+      >
+        {anchorEl.status !== "PENDING" && (
+          <MenuItem
+            onClick={() =>
+              handleChangeStatus({ id: anchorEl.id, status: "PENDING" })
+            }
+          >
+            PENDENTE
+          </MenuItem>
+        )}
+        {anchorEl.status !== "IN_PROGRESS" && (
+          <MenuItem
+            onClick={() =>
+              handleChangeStatus({ id: anchorEl.id, status: "IN_PROGRESS" })
+            }
+          >
+            ANDAMENTO
+          </MenuItem>
+        )}
+        {anchorEl.status !== "FINALIZED" && (
+          <MenuItem
+            onClick={() =>
+              handleChangeStatus({ id: anchorEl.id, status: "FINALIZED" })
+            }
+          >
+            FINALIZADO
+          </MenuItem>
+        )}
+        {anchorEl.status !== "CANCELED" && (
+          <MenuItem
+            onClick={() =>
+              handleChangeStatus({ id: anchorEl.id, status: "CANCELED" })
+            }
+          >
+            CANCELADO
+          </MenuItem>
+        )}
+      </StyledMenu>
     </>
   );
 }
