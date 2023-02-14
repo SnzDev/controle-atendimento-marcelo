@@ -20,6 +20,10 @@ import { api } from "../../utils/api";
 import { AssignmentStatus } from "@prisma/client";
 import { ResponsiveAppBar } from "../../components/AppBar";
 
+import Fab from "@mui/material/Fab";
+import AddIcon from "@mui/icons-material/Add";
+import { AssignmentModal } from "../../components/AssignmentModal";
+
 interface MenuChangeStatus {
   anchor: null | HTMLElement;
   id: string | null;
@@ -39,6 +43,7 @@ export default function Assignments() {
   const shopId = "cle0947h3000av5k41d3wxmmk";
   const dateActivity = "2023-11-02";
   const queryClient = api.useContext();
+  const [isVisibleModalCreate, setIsVisibleModalCreate] = useState(false);
   const [parent] = useAutoAnimate(/* optional config */);
   const [anchorEl, setAnchorEl] = useState<MenuChangeStatus>({
     anchor: null,
@@ -87,6 +92,15 @@ export default function Assignments() {
       </Head>
       <ResponsiveAppBar />
       <main className="flex min-h-screen flex-1 flex-col items-center bg-black">
+        <Fab
+          onClick={() => setIsVisibleModalCreate(true)}
+          sx={{ position: "absolute", right: 10, bottom: 10 }}
+          className="bg-blue-500"
+          color="primary"
+          aria-label="add"
+        >
+          <AddIcon />
+        </Fab>
         <div className="flex h-full w-full flex-1 flex-row  gap-4 overflow-x-scroll px-4">
           {listAssignments.data?.map(({ techId, assignments }) => (
             <TableContainer
@@ -265,6 +279,11 @@ export default function Assignments() {
             </MenuItem>
           )}
         </StyledMenu>
+
+        <AssignmentModal
+          isVisible={isVisibleModalCreate}
+          onClose={() => setIsVisibleModalCreate(false)}
+        />
       </main>
     </>
   );
