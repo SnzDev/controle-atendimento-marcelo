@@ -57,14 +57,16 @@ model User {
   Service       Service[]
   Shop          Shop[]
 
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
-  deletedBy        String?
-  user             User?     @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  User             User[]    @relation("DeletedBy")
-  HistoryAction    History[] @relation("UserAction")
-  HistoryDeletedBy History[] @relation("UserDeletedBy")
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  deletedAt            DateTime?
+  deletedBy            String?
+  user                 User?         @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  User                 User[]        @relation("DeletedBy")
+  HistoryAction        History[]     @relation("UserAction")
+  HistoryDeletedBy     History[]     @relation("UserDeletedBy")
+  ObservationAction    Observation[] @relation("ObservationUserDeletedBy")
+  ObservationDeletedBy Observation[] @relation("ObservationUserAction")
 }
 
 model VerificationToken {
@@ -141,9 +143,16 @@ model Assignment {
 }
 
 model Observation {
-  id           String @id @default(cuid())
-  assignmentId String
-  userId       String
+  id            String    @id @default(cuid())
+  assignmentId  String
+  userId        String
+  observation   String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+  userDeletedBy User?     @relation("ObservationUserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  userAction    User      @relation("ObservationUserAction", fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model History {
