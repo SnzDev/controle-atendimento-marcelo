@@ -138,21 +138,24 @@ model Assignment {
   client       Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
   service      Service          @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   technic      Technic          @relation(fields: [technicId], references: [id], onDelete: Cascade)
-  History      History?         @relation(fields: [historyId], references: [id])
-  historyId    String?
+}
+
+model Observation {
+  id           String @id @default(cuid())
+  assignmentId String
+  userId       String
 }
 
 model History {
-  id            String       @id @default(cuid())
+  id            String      @id @default(cuid())
   userId        String
   flag          HistoryFlag
   description   String
-  updatedAt     DateTime     @updatedAt
+  updatedAt     DateTime    @updatedAt
   deletedAt     DateTime?
   deletedBy     String?
-  userDeletedBy User?        @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  userAction    User         @relation("UserAction", fields: [userId], references: [id], onDelete: Cascade)
-  Assignment    Assignment[]
+  userDeletedBy User?       @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  userAction    User        @relation("UserAction", fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum AssignmentStatus {
