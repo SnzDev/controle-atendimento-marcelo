@@ -48,7 +48,7 @@ export function ResponsiveAppBar() {
   };
   const session = useSession();
   return (
-    <AppBar sx={{ background: "rgb(30 41 59)" }} position="static">
+    <AppBar sx={{ background: "rgb(30 41 59)" }} position="fixed">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Box
