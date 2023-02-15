@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Autocomplete } from "@mui/material";
+import { Autocomplete, createFilterOptions } from "@mui/material";
 import moment from "moment";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
@@ -15,8 +15,9 @@ interface AssignmentModalProps {
 export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
   const schemaValidation = z.object({
     client: z.object({
-      id: z.string({ required_error: "Obrigatório" }),
-      label: z.string().optional(),
+      id: z.string().optional(),
+      inputValue: z.string().optional(),
+      label: z.string(),
     }),
     technic: z.object({
       id: z.string({ required_error: "Obrigatório" }),
@@ -63,6 +64,11 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
     },
   });
   const queryCtx = api.useContext();
+  const filter = createFilterOptions<{
+    id?: string;
+    label: string;
+    inputValue?: string;
+  }>();
 
   const createAssignment = api.assignment.create.useMutation({
     onSuccess: () => {
@@ -92,23 +98,55 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
     },
   });
 
+  const createPatient = api.clients.create.useMutation({
+    onSuccess: () => {
+      void queryCtx.clients.getAll.invalidate();
+    },
+  });
+
   const listClients = api.clients.getAll.useQuery({});
   const listTechnic = api.technic.getAll.useQuery({});
   const listShop = api.shop.getAll.useQuery({});
   const listService = api.service.getAll.useQuery({});
 
-  const onSubmit: SubmitHandler<FieldValues> = ({ observation, ...data }) =>
-    createAssignment.mutateAsync(data).then(({ id }) => {
-      if (observation)
-        createObservation.mutate({ assignmentId: id, observation });
-    });
+  const onSubmit: SubmitHandler<FieldValues> = ({
+    observation,
+    client,
+    ...data
+  }) => {
+    if (!client.id)
+      return createPatient
+        .mutateAsync({ name: client.label })
+        .then((response) =>
+          createAssignment
+            .mutateAsync({
+              ...data,
+              client: { id: response.id, label: response.name },
+            })
+            .then(({ id }) => {
+              if (observation)
+                createObservation.mutate({ assignmentId: id, observation });
+            })
+        );
+
+    createAssignment
+      .mutateAsync({
+        client: { id: client.id, label: client.label },
+        ...data,
+      })
+      .then(({ id }) => {
+        if (observation)
+          createObservation.mutate({ assignmentId: id, observation });
+      })
+      .catch((e) => console.log(e));
+  };
   return (
     <Modal
       open={isVisible}
       sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
       onClose={onClose}
     >
-      <div className="flex w-[50%] flex-col items-center justify-center rounded bg-slate-800 p-2 shadow-md ">
+      <div className="flex flex-col items-center justify-center rounded bg-slate-800 p-5 px-10 shadow-md ">
         <form
           className="flex flex-col items-center justify-items-center"
           onSubmit={handleSubmit(onSubmit)}
@@ -119,14 +157,43 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
             render={({ field: { onChange, ...field } }) => (
               <Autocomplete
                 {...field}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                onChange={(_e, v) => onChange(v)}
+                freeSolo
+                onChange={(_e, v) => {
+                  if (typeof v === "string") {
+                    onChange({
+                      label: v,
+                    });
+                  } else if (v && v?.inputValue) {
+                    // Create a new value from the user input
+                    onChange({
+                      label: v.inputValue,
+                    });
+                  } else onChange(v);
+                }}
+                filterOptions={(options, params) => {
+                  const filtered = filter(options, params);
+
+                  const { inputValue } = params;
+                  // Suggest the creation of a new value
+                  const isExisting = options.some(
+                    (option) => inputValue === option.label
+                  );
+                  if (inputValue !== "" && !isExisting) {
+                    filtered.push({
+                      inputValue,
+                      label: `Adcionar "${inputValue}"`,
+                    });
+                  }
+
+                  return filtered;
+                }}
                 disablePortal
                 id="combo-box-demo"
                 style={{ color: "black" }}
+                disableClearable
                 options={
                   listClients.data?.map(({ id, name }) => {
-                    return { id, label: name };
+                    return { id, label: name, inputValue: undefined };
                   }) ?? []
                 }
                 renderInput={(params) => (

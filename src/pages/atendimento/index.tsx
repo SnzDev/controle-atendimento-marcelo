@@ -90,8 +90,7 @@ export default function Assignments() {
         <link rel="icon" href="/favicon.ico" />
         <style></style>
       </Head>
-      <ResponsiveAppBar />
-      <main className="flex min-h-screen flex-1 flex-col items-center bg-black">
+      <main className="flex min-h-screen flex-1 flex-col items-center overflow-y-hidden bg-black ">
         <Fab
           onClick={() => setIsVisibleModalCreate(true)}
           sx={{ position: "absolute", right: 10, bottom: 10 }}
@@ -101,7 +100,9 @@ export default function Assignments() {
         >
           <AddIcon />
         </Fab>
-        <div className="flex h-full w-full flex-1 flex-row  gap-4 overflow-x-scroll px-4">
+        <ResponsiveAppBar />
+
+        <div className=" mt-16 flex w-full flex-1 flex-row  gap-4 overflow-x-scroll px-4">
           {listAssignments.data?.map(({ techId, assignments }) => (
             <TableContainer
               key={techId}
@@ -110,7 +111,8 @@ export default function Assignments() {
                 position: "relative",
                 marginTop: "16px",
                 maxHeight: "600px",
-                width: "400px",
+                maxWidth: "400px",
+                minWidth: "350px",
                 backgroundColor: "rgb(30 41 59)",
               }}
               className="rounded-lg shadow"
