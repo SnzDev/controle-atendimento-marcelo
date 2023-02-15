@@ -76,6 +76,9 @@ export default function Assignments() {
   const changeStatus = api.assignment.changeStatus.useMutation({
     onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
   });
+  const changeTechnic = api.assignment.changeTechnic.useMutation({
+    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
+  });
   const handleChangeStatus = ({ id, status }: HandleChangeStatusProps) => {
     if (!id || !status) return handleCloseMenu();
 
@@ -234,6 +237,33 @@ export default function Assignments() {
             </TableContainer>
           ))}
         </div>
+        <StyledMenu
+          id="fade-menu"
+          MenuListProps={{
+            "aria-labelledby": "fade-button",
+          }}
+          anchorEl={anchorEl.anchor}
+          open={open}
+          onClose={handleCloseMenu}
+          TransitionComponent={Fade}
+        >
+          {listAssignments.data?.map((item) => {
+            const technicName = item.assignments[0]?.technic.name;
+            return (
+              <MenuItem
+                onClick={() =>
+                  changeTechnic.mutate({
+                    id: anchorEl.id,
+                    technicId: item.techId,
+                  })
+                }
+              >
+                {technicName}
+              </MenuItem>
+            );
+          })}
+        </StyledMenu>
+
         <StyledMenu
           id="fade-menu"
           MenuListProps={{
