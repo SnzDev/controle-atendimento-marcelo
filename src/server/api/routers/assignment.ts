@@ -183,4 +183,33 @@ export const assignmentRouter = createTRPCRouter({
         data: { status: input.status },
       });
     }),
+  changeTechnic: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        technicId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const assignment = await ctx.prisma.assignment.findUnique({
+        where: { id: input.id },
+      });
+      const lastPosition = await ctx.prisma.assignment.findMany({
+        where: {
+          shopId: assignment?.shopId,
+          dateActivity: assignment?.dateActivity,
+          technicId: input.technicId,
+        },
+        orderBy: {
+          position: "desc",
+        },
+      });
+      return ctx.prisma.assignment.update({
+        where: { id: input.id },
+        data: {
+          technicId: input.technicId,
+          position: (lastPosition?.[0]?.position ?? 0) + 1,
+        },
+      });
+    }),
 });

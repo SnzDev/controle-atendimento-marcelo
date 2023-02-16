@@ -17,18 +17,19 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import { StyledMenu } from "../../components/StyledMenu";
 import { api } from "../../utils/api";
-import { AssignmentStatus } from "@prisma/client";
+import type { AssignmentStatus } from "@prisma/client";
 import { ResponsiveAppBar } from "../../components/AppBar";
 
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import { AssignmentModal } from "../../components/AssignmentModal";
 
-interface MenuChangeStatus {
+interface AnchorMenuStatus {
   anchor: null | HTMLElement;
   id: string | null;
   status: AssignmentStatus | null;
 }
+
 interface HandleOpenMenuProps {
   event: React.MouseEvent<HTMLButtonElement>;
   id: string;
@@ -38,6 +39,23 @@ interface HandleChangeStatusProps {
   status: AssignmentStatus | null;
   id: string | null;
 }
+interface AnchorMenuChangeTechnic {
+  anchor: null | HTMLElement;
+  id: string | null;
+  status: AssignmentStatus | null;
+  oldTechnicId: string | null;
+}
+
+interface HandleOpenMenuProps {
+  event: React.MouseEvent<HTMLButtonElement>;
+  id: string;
+  status: AssignmentStatus | null;
+  oldTechnicId: string | null;
+}
+interface HandleChangeTechnicProps {
+  technicId: string | null;
+  id: string | null;
+}
 
 export default function Assignments() {
   const shopId = "cle0947h3000av5k41d3wxmmk";
@@ -45,21 +63,44 @@ export default function Assignments() {
   const queryClient = api.useContext();
   const [isVisibleModalCreate, setIsVisibleModalCreate] = useState(false);
   const [parent] = useAutoAnimate(/* optional config */);
-  const [anchorEl, setAnchorEl] = useState<MenuChangeStatus>({
+  const [anchorMenuStatus, setAnchorMenuStatus] = useState<AnchorMenuStatus>({
     anchor: null,
     id: null,
     status: null,
   });
-  const open = Boolean(anchorEl.anchor);
-  const handleOpenMenu = ({
+  const [anchorMenuChangeTechnic, setAnchorMenuChangeTechnic] =
+    useState<AnchorMenuChangeTechnic>({
+      anchor: null,
+      id: null,
+      status: null,
+      oldTechnicId: null,
+    });
+
+  const handleOpenMenuChangeTechnic = ({
+    status,
+    event: { currentTarget: anchor },
+    id,
+    oldTechnicId,
+  }: HandleOpenMenuProps) => {
+    setAnchorMenuChangeTechnic({ anchor, id, status, oldTechnicId });
+  };
+  const handleCloseMenuChangeTechnic = () => {
+    setAnchorMenuChangeTechnic({
+      anchor: null,
+      id: null,
+      status: null,
+      oldTechnicId: null,
+    });
+  };
+  const handleOpenMenuStatus = ({
     status,
     event: { currentTarget: anchor },
     id,
   }: HandleOpenMenuProps) => {
-    setAnchorEl({ anchor, id, status });
+    setAnchorMenuStatus({ anchor, id, status });
   };
-  const handleCloseMenu = () => {
-    setAnchorEl({ anchor: null, id: null, status: null });
+  const handleCloseMenuStatus = () => {
+    setAnchorMenuStatus({ anchor: null, id: null, status: null });
   };
   const listAssignments = api.assignment.getAssignments.useQuery({
     shopId,
@@ -76,11 +117,25 @@ export default function Assignments() {
   const changeStatus = api.assignment.changeStatus.useMutation({
     onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
   });
+  const changeTechnic = api.assignment.changeTechnic.useMutation({
+    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
+  });
   const handleChangeStatus = ({ id, status }: HandleChangeStatusProps) => {
-    if (!id || !status) return handleCloseMenu();
+    if (!id || !status) return handleCloseMenuStatus();
 
     changeStatus.mutate({ id, status });
-    handleCloseMenu();
+    handleCloseMenuStatus();
+  };
+  const handleChangeTechnic = ({ id, technicId }: HandleChangeTechnicProps) => {
+    if (!id || !technicId) return handleCloseMenuStatus();
+
+    if (anchorMenuChangeTechnic.id)
+      changeTechnic.mutate({
+        id: anchorMenuChangeTechnic.id,
+        technicId,
+      });
+
+    handleCloseMenuChangeTechnic();
   };
   return (
     <>
@@ -162,7 +217,7 @@ export default function Assignments() {
                               <button
                                 aria-label="fade-button"
                                 onClick={(event) =>
-                                  handleOpenMenu({
+                                  handleOpenMenuStatus({
                                     status: assignment.status,
                                     event,
                                     id: assignment.id,
@@ -205,6 +260,24 @@ export default function Assignments() {
                             {assignment.service.name}
 
                             <div className="flex flex-row gap-3">
+                              <button
+                                onClick={(event) =>
+                                  handleOpenMenuChangeTechnic({
+                                    status: assignment.status,
+                                    event,
+                                    id: assignment.id,
+                                    oldTechnicId: techId,
+                                  })
+                                }
+                                className="text-blue-500"
+                              >
+                                <Image
+                                  alt="technical_icon"
+                                  src="/icons/Technical.svg"
+                                  width={16}
+                                  height={16}
+                                />
+                              </button>
                               <IconButton
                                 onClick={() =>
                                   positionUp.mutate({ id: assignment.id })
@@ -239,42 +312,83 @@ export default function Assignments() {
           MenuListProps={{
             "aria-labelledby": "fade-button",
           }}
-          anchorEl={anchorEl.anchor}
-          open={open}
-          onClose={handleCloseMenu}
+          anchorEl={anchorMenuChangeTechnic.anchor}
+          open={!!anchorMenuChangeTechnic.anchor}
+          onClose={handleCloseMenuChangeTechnic}
           TransitionComponent={Fade}
         >
-          {anchorEl.status !== "PENDING" && (
+          {listAssignments.data?.map((item) => {
+            const technicName = item.assignments[0]?.technic.name;
+            if (item.techId !== anchorMenuChangeTechnic.oldTechnicId)
+              return (
+                <MenuItem
+                  key={item.techId}
+                  onClick={() =>
+                    handleChangeTechnic({
+                      id: anchorMenuChangeTechnic.id,
+                      technicId: item.techId,
+                    })
+                  }
+                >
+                  {technicName}
+                </MenuItem>
+              );
+          })}
+        </StyledMenu>
+
+        <StyledMenu
+          id="fade-menu"
+          MenuListProps={{
+            "aria-labelledby": "fade-button",
+          }}
+          anchorEl={anchorMenuStatus.anchor}
+          open={!!anchorMenuStatus.anchor}
+          onClose={handleCloseMenuStatus}
+          TransitionComponent={Fade}
+        >
+          {anchorMenuStatus.status !== "PENDING" && (
             <MenuItem
               onClick={() =>
-                handleChangeStatus({ id: anchorEl.id, status: "PENDING" })
+                handleChangeStatus({
+                  id: anchorMenuStatus.id,
+                  status: "PENDING",
+                })
               }
             >
               PENDENTE
             </MenuItem>
           )}
-          {anchorEl.status !== "IN_PROGRESS" && (
+          {anchorMenuStatus.status !== "IN_PROGRESS" && (
             <MenuItem
               onClick={() =>
-                handleChangeStatus({ id: anchorEl.id, status: "IN_PROGRESS" })
+                handleChangeStatus({
+                  id: anchorMenuStatus.id,
+                  status: "IN_PROGRESS",
+                })
               }
             >
               ANDAMENTO
             </MenuItem>
           )}
-          {anchorEl.status !== "FINALIZED" && (
+          {anchorMenuStatus.status !== "FINALIZED" && (
             <MenuItem
               onClick={() =>
-                handleChangeStatus({ id: anchorEl.id, status: "FINALIZED" })
+                handleChangeStatus({
+                  id: anchorMenuStatus.id,
+                  status: "FINALIZED",
+                })
               }
             >
               FINALIZADO
             </MenuItem>
           )}
-          {anchorEl.status !== "CANCELED" && (
+          {anchorMenuStatus.status !== "CANCELED" && (
             <MenuItem
               onClick={() =>
-                handleChangeStatus({ id: anchorEl.id, status: "CANCELED" })
+                handleChangeStatus({
+                  id: anchorMenuStatus.id,
+                  status: "CANCELED",
+                })
               }
             >
               CANCELADO
