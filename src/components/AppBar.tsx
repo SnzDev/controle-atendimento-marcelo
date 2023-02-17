@@ -18,26 +18,35 @@ import { StyledMenu } from "./StyledMenu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Badge } from "@mui/material";
+import { Badge, TextField } from "@mui/material";
+import { api } from "../utils/api";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 
-export function ResponsiveAppBar() {
+import type { Moment } from "moment";
+import moment from "moment";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+interface ResponsiveAppBarProps {
+  shopId: string | null;
+  dateActivity: string;
+  onChange: (props: HandleChange) => void;
+}
+interface HandleChange {
+  key: "shopId" | "dateActivity";
+  value: string;
+}
+export function ResponsiveAppBar({
+  dateActivity,
+  onChange,
+  shopId,
+}: ResponsiveAppBarProps) {
   const { push } = useRouter();
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-    null
-  );
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
   };
 
   const handleCloseUserMenu = () => {
@@ -46,6 +55,7 @@ export function ResponsiveAppBar() {
   const handleLogout = async () => {
     await push("/auth/desconectar");
   };
+  const listShop = api.shop.getAll.useQuery({});
   const session = useSession();
   return (
     <AppBar sx={{ background: "rgb(30 41 59)" }} position="fixed">
@@ -94,42 +104,79 @@ export function ResponsiveAppBar() {
             }}
           >
             <Link href="/cadastro/cliente">
-              <MenuItem onClick={handleCloseNavMenu}>
+              <MenuItem>
                 <Typography textAlign="center">Clientes</Typography>
               </MenuItem>
             </Link>
             <Link href="/cadastro/tecnico">
-              <MenuItem onClick={handleCloseNavMenu}>
+              <MenuItem>
                 <Badge variant="dot" color="error">
                   <Typography textAlign="center">Técnicos</Typography>
                 </Badge>
               </MenuItem>
             </Link>
             <Link href="/cadastro/loja">
-              <MenuItem onClick={handleCloseNavMenu}>
+              <MenuItem>
                 <Badge variant="dot" color="error">
                   <Typography textAlign="center">Revendas</Typography>
                 </Badge>
               </MenuItem>
             </Link>
             <Link href="/cadastro/servico">
-              <MenuItem onClick={handleCloseNavMenu}>
+              <MenuItem>
                 <Badge variant="dot" color="error">
                   <Typography textAlign="center">Serviços</Typography>
                 </Badge>
               </MenuItem>
             </Link>
             <Link href="/cadastro/usuario">
-              <MenuItem onClick={handleCloseNavMenu}>
+              <MenuItem>
                 <Badge variant="dot" color="error">
                   <Typography textAlign="center">Usuarios</Typography>
                 </Badge>
               </MenuItem>
             </Link>
+            <Box sx={{ ml: 10, display: "flex" }}>
+              <select
+                value={shopId ?? ""}
+                onChange={(e) => {
+                  onChange({ key: "shopId", value: e.target.value });
+                }}
+                style={{ background: "rgb(30 41 59)" }}
+                placeholder="Loja"
+              >
+                <option value="">Revenda</option>
+                {listShop?.data?.map((item) => (
+                  <option
+                    value={item.id}
+                    key={item.id}
+                    className=" text-white"
+                    onClick={() => {
+                      console.log(item.name);
+                    }}
+                  >
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                value={dateActivity}
+                onChange={(e) =>
+                  onChange({ key: "dateActivity", value: e.target.value })
+                }
+                type="date"
+                style={{
+                  background: "rgb(30 41 59)",
+                  marginLeft: 20,
+                  color: "#FFF",
+                }}
+              />
+            </Box>
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
+            <Tooltip title="Opções">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
                   sx={{ background: " rgb(51 65 85)" }}
@@ -149,14 +196,6 @@ export function ResponsiveAppBar() {
                     session.data?.user.name?.[0] ?? ""
                   )}
                 </Avatar>
-
-                {/* <Avatar
-                component=
-                  alt={session.data?.user.name ?? ""}
-                  src={
-                    session.data?.user.image ?? "/static/images/avatar/2.jpg"
-                  }
-                /> */}
               </IconButton>
             </Tooltip>
             <StyledMenu
@@ -172,7 +211,7 @@ export function ResponsiveAppBar() {
                 vertical: "top",
                 horizontal: "right",
               }}
-              open={Boolean(anchorElUser)}
+              open={!!anchorElUser}
               onClose={handleCloseUserMenu}
             >
               <MenuItem sx={{ color: "#FFF" }} onClick={handleLogout}>

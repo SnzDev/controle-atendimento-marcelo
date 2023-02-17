@@ -11,7 +11,6 @@ import TableRow from "@mui/material/TableRow";
 import Head from "next/head";
 import Image from "next/image";
 
-import {} from "@formkit/auto-animate";
 import Fade from "@mui/material/Fade";
 import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
@@ -23,6 +22,8 @@ import { ResponsiveAppBar } from "../../components/AppBar";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import { AssignmentModal } from "../../components/AssignmentModal";
+import moment from "moment";
+import useDebounce from "../../hooks/useDebounce";
 
 interface AnchorMenuStatus {
   anchor: null | HTMLElement;
@@ -56,13 +57,24 @@ interface HandleChangeTechnicProps {
   technicId: string | null;
   id: string | null;
 }
+interface FilterAssignment {
+  shopId: string | null;
+  dateActivity: string;
+}
 
+interface HandleChangeFilterAssignment {
+  key: "shopId" | "dateActivity";
+  value: string;
+}
 export default function Assignments() {
-  const shopId = "cle0947h3000av5k41d3wxmmk";
-  const dateActivity = "2023-11-02";
   const queryClient = api.useContext();
   const [isVisibleModalCreate, setIsVisibleModalCreate] = useState(false);
   const [parent] = useAutoAnimate(/* optional config */);
+  const [filterAssignment, setFilterAssignment] = useState<FilterAssignment>({
+    shopId: null,
+    dateActivity: moment().format("YYYY-MM-DD"),
+  });
+  const { shopId, dateActivity } = useDebounce(filterAssignment, 1000);
   const [anchorMenuStatus, setAnchorMenuStatus] = useState<AnchorMenuStatus>({
     anchor: null,
     id: null,
@@ -102,6 +114,11 @@ export default function Assignments() {
   const handleCloseMenuStatus = () => {
     setAnchorMenuStatus({ anchor: null, id: null, status: null });
   };
+  const handleChangeFilter = ({ key, value }: HandleChangeFilterAssignment) =>
+    setFilterAssignment((old) => {
+      return { ...old, [key]: value };
+    });
+
   const listAssignments = api.assignment.getAssignments.useQuery({
     shopId,
     dateActivity,
@@ -134,9 +151,9 @@ export default function Assignments() {
         id: anchorMenuChangeTechnic.id,
         technicId,
       });
-
     handleCloseMenuChangeTechnic();
   };
+  console.log(filterAssignment);
   return (
     <>
       <Head>
@@ -155,7 +172,11 @@ export default function Assignments() {
         >
           <AddIcon />
         </Fab>
-        <ResponsiveAppBar />
+        <ResponsiveAppBar
+          shopId={filterAssignment.shopId}
+          dateActivity={filterAssignment.dateActivity}
+          onChange={handleChangeFilter}
+        />
 
         <div className=" mt-16 flex w-full flex-1 flex-row  gap-4 overflow-x-scroll px-4">
           {listAssignments.data?.map(({ techId, assignments }) => (
@@ -221,6 +242,7 @@ export default function Assignments() {
                                     status: assignment.status,
                                     event,
                                     id: assignment.id,
+                                    oldTechnicId: assignment.technicId,
                                   })
                                 }
                                 className={`rounded  p-2 text-slate-50  

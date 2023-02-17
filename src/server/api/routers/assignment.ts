@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { AssignmentStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import moment from "moment";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
@@ -57,11 +58,16 @@ export const assignmentRouter = createTRPCRouter({
       });
     }),
   getAssignments: protectedProcedure
-    .input(z.object({ shopId: z.string(), dateActivity: z.string() }))
+    .input(
+      z.object({ shopId: z.string().nullable(), dateActivity: z.string() })
+    )
     .query(async ({ ctx, input }) => {
+      if (!input.shopId || !moment(input.dateActivity).isValid()) return;
       const technics = await ctx.prisma.assignment.findMany({
         where: {
-          // dateActivity: input.dateActivity,
+          dateActivity: new Date(
+            moment(input.dateActivity).format("YYYY-MM-DD")
+          ),
           shopId: input.shopId,
         },
         include: {
