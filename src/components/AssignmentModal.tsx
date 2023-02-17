@@ -31,7 +31,7 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
       id: z.string({ required_error: "Obrigatório" }),
       label: z.string().optional(),
     }),
-    dateActivity: z.date(),
+    dateActivity: z.string(),
     observation: z.string().optional(),
   });
   type FieldValues = z.infer<typeof schemaValidation>;
@@ -60,7 +60,7 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
         id: "",
         label: "",
       },
-      dateActivity: new Date(moment().format("YYYY-MM-DD")),
+      dateActivity: moment().format("YYYY-MM-DD"),
     },
   });
   const queryCtx = api.useContext();
@@ -339,7 +339,7 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                 renderInput={(params) => (
                   <div ref={params.InputProps.ref}>
                     <p className=" text-base font-semibold text-stone-100">
-                      Observação
+                      Revenda
                     </p>
                     <span className="flex flex-row items-center pl-1.5">
                       <Image
@@ -364,6 +364,31 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                 )}
                 noOptionsText="Não encontrado"
               />
+            )}
+          />
+          <Controller
+            control={control}
+            name="dateActivity"
+            render={({ field: { onChange, ...field } }) => (
+              <div>
+                <p className=" text-base font-semibold text-stone-100">
+                  Revenda
+                </p>
+                <span className="flex flex-row items-center pl-1.5">
+                  <div className="z-10 mr-[-32px] w-[24px]"></div>
+                  <input
+                    onChange={onChange}
+                    value={field.value}
+                    type="date"
+                    className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 text-stone-100"
+                  />
+                </span>
+                {errors.technic && (
+                  <p className="text-sm font-semibold text-red-500">
+                    {errors.technic.message}
+                  </p>
+                )}
+              </div>
             )}
           />
           <div>

@@ -29,7 +29,7 @@ export const assignmentRouter = createTRPCRouter({
           id: z.string({ required_error: "Obrigatório" }),
           label: z.string().optional(),
         }),
-        dateActivity: z.date(),
+        dateActivity: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -37,7 +37,9 @@ export const assignmentRouter = createTRPCRouter({
         where: {
           technicId: input.technic.id,
           shopId: input.shop.id,
-          dateActivity: input.dateActivity,
+          dateActivity: new Date(
+            moment(input.dateActivity).format("YYYY-MM-DD")
+          ),
         },
         orderBy: {
           position: "desc",
@@ -48,7 +50,9 @@ export const assignmentRouter = createTRPCRouter({
       return ctx.prisma.assignment.create({
         data: {
           clientId: input.client.id,
-          dateActivity: input.dateActivity,
+          dateActivity: new Date(
+            moment(input.dateActivity).format("YYYY-MM-DD")
+          ),
           serviceId: input.service.id,
           position,
           technicId: input.technic.id,
@@ -200,6 +204,28 @@ export const assignmentRouter = createTRPCRouter({
       const assignment = await ctx.prisma.assignment.findUnique({
         where: { id: input.id },
       });
+      if (!assignment) return;
+      const allAssignmentsBehind = await ctx.prisma.assignment.findMany({
+        where: {
+          technicId: assignment.technicId,
+          dateActivity: assignment.dateActivity,
+          shopId: assignment.shopId,
+          position: {
+            lt: assignment.position,
+          },
+        },
+      });
+      allAssignmentsBehind.forEach(
+        async (item) =>
+          await ctx.prisma.assignment.update({
+            where: {
+              id: item.id,
+            },
+            data: {
+              position: item.position - 1,
+            },
+          })
+      );
       const lastPosition = await ctx.prisma.assignment.findMany({
         where: {
           shopId: assignment?.shopId,
