@@ -192,9 +192,11 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                 style={{ color: "black" }}
                 disableClearable
                 options={
-                  listClients.data?.map(({ id, name }) => {
-                    return { id, label: name, inputValue: undefined };
-                  }) ?? []
+                  listClients.data
+                    ?.filter((item) => !item.deletedAt)
+                    ?.map(({ id, name }) => {
+                      return { id, label: name, inputValue: undefined };
+                    }) ?? []
                 }
                 renderInput={(params) => (
                   <div ref={params.InputProps.ref}>
@@ -239,9 +241,11 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                 id="combo-box-demo"
                 style={{ color: "black" }}
                 options={
-                  listTechnic.data?.map(({ id, name }) => {
-                    return { id, label: name };
-                  }) ?? []
+                  listTechnic.data
+                    ?.filter((item) => !item.deletedAt)
+                    ?.map(({ id, name }) => {
+                      return { id, label: name };
+                    }) ?? []
                 }
                 renderInput={(params) => (
                   <div ref={params.InputProps.ref}>
@@ -286,9 +290,11 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                 id="combo-box-demo"
                 style={{ color: "black" }}
                 options={
-                  listService.data?.map(({ id, name }) => {
-                    return { id, label: name };
-                  }) ?? []
+                  listService.data
+                    ?.filter((item) => !item.deletedAt)
+                    ?.map(({ id, name }) => {
+                      return { id, label: name };
+                    }) ?? []
                 }
                 renderInput={(params) => (
                   <div ref={params.InputProps.ref}>
@@ -332,9 +338,11 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                 id="combo-box-demo"
                 style={{ color: "black" }}
                 options={
-                  listShop.data?.map(({ id, name }) => {
-                    return { id, label: `${name}` };
-                  }) ?? []
+                  listShop.data
+                    ?.filter((item) => !item.deletedAt)
+                    ?.map(({ id, name }) => {
+                      return { id, label: `${name}` };
+                    }) ?? []
                 }
                 renderInput={(params) => (
                   <div ref={params.InputProps.ref}>

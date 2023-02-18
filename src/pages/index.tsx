@@ -1,14 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import moment from "moment";
+import type {
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+} from "next";
 import { getServerSession } from "next-auth";
-import { getProviders, signIn, useSession } from "next-auth/react";
+import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { authOptions } from "../server/auth";
+moment.locale("pt-br");
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
@@ -26,7 +31,7 @@ export const getServerSideProps = async (
 const Login = ({
   providers,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { query, push } = useRouter();
+  const { query } = useRouter();
   const loginError = query?.error;
   const schemaValidation = z.object({
     email: z.string({ required_error: "Obrigatório" }).email("E-mail inválido"),
@@ -141,25 +146,25 @@ const Login = ({
           {Object.values(providers).map(
             (provider) =>
               provider.name !== "credentials" && (
-                  <button
-                    key={provider.id}
-                    type="button"
-                    onClick={() =>
-                      signIn(provider.id, {
-                        // callbackUrl: `${window.location.origin}`,
-                      })
-                    }
-                    className="w-82 row flex items-center gap-2 rounded bg-white p-2 pl-16 text-base font-semibold"
-                  >
-                    <Image
-                      src="/icons/Google.svg"
-                      className="z-10"
-                      width={24}
-                      height={24}
-                      alt="Logo AcesseNet"
-                    />
-                    Entrar com {provider.name}
-                  </button>
+                <button
+                  key={provider.id}
+                  type="button"
+                  onClick={() =>
+                    signIn(provider.id, {
+                      // callbackUrl: `${window.location.origin}`,
+                    })
+                  }
+                  className="w-82 row flex items-center gap-2 rounded bg-white p-2 pl-16 text-base font-semibold"
+                >
+                  <Image
+                    src="/icons/Google.svg"
+                    className="z-10"
+                    width={24}
+                    height={24}
+                    alt="Logo AcesseNet"
+                  />
+                  Entrar com {provider.name}
+                </button>
               )
           )}
 

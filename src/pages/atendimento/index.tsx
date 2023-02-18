@@ -1,30 +1,33 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import AddIcon from "@mui/icons-material/Add";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
+import EventIcon from "@mui/icons-material/Event";
 import { IconButton } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
+import Fab from "@mui/material/Fab";
+import Fade from "@mui/material/Fade";
+import MenuItem from "@mui/material/MenuItem";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import type { AssignmentStatus } from "@prisma/client";
+import moment from "moment";
 import Head from "next/head";
 import Image from "next/image";
-
-import Fade from "@mui/material/Fade";
-import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
-import { StyledMenu } from "../../components/StyledMenu";
-import { api } from "../../utils/api";
-import type { AssignmentStatus } from "@prisma/client";
 import { ResponsiveAppBar } from "../../components/AppBar";
-
-import Fab from "@mui/material/Fab";
-import AddIcon from "@mui/icons-material/Add";
 import { AssignmentModal } from "../../components/AssignmentModal";
-import moment from "moment";
+import { StyledMenu } from "../../components/StyledMenu";
 import useDebounce from "../../hooks/useDebounce";
-
+import { api } from "../../utils/api";
+import { changeStatusColor, changeStatusPortuguese } from "../../utils/status";
+import { Observation } from "../../components/Observation";
 interface AnchorMenuStatus {
   anchor: null | HTMLElement;
   id: string | null;
@@ -186,12 +189,9 @@ export default function Assignments() {
                 overflowY: "scroll",
                 position: "relative",
                 marginTop: "16px",
-                maxHeight: "600px",
-                maxWidth: "400px",
-                minWidth: "350px",
                 backgroundColor: "rgb(30 41 59)",
               }}
-              className="rounded-lg shadow"
+              className="max-h-[800px] min-w-[350px] max-w-[400px] rounded-lg shadow"
             >
               <Table aria-label="simple table">
                 <TableHead className="sticky top-0 z-10 bg-slate-800">
@@ -221,109 +221,145 @@ export default function Assignments() {
                   </TableRow>
                 </TableHead>
                 <TableBody ref={parent}>
-                  {assignments.map((assignment) => (
-                    <TableRow key={assignment.id}>
-                      <TableCell
-                        sx={{
-                          border: "none",
-                          padding: 1,
-                        }}
-                      >
-                        <div className="rounded bg-slate-700 p-2 drop-shadow-md">
-                          <div className="flex flex-row justify-between">
-                            <span className="overflow-ellipsis text-lg font-bold capitalize text-slate-50 ">
-                              {assignment.client.name}
-                            </span>
-                            <div className="flex flex-row gap-1">
-                              <button
-                                aria-label="fade-button"
-                                onClick={(event) =>
-                                  handleOpenMenuStatus({
-                                    status: assignment.status,
-                                    event,
-                                    id: assignment.id,
-                                    oldTechnicId: assignment.technicId,
-                                  })
-                                }
-                                className={`rounded  p-2 text-slate-50  
-                                ${
-                                  assignment.status === "PENDING"
-                                    ? "bg-yellow-600 hover:bg-yellow-700"
-                                    : ""
-                                }
-                                ${
-                                  assignment.status === "IN_PROGRESS"
-                                    ? "bg-blue-600 hover:bg-blue-700"
-                                    : ""
-                                }
-                                ${
-                                  assignment.status === "FINALIZED"
-                                    ? "bg-green-600 hover:bg-green-700"
-                                    : ""
-                                }
-                                ${
-                                  assignment.status === "CANCELED"
-                                    ? "bg-red-600 hover:bg-red-700"
-                                    : ""
-                                }
+                  {assignments.map((assignment) => {
+                    const dateAssignment = moment(
+                      assignment.dateActivity,
+                      "YYYY-MM-DD"
+                    )
+                      .utc()
+                      .format("YYYY-MM-DD");
+                    const now = moment();
+                    const dateNow = moment(now).format("YYYY-MM-DD");
+                    return (
+                      <TableRow key={assignment.id}>
+                        <TableCell
+                          sx={{
+                            border: "none",
+                            padding: 1,
+                          }}
+                        >
+                          <div className="rounded bg-slate-700 p-2 drop-shadow-md">
+                            <div className="flex flex-row justify-between">
+                              <span className="flex items-center gap-1 overflow-ellipsis text-lg font-bold capitalize text-slate-50 ">
+                                <button className="inline-block rounded-full bg-gray-200 text-xs font-medium uppercase leading-tight text-gray-700 shadow-md transition duration-150 ease-in-out hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400 active:shadow-lg">
+                                  <InfoIcon />
+                                </button>
+                                {assignment.client.name}
+                              </span>
+                              <div className="flex flex-row gap-1">
+                                <button
+                                  aria-label="fade-button"
+                                  onClick={(event) =>
+                                    handleOpenMenuStatus({
+                                      status: assignment.status,
+                                      event,
+                                      id: assignment.id,
+                                      oldTechnicId: assignment.technicId,
+                                    })
+                                  }
+                                  className={`rounded  p-2 text-slate-50  
+                               ${changeStatusColor(assignment.status)}
                                 `}
-                              >
-                                {assignment.status === "PENDING" && "PENDENTE"}
-                                {assignment.status === "CANCELED" &&
-                                  "CANCELADO"}
-                                {assignment.status === "IN_PROGRESS" &&
-                                  "ANDAMENTO"}
-                                {assignment.status === "FINALIZED" &&
-                                  "FINALIZADO"}
-                              </button>
-                            </div>
-                          </div>
-                          <div className="flex flex-row items-center justify-between font-bold text-blue-500">
-                            {assignment.service.name}
-
-                            <div className="flex flex-row gap-3">
-                              <button
-                                onClick={(event) =>
-                                  handleOpenMenuChangeTechnic({
+                                >
+                                  {changeStatusPortuguese({
                                     status: assignment.status,
-                                    event,
-                                    id: assignment.id,
-                                    oldTechnicId: techId,
-                                  })
-                                }
-                                className="text-blue-500"
-                              >
-                                <Image
-                                  alt="technical_icon"
-                                  src="/icons/Technical.svg"
-                                  width={16}
-                                  height={16}
-                                />
-                              </button>
-                              <IconButton
-                                onClick={() =>
-                                  positionUp.mutate({ id: assignment.id })
-                                }
-                                color="primary"
-                                component="label"
-                              >
-                                <ArrowUpwardIcon />
-                              </IconButton>
-                              <IconButton
-                                onClick={() =>
-                                  positionDown.mutate({ id: assignment.id })
-                                }
-                                color="primary"
-                                component="label"
-                              >
-                                <ArrowDownwardIcon />
-                              </IconButton>
+                                    isUppercase: true,
+                                  })}
+                                </button>
+                              </div>
                             </div>
+                            <div className="mt-1 flex flex-row items-center justify-between font-bold text-slate-500">
+                              <div className="flex flex-row items-center gap-0 ">
+                                <EventIcon />
+                                {moment(dateAssignment).format("DD/MM")}
+                              </div>
+                              <div className="flex flex-row items-center gap-0 ">
+                                <AccessTimeIcon />
+                                {moment(assignment.createdAt).format(
+                                  "DD/MM HH:mm"
+                                )}
+                              </div>
+                              <div className="flex flex-row items-center gap-1 ">
+                                <AccessAlarmIcon />
+                                {assignment.finalizedAt
+                                  ? moment(assignment.finalizedAt).diff(
+                                      assignment.createdAt,
+                                      "hours"
+                                    )
+                                  : moment().diff(
+                                      assignment.createdAt,
+                                      "hours"
+                                    )}
+                                H
+                              </div>
+                              <div className="flex">
+                                {moment(dateAssignment).isBefore(
+                                  dateNow,
+                                  "day"
+                                ) ? (
+                                  <button className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700">
+                                    Fixar
+                                  </button>
+                                ) : (
+                                  <button className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700">
+                                    Adiar
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row items-center justify-between font-bold text-blue-500">
+                              {assignment.service.name}
+
+                              <div className="flex flex-row gap-3">
+                                <button
+                                  onClick={(event) =>
+                                    handleOpenMenuChangeTechnic({
+                                      status: assignment.status,
+                                      event,
+                                      id: assignment.id,
+                                      oldTechnicId: techId,
+                                    })
+                                  }
+                                  className="text-blue-500"
+                                >
+                                  <Image
+                                    alt="technical_icon"
+                                    src="/icons/Technical.svg"
+                                    width={16}
+                                    height={16}
+                                  />
+                                </button>
+                                <IconButton
+                                  onClick={() =>
+                                    positionUp.mutate({ id: assignment.id })
+                                  }
+                                  color="primary"
+                                  component="label"
+                                >
+                                  <ArrowUpwardIcon />
+                                </IconButton>
+                                <IconButton
+                                  onClick={() =>
+                                    positionDown.mutate({ id: assignment.id })
+                                  }
+                                  color="primary"
+                                  component="label"
+                                >
+                                  <ArrowDownwardIcon />
+                                </IconButton>
+                              </div>
+                            </div>
+                            {!!assignment.observation.length && (
+                              <Observation
+                                observation={assignment.observation}
+                              />
+                            )}
                           </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>

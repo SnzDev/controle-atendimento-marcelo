@@ -2,12 +2,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { AssignmentStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import moment from "moment";
 import { z } from "zod";
+import { changeStatusPortuguese } from "../../../utils/status";
 
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const assignmentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -79,21 +79,70 @@ export const assignmentRouter = createTRPCRouter({
           shop: true,
           service: true,
           client: true,
+          observation: {
+            include: {
+              userAction: true,
+            },
+          },
         },
         orderBy: {
           position: "asc",
         },
       });
+      const allPendingAssignments = await ctx.prisma.assignment.findMany({
+        where: {
+          shopId: input.shopId,
+          dateActivity: {
+            lt: new Date(moment(input.dateActivity).format("YYYY-MM-DD")),
+          },
+          OR: [
+            {
+              status: "IN_PROGRESS",
+            },
+            {
+              status: "PENDING",
+            },
+          ],
+        },
+        include: {
+          technic: true,
+          shop: true,
+          service: true,
+          client: true,
+          observation: {
+            include: {
+              userAction: true,
+            },
+          },
+        },
+      });
+
       const data: {
         techId: string;
         assignments: typeof technics;
       }[] = [];
+
+      allPendingAssignments?.map((item) => {
+        const index = data.findIndex((data) => data.techId === item.technicId);
+        if (index !== -1)
+          if (data[index]?.assignments)
+            return (data[index] = {
+              techId: item.technicId,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              //@ts-ignore
+              assignments: [...data?.[index]?.assignments, item],
+            });
+
+        data.push({ techId: item.technicId, assignments: [item] });
+      });
+
       technics?.map((item) => {
         const index = data.findIndex((data) => data.techId === item.technicId);
         if (index !== -1)
           if (data[index]?.assignments)
             return (data[index] = {
               techId: item.technicId,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               //@ts-ignore
               assignments: [...data?.[index]?.assignments, item],
             });
@@ -187,11 +236,34 @@ export const assignmentRouter = createTRPCRouter({
         status: z.enum(["PENDING", "IN_PROGRESS", "FINALIZED", "CANCELED"]),
       })
     )
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.assignment.update({
+    .mutation(async ({ ctx, input }) => {
+      const assignment = await ctx.prisma.assignment.findUnique({
         where: { id: input.id },
-        data: { status: input.status },
       });
+      if (!assignment)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Não existe esse atendimento",
+        });
+
+      const data = await ctx.prisma.assignment.update({
+        where: { id: input.id },
+        data:
+          input.status === "FINALIZED"
+            ? { status: input.status, finalizedAt: new Date() }
+            : { status: input.status },
+      });
+
+      await ctx.prisma.historyAssignment.create({
+        data: {
+          assignmentId: input.id,
+          userId: ctx.session.user.id,
+          description: `Alterou o status de ${changeStatusPortuguese({
+            status: assignment.status,
+          })} para ${changeStatusPortuguese({ status: input.status })}`,
+        },
+      });
+      return data;
     }),
   changeTechnic: protectedProcedure
     .input(

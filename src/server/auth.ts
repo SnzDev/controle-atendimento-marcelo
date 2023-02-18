@@ -84,7 +84,7 @@ export const authOptions: NextAuthOptions = {
           );
           if (passwordMatch) {
             //SALVAR NO HISTÒRICO
-            await prisma.history.create({
+            await prisma.log.create({
               data: {
                 description: "Usuário logado com sucesso!",
                 flag: "SUCCESS",

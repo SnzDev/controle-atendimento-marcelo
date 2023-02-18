@@ -45,7 +45,7 @@ export const userRouter = createTRPCRouter({
         data: { password: encryptedPassword, ...input },
       });
       if (created)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Criou o usuario de Id: ${created.id}!`,
             flag: "SUCCESS",
@@ -62,7 +62,7 @@ export const userRouter = createTRPCRouter({
         data: { deletedAt: new Date(), deletedBy: ctx.session.user.id },
       });
       if (inactivate)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Inativou o usuario de Id: ${inactivate.id}!`,
             flag: "SUCCESS",
@@ -79,7 +79,7 @@ export const userRouter = createTRPCRouter({
         data: { deletedAt: null, deletedBy: null },
       });
       if (activate)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Ativou o usuario de Id: ${activate.id}!`,
             flag: "SUCCESS",

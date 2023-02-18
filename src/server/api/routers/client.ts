@@ -26,7 +26,7 @@ export const clientRouter = createTRPCRouter({
         data: { name: input.name },
       });
       if (created)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Criou o cliente de Id: ${created.id}!`,
             flag: "SUCCESS",
@@ -43,7 +43,7 @@ export const clientRouter = createTRPCRouter({
         data: { name: input.name },
       });
       if (update)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Atualizou o cliente de Id: ${update.id}!`,
             flag: "SUCCESS",
@@ -60,7 +60,7 @@ export const clientRouter = createTRPCRouter({
         data: { deletedAt: new Date(), deletedBy: ctx.session.user.id },
       });
       if (inactivate)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Inativou o cliente de Id: ${inactivate.id}!`,
             flag: "SUCCESS",
@@ -77,7 +77,7 @@ export const clientRouter = createTRPCRouter({
         data: { deletedAt: null, deletedBy: null },
       });
       if (activate)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Ativou o cliente de Id: ${activate.id}!`,
             flag: "SUCCESS",

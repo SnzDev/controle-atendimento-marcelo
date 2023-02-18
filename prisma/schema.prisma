@@ -57,16 +57,18 @@ model User {
   Service       Service[]
   Shop          Shop[]
 
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
-  deletedAt            DateTime?
-  deletedBy            String?
-  user                 User?         @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  User                 User[]        @relation("DeletedBy")
-  HistoryAction        History[]     @relation("UserAction")
-  HistoryDeletedBy     History[]     @relation("UserDeletedBy")
-  ObservationAction    Observation[] @relation("ObservationUserDeletedBy")
-  ObservationDeletedBy Observation[] @relation("ObservationUserAction")
+  createdAt                  DateTime            @default(now())
+  updatedAt                  DateTime            @updatedAt
+  deletedAt                  DateTime?
+  deletedBy                  String?
+  user                       User?               @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  User                       User[]              @relation("DeletedBy")
+  HistoryAction              Log[]               @relation("UserAction")
+  LogDeletedBy               Log[]               @relation("UserDeletedBy")
+  ObservationAction          Observation[]       @relation("ObservationUserDeletedBy")
+  ObservationDeletedBy       Observation[]       @relation("ObservationUserAction")
+  HistoryAssignmentAction    HistoryAssignment[] @relation("HistoryAssignmentUserDeletedBy")
+  HistoryAssignmentDeletedBy HistoryAssignment[] @relation("HistoryAssignmentUserAction")
 }
 
 model VerificationToken {
@@ -122,25 +124,41 @@ model Shop {
 }
 
 model Assignment {
-  id           String           @id @default(cuid())
-  shopId       String
-  clientId     String
-  technicId    String
-  serviceId    String
-  informations String?
-  dateActivity DateTime         @db.Date
-  position     Int
-  status       AssignmentStatus
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  deletedAt    DateTime?
-  deletedBy    String?
-  user         User?            @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
-  shop         Shop             @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  client       Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  service      Service          @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  technic      Technic          @relation(fields: [technicId], references: [id], onDelete: Cascade)
-  Observation  Observation[]
+  id                String              @id @default(cuid())
+  shopId            String
+  clientId          String
+  technicId         String
+  serviceId         String
+  informations      String?
+  dateActivity      DateTime            @db.Date
+  position          Int
+  status            AssignmentStatus
+  finalizedAt       DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+  deletedBy         String?
+  user              User?               @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  shop              Shop                @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  client            Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service           Service             @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  technic           Technic             @relation(fields: [technicId], references: [id], onDelete: Cascade)
+  observation       Observation[]
+  HistoryAssignment HistoryAssignment[]
+}
+
+model HistoryAssignment {
+  id            String     @id @default(cuid())
+  assignmentId  String
+  userId        String
+  description   String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+  userAction    User       @relation("HistoryAssignmentUserAction", fields: [userId], references: [id], onDelete: Cascade)
+  userDeletedBy User?      @relation("HistoryAssignmentUserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 }
 
 model Observation {
@@ -157,16 +175,16 @@ model Observation {
   assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 }
 
-model History {
-  id            String      @id @default(cuid())
+model Log {
+  id            String    @id @default(cuid())
   userId        String
-  flag          HistoryFlag
+  flag          LogFlag
   description   String
-  updatedAt     DateTime    @updatedAt
+  updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
   deletedBy     String?
-  userDeletedBy User?       @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  userAction    User        @relation("UserAction", fields: [userId], references: [id], onDelete: Cascade)
+  userDeletedBy User?     @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  userAction    User      @relation("UserAction", fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum AssignmentStatus {
@@ -182,7 +200,7 @@ enum UserRole {
   VIEWER
 }
 
-enum HistoryFlag {
+enum LogFlag {
   ACCESS_DENIED
   ERROR
   SUCCESS

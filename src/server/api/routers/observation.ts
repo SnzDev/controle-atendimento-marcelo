@@ -27,7 +27,7 @@ export const observationRouter = createTRPCRouter({
         },
       });
       if (created)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Criou a observação de Id: ${created.id}!`,
             flag: "SUCCESS",
@@ -41,10 +41,10 @@ export const observationRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const update = await ctx.prisma.observation.update({
         where: { id: input.id },
-        data: { observation: input.observation },
+        data: { observation: input.observation, userId: ctx.session.user.id },
       });
       if (update)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Atualizou a observação de Id: ${update.id}!`,
             flag: "SUCCESS",
@@ -61,7 +61,7 @@ export const observationRouter = createTRPCRouter({
         data: { deletedAt: new Date(), deletedBy: ctx.session.user.id },
       });
       if (inactivate)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Inativou a observação de Id: ${inactivate.id}!`,
             flag: "SUCCESS",
@@ -78,7 +78,7 @@ export const observationRouter = createTRPCRouter({
         data: { deletedAt: null, deletedBy: null },
       });
       if (activate)
-        await ctx.prisma.history.create({
+        await ctx.prisma.log.create({
           data: {
             description: `Ativou a observação de Id: ${activate.id}!`,
             flag: "SUCCESS",
