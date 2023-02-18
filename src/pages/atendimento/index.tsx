@@ -1,12 +1,11 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
 import EventIcon from "@mui/icons-material/Event";
 import { IconButton } from "@mui/material";
-import InfoIcon from "@mui/icons-material/Info";
 import Fab from "@mui/material/Fab";
 import Fade from "@mui/material/Fade";
 import MenuItem from "@mui/material/MenuItem";
@@ -23,11 +22,12 @@ import Image from "next/image";
 import { useState } from "react";
 import { ResponsiveAppBar } from "../../components/AppBar";
 import { AssignmentModal } from "../../components/AssignmentModal";
+import { Observation } from "../../components/Observation";
+import { StatusHistoryModal } from "../../components/StatusHistoryModal";
 import { StyledMenu } from "../../components/StyledMenu";
 import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
 import { changeStatusColor, changeStatusPortuguese } from "../../utils/status";
-import { Observation } from "../../components/Observation";
 interface AnchorMenuStatus {
   anchor: null | HTMLElement;
   id: string | null;
@@ -241,9 +241,11 @@ export default function Assignments() {
                           <div className="rounded bg-slate-700 p-2 drop-shadow-md">
                             <div className="flex flex-row justify-between">
                               <span className="flex items-center gap-1 overflow-ellipsis text-lg font-bold capitalize text-slate-50 ">
-                                <button className="inline-block rounded-full bg-gray-200 text-xs font-medium uppercase leading-tight text-gray-700 shadow-md transition duration-150 ease-in-out hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400 active:shadow-lg">
-                                  <InfoIcon />
-                                </button>
+                                <StatusHistoryModal
+                                  historyAssignment={
+                                    assignment.HistoryAssignment
+                                  }
+                                />
                                 {assignment.client.name}
                               </span>
                               <div className="flex flex-row gap-1">

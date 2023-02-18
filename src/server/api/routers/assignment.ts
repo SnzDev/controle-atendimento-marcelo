@@ -33,13 +33,12 @@ export const assignmentRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const date = moment(input.dateActivity).format("YYYY-MM-DD");
       const lastPosition = await ctx.prisma.assignment.findFirst({
         where: {
           technicId: input.technic.id,
           shopId: input.shop.id,
-          dateActivity: new Date(
-            moment(input.dateActivity).format("YYYY-MM-DD")
-          ),
+          dateActivity: new Date(date),
         },
         orderBy: {
           position: "desc",
@@ -47,12 +46,10 @@ export const assignmentRouter = createTRPCRouter({
       });
       const position = (lastPosition?.position ?? 0) + 1;
 
-      return ctx.prisma.assignment.create({
+      const data = await ctx.prisma.assignment.create({
         data: {
           clientId: input.client.id,
-          dateActivity: new Date(
-            moment(input.dateActivity).format("YYYY-MM-DD")
-          ),
+          dateActivity: new Date(date),
           serviceId: input.service.id,
           position,
           technicId: input.technic.id,
@@ -60,6 +57,16 @@ export const assignmentRouter = createTRPCRouter({
           shopId: input.shop.id,
         },
       });
+      await ctx.prisma.historyAssignment.create({
+        data: {
+          assignmentId: data.id,
+          userId: ctx.session.user.id,
+          description: `Criou o atendimento para a data ${moment(date).format(
+            "DD/MM/YYYY"
+          )}`,
+        },
+      });
+      return data;
     }),
   getAssignments: protectedProcedure
     .input(
@@ -79,6 +86,9 @@ export const assignmentRouter = createTRPCRouter({
           shop: true,
           service: true,
           client: true,
+          HistoryAssignment: {
+            include: { userAction: true },
+          },
           observation: {
             include: {
               userAction: true,
@@ -109,6 +119,9 @@ export const assignmentRouter = createTRPCRouter({
           shop: true,
           service: true,
           client: true,
+          HistoryAssignment: {
+            include: { userAction: true },
+          },
           observation: {
             include: {
               userAction: true,
@@ -183,12 +196,23 @@ export const assignmentRouter = createTRPCRouter({
           position: assignmentUp.position + 1,
         },
       });
-      return await ctx.prisma.assignment.update({
+      const data = await ctx.prisma.assignment.update({
         where: { id: assignment.id },
         data: {
           position: assignment.position - 1,
         },
       });
+      await ctx.prisma.historyAssignment.create({
+        data: {
+          assignmentId: data.id,
+          userId: ctx.session.user.id,
+          description: `Moveu para cima da posição ${
+            assignment.position
+          } para a posição ${assignment.position - 1}`,
+        },
+      });
+
+      return data;
     }),
   positionDown: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -222,12 +246,23 @@ export const assignmentRouter = createTRPCRouter({
           position: assignmentDown.position - 1,
         },
       });
-      return await ctx.prisma.assignment.update({
+      const data = await ctx.prisma.assignment.update({
         where: { id: assignment.id },
         data: {
           position: assignment.position + 1,
         },
       });
+      await ctx.prisma.historyAssignment.create({
+        data: {
+          assignmentId: data.id,
+          userId: ctx.session.user.id,
+          description: `Moveu para cima da posição ${
+            assignment.position
+          } para a posição ${assignment.position + 1}`,
+        },
+      });
+
+      return data;
     }),
   changeStatus: protectedProcedure
     .input(
@@ -275,6 +310,9 @@ export const assignmentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const assignment = await ctx.prisma.assignment.findUnique({
         where: { id: input.id },
+        include: {
+          technic: true,
+        },
       });
       if (!assignment) return;
       const allAssignmentsBehind = await ctx.prisma.assignment.findMany({
@@ -308,12 +346,25 @@ export const assignmentRouter = createTRPCRouter({
           position: "desc",
         },
       });
-      return ctx.prisma.assignment.update({
+
+      const data = await ctx.prisma.assignment.update({
         where: { id: input.id },
         data: {
           technicId: input.technicId,
           position: (lastPosition?.[0]?.position ?? 0) + 1,
         },
+        include: {
+          technic: true,
+        },
       });
+      await ctx.prisma.historyAssignment.create({
+        data: {
+          assignmentId: assignment.id,
+          userId: ctx.session.user.id,
+          description: `Trocou do técnico ${assignment.technic.name} para o técnico ${data.technic.name}`,
+        },
+      });
+
+      return data;
     }),
 });
