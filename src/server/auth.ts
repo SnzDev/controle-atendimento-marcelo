@@ -6,11 +6,11 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import DiscordProvider from "next-auth/providers/discord";
 import GoogleProvider from "next-auth/providers/google";
 import * as bcrypt from "bcrypt";
 import { env } from "../env/server.mjs";
 import { prisma } from "./db";
+import type { UserRole } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types.
@@ -23,6 +23,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      role: UserRole;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -42,9 +43,14 @@ declare module "next-auth" {
  **/
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session({ session, user }) {
+    async session({ session, user }) {
       if (session.user) {
-        session.user.id = user.id;
+        const data = await prisma.user.findUnique({ where: { id: user.id } });
+
+        if (!data) return session;
+        session.user.id = data.id;
+        session.user.role = data.role;
+
         // session.user.role = user.role; <-- put other properties on the session here
       }
       return session;

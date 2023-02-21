@@ -7,7 +7,10 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "dokku": {
+      "predeploy": "npm run build"
+    }
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",

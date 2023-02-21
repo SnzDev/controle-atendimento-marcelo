@@ -305,6 +305,7 @@ export const assignmentRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         technicId: z.string(),
+        dateActivity: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -352,16 +353,22 @@ export const assignmentRouter = createTRPCRouter({
         data: {
           technicId: input.technicId,
           position: (lastPosition?.[0]?.position ?? 0) + 1,
+          dateActivity: input.dateActivity
+            ? new Date(input.dateActivity)
+            : assignment?.dateActivity,
         },
         include: {
           technic: true,
         },
       });
+
       await ctx.prisma.historyAssignment.create({
         data: {
           assignmentId: assignment.id,
           userId: ctx.session.user.id,
-          description: `Trocou do técnico ${assignment.technic.name} para o técnico ${data.technic.name}`,
+          description: input.dateActivity
+            ? `Fixou na data ${moment(input.dateActivity).format("DD/MM/YYYY")}`
+            : `Trocou do técnico ${assignment.technic.name} para o técnico ${data.technic.name}`,
         },
       });
 

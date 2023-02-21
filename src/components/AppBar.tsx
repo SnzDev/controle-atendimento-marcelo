@@ -1,31 +1,22 @@
-import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
-import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
-import MenuItem from "@mui/material/MenuItem";
-import AdbIcon from "@mui/icons-material/Adb";
-import Image from "next/image";
-import { useSession } from "next-auth/react";
-import { StyledMenu } from "./StyledMenu";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useRouter } from "next/router";
+import { Badge } from "@mui/material";
+import AppBar from "@mui/material/AppBar";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import Toolbar from "@mui/material/Toolbar";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
-import { Badge, TextField } from "@mui/material";
+import { useRouter } from "next/router";
+import * as React from "react";
 import { api } from "../utils/api";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import { StyledMenu } from "./StyledMenu";
 
-import type { Moment } from "moment";
-import moment from "moment";
-import { LocalizationProvider } from "@mui/x-date-pickers";
 interface ResponsiveAppBarProps {
   shopId: string | null;
   dateActivity: string;
@@ -52,11 +43,13 @@ export function ResponsiveAppBar({
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
   const handleLogout = async () => {
     await push("/auth/desconectar");
   };
   const listShop = api.shop.getAll.useQuery({});
   const session = useSession();
+  const role = session.data?.user.role;
   return (
     <AppBar sx={{ background: "rgb(30 41 59)" }} position="fixed">
       <Container maxWidth="xl">
@@ -103,39 +96,48 @@ export function ResponsiveAppBar({
               //  display: { xs: "none", md: "flex" }
             }}
           >
+            <Link href="/atendimento">
+              <MenuItem>
+                <Typography textAlign="center">Atendimentos</Typography>
+              </MenuItem>
+            </Link>
             <Link href="/cadastro/cliente">
               <MenuItem>
                 <Typography textAlign="center">Clientes</Typography>
               </MenuItem>
             </Link>
-            <Link href="/cadastro/tecnico">
-              <MenuItem>
-                <Badge variant="dot" color="error">
-                  <Typography textAlign="center">Técnicos</Typography>
-                </Badge>
-              </MenuItem>
-            </Link>
-            <Link href="/cadastro/loja">
-              <MenuItem>
-                <Badge variant="dot" color="error">
-                  <Typography textAlign="center">Revendas</Typography>
-                </Badge>
-              </MenuItem>
-            </Link>
-            <Link href="/cadastro/servico">
-              <MenuItem>
-                <Badge variant="dot" color="error">
-                  <Typography textAlign="center">Serviços</Typography>
-                </Badge>
-              </MenuItem>
-            </Link>
-            <Link href="/cadastro/usuario">
-              <MenuItem>
-                <Badge variant="dot" color="error">
-                  <Typography textAlign="center">Usuarios</Typography>
-                </Badge>
-              </MenuItem>
-            </Link>
+            {role === "ADMIN" && (
+              <>
+                <Link href="/cadastro/tecnico">
+                  <MenuItem>
+                    <Badge variant="dot" color="error">
+                      <Typography textAlign="center">Técnicos</Typography>
+                    </Badge>
+                  </MenuItem>
+                </Link>
+                <Link href="/cadastro/loja">
+                  <MenuItem>
+                    <Badge variant="dot" color="error">
+                      <Typography textAlign="center">Revendas</Typography>
+                    </Badge>
+                  </MenuItem>
+                </Link>
+                <Link href="/cadastro/servico">
+                  <MenuItem>
+                    <Badge variant="dot" color="error">
+                      <Typography textAlign="center">Serviços</Typography>
+                    </Badge>
+                  </MenuItem>
+                </Link>
+                <Link href="/cadastro/usuario">
+                  <MenuItem>
+                    <Badge variant="dot" color="error">
+                      <Typography textAlign="center">Usuarios</Typography>
+                    </Badge>
+                  </MenuItem>
+                </Link>
+              </>
+            )}
             <Box sx={{ ml: 10, display: "flex" }}>
               <select
                 value={shopId ?? ""}

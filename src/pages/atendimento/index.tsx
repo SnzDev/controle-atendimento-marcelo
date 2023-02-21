@@ -179,7 +179,7 @@ export default function Assignments() {
           shopId={filterAssignment.shopId}
           dateActivity={filterAssignment.dateActivity}
           onChange={handleChangeFilter}
-        />
+        /> 
 
         <div className=" mt-16 flex w-full flex-1 flex-row  gap-4 overflow-x-scroll px-4">
           {listAssignments.data?.map(({ techId, assignments }) => (
@@ -222,19 +222,34 @@ export default function Assignments() {
                 </TableHead>
                 <TableBody ref={parent}>
                   {assignments.map((assignment) => {
-                    const dateAssignment = moment(
-                      assignment.dateActivity,
-                      "YYYY-MM-DD"
-                    )
-                      .utc()
-                      .format("YYYY-MM-DD");
                     const now = moment();
                     const dateNow = moment(now).format("YYYY-MM-DD");
+                    const finalizedAt = moment(assignment.finalizedAt);
+                    const createdAt = moment(assignment.createdAt);
+                    const dateActivity = moment(assignment.dateActivity).utc();
+                    const diffHour = now.diff(createdAt, "hours");
+                    const diffMinutes = now.diff(createdAt, "minutes");
+                    const diffFinalizedHour = finalizedAt.diff(
+                      createdAt,
+                      "hours"
+                    );
+                    const diffFinalizedMinutes = finalizedAt.diff(
+                      createdAt,
+                      "minutes"
+                    );
+                    const isActivityBeforeActivityDay = moment(
+                      dateActivity.format("YYYY-MM-DD")
+                    ).isBefore(filterAssignment.dateActivity, "day");
+
                     return (
                       <TableRow key={assignment.id}>
                         <TableCell
                           sx={{
-                            border: "none",
+                            border: isActivityBeforeActivityDay
+                              ? undefined
+                              : "none",
+                            borderWidth: "2px",
+                            borderColor: "rebeccapurple",
                             padding: 1,
                           }}
                         >
@@ -252,6 +267,7 @@ export default function Assignments() {
                                 <button
                                   aria-label="fade-button"
                                   onClick={(event) =>
+                                    !isActivityBeforeActivityDay &&
                                     handleOpenMenuStatus({
                                       status: assignment.status,
                                       event,
@@ -273,40 +289,43 @@ export default function Assignments() {
                             <div className="mt-1 flex flex-row items-center justify-between font-bold text-slate-500">
                               <div className="flex flex-row items-center gap-0 ">
                                 <EventIcon />
-                                {moment(dateAssignment).format("DD/MM")}
+                                {dateActivity.format("DD/MM")}
                               </div>
                               <div className="flex flex-row items-center gap-0 ">
                                 <AccessTimeIcon />
-                                {moment(assignment.createdAt).format(
-                                  "DD/MM HH:mm"
-                                )}
+                                {createdAt.format("DD/MM HH:mm")}
                               </div>
                               <div className="flex flex-row items-center gap-1 ">
                                 <AccessAlarmIcon />
                                 {assignment.finalizedAt
-                                  ? moment(assignment.finalizedAt).diff(
-                                      assignment.createdAt,
-                                      "hours"
-                                    )
-                                  : moment().diff(
-                                      assignment.createdAt,
-                                      "hours"
-                                    )}
-                                H
+                                  ? diffFinalizedHour
+                                    ? `${diffFinalizedHour} H`
+                                    : `${diffFinalizedMinutes} M`
+                                  : diffHour
+                                  ? `${diffHour} H`
+                                  : `${diffMinutes} M`}
                               </div>
                               <div className="flex">
-                                {moment(dateAssignment).isBefore(
-                                  dateNow,
-                                  "day"
-                                ) ? (
-                                  <button className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700">
-                                    Fixar
-                                  </button>
-                                ) : (
-                                  <button className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700">
-                                    Adiar
-                                  </button>
-                                )}
+                                {
+                                  isActivityBeforeActivityDay ? (
+                                    <button
+                                      onClick={() =>
+                                        changeTechnic.mutate({
+                                          id: assignment.id,
+                                          technicId: assignment.technicId,
+                                          dateActivity:
+                                            filterAssignment.dateActivity,
+                                        })
+                                      }
+                                      className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700"
+                                    >
+                                      Fixar
+                                    </button>
+                                  ) : null
+                                  // <button className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700">
+                                  //   Adiar
+                                  // </button>
+                                }
                               </div>
                             </div>
 
@@ -314,42 +333,49 @@ export default function Assignments() {
                               {assignment.service.name}
 
                               <div className="flex flex-row gap-3">
-                                <button
-                                  onClick={(event) =>
-                                    handleOpenMenuChangeTechnic({
-                                      status: assignment.status,
-                                      event,
-                                      id: assignment.id,
-                                      oldTechnicId: techId,
-                                    })
-                                  }
-                                  className="text-blue-500"
-                                >
-                                  <Image
-                                    alt="technical_icon"
-                                    src="/icons/Technical.svg"
-                                    width={16}
-                                    height={16}
-                                  />
-                                </button>
-                                <IconButton
-                                  onClick={() =>
-                                    positionUp.mutate({ id: assignment.id })
-                                  }
-                                  color="primary"
-                                  component="label"
-                                >
-                                  <ArrowUpwardIcon />
-                                </IconButton>
-                                <IconButton
-                                  onClick={() =>
-                                    positionDown.mutate({ id: assignment.id })
-                                  }
-                                  color="primary"
-                                  component="label"
-                                >
-                                  <ArrowDownwardIcon />
-                                </IconButton>
+                                {!isActivityBeforeActivityDay && (
+                                  <>
+                                    <button
+                                      onClick={(event) =>
+                                        !isActivityBeforeActivityDay &&
+                                        handleOpenMenuChangeTechnic({
+                                          status: assignment.status,
+                                          event,
+                                          id: assignment.id,
+                                          oldTechnicId: techId,
+                                        })
+                                      }
+                                      className="text-blue-500"
+                                    >
+                                      <Image
+                                        alt="technical_icon"
+                                        src="/icons/Technical.svg"
+                                        width={16}
+                                        height={16}
+                                      />
+                                    </button>
+                                    <IconButton
+                                      onClick={() =>
+                                        positionUp.mutate({ id: assignment.id })
+                                      }
+                                      color="primary"
+                                      component="label"
+                                    >
+                                      <ArrowUpwardIcon />
+                                    </IconButton>
+                                    <IconButton
+                                      onClick={() =>
+                                        positionDown.mutate({
+                                          id: assignment.id,
+                                        })
+                                      }
+                                      color="primary"
+                                      component="label"
+                                    >
+                                      <ArrowDownwardIcon />
+                                    </IconButton>
+                                  </>
+                                )}
                               </div>
                             </div>
                             {!!assignment.observation.length && (
