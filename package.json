@@ -9,7 +9,7 @@
     "lint": "next lint",
     "start": "next start",
     "dokku": {
-      "predeploy": "npm run build && npx prisma db "
+      "predeploy": "npm run build && npx prisma db:push"
     }
   },
   "dependencies": {
