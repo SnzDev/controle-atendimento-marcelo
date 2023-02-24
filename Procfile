@@ -1,1 +1,1 @@
-web: npm start
+web: docker compose up
