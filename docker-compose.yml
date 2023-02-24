@@ -13,3 +13,8 @@ services:
     image: t3-app
     environment:
       - DATABASE_URL=mysql://mariadb:73387167e5224756@100.120.0.7:3306/att_db
+      - DISCORD_CLIENT_ID=""
+      - DISCORD_CLIENT_SECRET=""
+      - GOOGLE_CLIENT_ID="174216178336-sdilf9j51ju2jn7ag30fne00tc8a8urk.apps.googleusercontent.com"
+      - GOOGLE_CLIENT_SECRET="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"
+      - NEXTAUTH_SECRET="FE7uaTHMbLZjD/nfrfIPPsV0VSVm4rwjJmo2HYj7JEc="
