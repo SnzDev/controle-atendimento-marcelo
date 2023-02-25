@@ -1,4 +1,4 @@
-import type { AssignmentStatus } from "@prisma/client";
+import type { AssignmentStatus, UserRole } from "@prisma/client";
 
 interface ChangeStatusPortugueseProps {
   status: AssignmentStatus;
@@ -26,4 +26,16 @@ export function changeStatusColor(status: AssignmentStatus) {
     CANCELED: "bg-red-600 hover:bg-red-700",
   };
   return colors[status];
+}
+
+type ColorsRoles = "error" | "success" | "info";
+
+export function colorRoles(role: UserRole): ColorsRoles {
+  const colors = {
+    ADMIN: "error" as const,
+    USER: "success" as const,
+    TECH: "info" as const,
+  };
+
+  return colors[role];
 }

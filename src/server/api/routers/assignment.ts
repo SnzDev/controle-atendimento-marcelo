@@ -5,7 +5,7 @@
 import { TRPCError } from "@trpc/server";
 import moment from "moment";
 import { z } from "zod";
-import { changeStatusPortuguese } from "../../../utils/status";
+import { changeStatusPortuguese } from "../../../utils/utils";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 

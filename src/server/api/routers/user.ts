@@ -1,17 +1,34 @@
-import { z } from "zod";
 import * as bcrypt from "bcrypt";
+import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import { UserRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.user.findMany();
-  }),
+  getAll: protectedProcedure
+    .input(z.object({ name: z.string().optional() }))
+    .query(({ ctx, input }) => {
+      return ctx.prisma.user.findMany({
+        where: {
+          name: { contains: input.name },
+        },
+      });
+    }),
   findOne: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.prisma.user.findUnique({ where: { id: input.id } });
+    .query(async ({ ctx, input }) => {
+      const data = await ctx.prisma.user.findUnique({
+        where: { id: input.id },
+      });
+      if (!data)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Usuário não encontrado",
+        });
+
+      const { password, ...user } = data;
+      return user;
     }),
   create: protectedProcedure
     .input(
@@ -25,6 +42,7 @@ export const userRouter = createTRPCRouter({
         password: z
           .string({ required_error: "Obrigatório" })
           .min(8, "No minímo 8 caracteres"),
+        role: z.enum([UserRole.ADMIN, UserRole.TECH, UserRole.USER]),
       })
     )
     .mutation(async ({ ctx, input: { password, ...input } }) => {

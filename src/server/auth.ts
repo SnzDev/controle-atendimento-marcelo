@@ -10,7 +10,7 @@ import GoogleProvider from "next-auth/providers/google";
 import * as bcrypt from "bcrypt";
 import { env } from "../env/server.mjs";
 import { prisma } from "./db";
-import type { UserRole } from "@prisma/client";
+import type { Technic, User } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types.
@@ -21,11 +21,8 @@ import type { UserRole } from "@prisma/client";
  **/
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: {
-      id: string;
-      role: UserRole;
-      // ...other properties
-      // role: UserRole;
+    user: Omit<User, "password"> & {
+      TechnicUser?: Technic[];
     } & DefaultSession["user"];
   }
 
@@ -43,18 +40,26 @@ declare module "next-auth" {
  **/
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    async session({ session, user }) {
+    async session({ session }) {
       if (session.user) {
-        const data = await prisma.user.findUnique({ where: { id: user.id } });
+        const data = await prisma.user.findUnique({
+          where: { email: session.user.email },
+          include: { TechnicUser: true },
+        });
 
         if (!data) return session;
-        session.user.id = data.id;
-        session.user.role = data.role;
-
+        const { password, ...user } = data;
+        session.user = user;
         // session.user.role = user.role; <-- put other properties on the session here
       }
+      console.log(session.user);
       return session;
     },
+  },
+  session: {
+    strategy: "jwt",
+    // Seconds - How long until an idle session expires and is no longer valid.
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -77,16 +82,20 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const user = await prisma.user.findFirst({
+        const data = await prisma.user.findUnique({
           where: {
             email: credentials?.email,
           },
+          include: {
+            TechnicUser: true,
+          },
         });
-        if (user && user.password && credentials?.password) {
+        if (data && data.password && credentials?.password) {
+          const { password, ...user } = data;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           const passwordMatch = bcrypt.compareSync(
             credentials.password,
-            user.password
+            password
           );
           if (passwordMatch) {
             //SALVAR NO HISTÒRICO

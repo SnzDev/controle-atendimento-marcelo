@@ -42,20 +42,20 @@ model Session {
 }
 
 model User {
-  id            String       @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String       @unique
+  email         String    @unique
   password      String?
   emailVerified DateTime?
   image         String?
-  role          UserRole     @default(USER)
-  accounts      Account[]
-  sessions      Session[]
-  Cient         Client[]
-  Technic       Technic[]
-  Assignment    Assignment[]
-  Service       Service[]
-  Shop          Shop[]
+  role          UserRole  @default(USER)
+
+  accounts   Account[]
+  sessions   Session[]
+  Cient      Client[]
+  Assignment Assignment[]
+  Service    Service[]
+  Shop       Shop[]
 
   createdAt                  DateTime            @default(now())
   updatedAt                  DateTime            @updatedAt
@@ -69,6 +69,8 @@ model User {
   ObservationDeletedBy       Observation[]       @relation("ObservationUserAction")
   HistoryAssignmentAction    HistoryAssignment[] @relation("HistoryAssignmentUserDeletedBy")
   HistoryAssignmentDeletedBy HistoryAssignment[] @relation("HistoryAssignmentUserAction")
+  TechnicDeletedBy           Technic[]           @relation("TechnicUserDeletedBy")
+  TechnicUser                Technic[]           @relation("TechnicUser")
 }
 
 model VerificationToken {
@@ -102,14 +104,16 @@ model Client {
 }
 
 model Technic {
-  id         String       @id @default(cuid())
-  name       String
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  deletedAt  DateTime?
-  deletedBy  String?
-  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
-  Assignment Assignment[]
+  id            String       @id @default(cuid())
+  name          String
+  userId        String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+  userTechnic   User?        @relation("TechnicUser", fields: [userId], references: [id], onDelete: Cascade)
+  userDeletedBy User?        @relation("TechnicUserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  Assignment    Assignment[]
 }
 
 model Shop {
@@ -197,7 +201,7 @@ enum AssignmentStatus {
 enum UserRole {
   ADMIN
   USER
-  VIEWER
+  TECH
 }
 
 enum LogFlag {

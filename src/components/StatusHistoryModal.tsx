@@ -33,7 +33,7 @@ export const StatusHistoryModal = ({
         aria-describedby="modal-modal-description"
         sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
       >
-        <div className="flex max-h-[400px] max-w-[600px] flex-col gap-6 overflow-y-scroll rounded bg-slate-700 p-5 text-slate-200">
+        <div className="xs:max-w-[200px] flex max-h-[400px] flex-col gap-6 overflow-y-scroll rounded bg-slate-700 p-5 text-slate-200 lg:max-w-[600px]">
           {historyAssignment?.map((item) => (
             <div key={item.id}>
               <div className=" flex flex-row items-center gap-2 text-sm">

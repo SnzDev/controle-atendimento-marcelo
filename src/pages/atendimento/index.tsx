@@ -27,7 +27,7 @@ import { StatusHistoryModal } from "../../components/StatusHistoryModal";
 import { StyledMenu } from "../../components/StyledMenu";
 import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
-import { changeStatusColor, changeStatusPortuguese } from "../../utils/status";
+import { changeStatusColor, changeStatusPortuguese } from "../../utils/utils";
 interface AnchorMenuStatus {
   anchor: null | HTMLElement;
   id: string | null;
@@ -179,7 +179,8 @@ export default function Assignments() {
           shopId={filterAssignment.shopId}
           dateActivity={filterAssignment.dateActivity}
           onChange={handleChangeFilter}
-        /> 
+          screenAssignment
+        />
 
         <div className=" mt-16 flex w-full flex-1 flex-row  gap-4 overflow-x-scroll px-4">
           {listAssignments.data?.map(({ techId, assignments }) => (
@@ -288,12 +289,12 @@ export default function Assignments() {
                             </div>
                             <div className="mt-1 flex flex-row items-center justify-between font-bold text-slate-500">
                               <div className="flex flex-row items-center gap-0 ">
-                                <EventIcon />
-                                {dateActivity.format("DD/MM")}
-                              </div>
-                              <div className="flex flex-row items-center gap-0 ">
                                 <AccessTimeIcon />
                                 {createdAt.format("DD/MM HH:mm")}
+                              </div>
+                              <div className="flex flex-row items-center gap-0 ">
+                                <EventIcon />
+                                {dateActivity.format("DD/MM")}
                               </div>
                               <div className="flex flex-row items-center gap-1 ">
                                 <AccessAlarmIcon />

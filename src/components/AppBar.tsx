@@ -1,5 +1,5 @@
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Badge } from "@mui/material";
+import { Badge, Menu } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -16,12 +16,22 @@ import { useRouter } from "next/router";
 import * as React from "react";
 import { api } from "../utils/api";
 import { StyledMenu } from "./StyledMenu";
+import MenuIcon from "@mui/icons-material/MenuOutlined";
 
-interface ResponsiveAppBarProps {
-  shopId: string | null;
-  dateActivity: string;
-  onChange: (props: HandleChange) => void;
-}
+type ResponsiveAppBarProps =
+  | {
+      screenAssignment: true;
+      shopId: string | null;
+      dateActivity: string;
+      onChange: (props: HandleChange) => void;
+    }
+  | {
+      screenAssignment?: false;
+      shopId?: string | null;
+      dateActivity?: string;
+      onChange?: (props: HandleChange) => void;
+    };
+
 interface HandleChange {
   key: "shopId" | "dateActivity";
   value: string;
@@ -30,8 +40,12 @@ export function ResponsiveAppBar({
   dateActivity,
   onChange,
   shopId,
+  screenAssignment,
 }: ResponsiveAppBarProps) {
   const { push } = useRouter();
+  const { data } = useSession();
+  const isTechnic = data?.user.role === "TECH";
+  const technic = data?.user.TechnicUser?.[0];
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
@@ -51,13 +65,12 @@ export function ResponsiveAppBar({
   const session = useSession();
   const role = session.data?.user.role;
   return (
-    <AppBar sx={{ background: "rgb(30 41 59)" }} position="fixed">
+    <AppBar sx={{ background: "rgb(30 41 59)", minHeight: "64px" }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Box
             sx={{
-              display: "flex",
-              // display: { xs: "none", md: "flex" },
+              display: { xs: "none", md: "flex" },
               mr: 1,
             }}
           >
@@ -75,9 +88,7 @@ export function ResponsiveAppBar({
             href="/"
             sx={{
               mr: 2,
-              display: "flex",
-
-              // display: { xs: "none", md: "flex" },
+              display: { xs: "none", md: "flex" },
               fontFamily: "monospace",
               fontWeight: 700,
               letterSpacing: ".3rem",
@@ -87,13 +98,10 @@ export function ResponsiveAppBar({
           >
             AcesseNet
           </Typography>
-
           <Box
             sx={{
               flexGrow: 1,
-              display: "flex",
-
-              //  display: { xs: "none", md: "flex" }
+              display: { xs: "none", md: "flex" },
             }}
           >
             <Link href="/atendimento">
@@ -138,46 +146,47 @@ export function ResponsiveAppBar({
                 </Link>
               </>
             )}
-            <Box sx={{ ml: 10, display: "flex" }}>
-              <select
-                value={shopId ?? ""}
-                onChange={(e) => {
-                  onChange({ key: "shopId", value: e.target.value });
-                }}
-                style={{ background: "rgb(30 41 59)" }}
-                placeholder="Loja"
-              >
-                <option value="">Revenda</option>
-                {listShop?.data?.map((item) => (
-                  <option
-                    value={item.id}
-                    key={item.id}
-                    className=" text-white"
-                    onClick={() => {
-                      console.log(item.name);
-                    }}
-                  >
-                    {item.name}
-                  </option>
-                ))}
-              </select>
+            {!isTechnic && screenAssignment && (
+              <Box sx={{ ml: 10, display: "flex" }}>
+                <select
+                  value={shopId ?? ""}
+                  onChange={(e) => {
+                    onChange({ key: "shopId", value: e.target.value });
+                  }}
+                  style={{ background: "rgb(30 41 59)" }}
+                  placeholder="Loja"
+                >
+                  <option value="">Revenda</option>
+                  {listShop?.data?.map((item) => (
+                    <option
+                      value={item.id}
+                      key={item.id}
+                      className=" text-white"
+                      onClick={() => {
+                        console.log(item.name);
+                      }}
+                    >
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
 
-              <input
-                value={dateActivity}
-                onChange={(e) =>
-                  onChange({ key: "dateActivity", value: e.target.value })
-                }
-                type="date"
-                style={{
-                  background: "rgb(30 41 59)",
-                  marginLeft: 20,
-                  color: "#FFF",
-                }}
-              />
-            </Box>
+                <input
+                  value={dateActivity}
+                  onChange={(e) =>
+                    onChange({ key: "dateActivity", value: e.target.value })
+                  }
+                  type="date"
+                  style={{
+                    background: "rgb(30 41 59)",
+                    marginLeft: 20,
+                    color: "#FFF",
+                  }}
+                />
+              </Box>
+            )}
           </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
+          <Box sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}>
             <Tooltip title="Opções">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
@@ -201,7 +210,7 @@ export function ResponsiveAppBar({
               </IconButton>
             </Tooltip>
             <StyledMenu
-              sx={{ mt: "50px" }}
+              sx={{ display: { xs: "none", md: "flex" }, mt: "50px" }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
@@ -222,64 +231,12 @@ export function ResponsiveAppBar({
               </MenuItem>
             </StyledMenu>
           </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
-  );
-}
-{
-  /* <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: "block", md: "none" },
-              }}
-            >
-              <MenuItem onClick={async () => await push("cadastro/cliente")}>
-                <Typography textAlign="center">Clientes</Typography>
-              </MenuItem>
-              <MenuItem onClick={() => push("cadastro/tecnico")}>
-                <Typography textAlign="center">Técnicos</Typography>
-              </MenuItem>
-              <MenuItem onClick={() => push("cadastro/loja")}>
-                <Typography textAlign="center">Revendas</Typography>
-              </MenuItem>
-              <MenuItem onClick={() => push("cadastro/servico")}>
-                <Typography textAlign="center">Serviços</Typography>
-              </MenuItem>
-              <MenuItem onClick={() => push("cadastro/usuario")}>
-                <Typography textAlign="center">Usuarios</Typography>
-              </MenuItem>
-            </Menu>
-          </Box>
-          
+
           <Box sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}>
             <Image
               src="/Logo.png"
-              width={95}
-              height={95}
+              width={65}
+              height={65}
               alt="Logo AcesseNet"
             />
           </Box>
@@ -300,5 +257,130 @@ export function ResponsiveAppBar({
             }}
           >
             AcesseNet
-          </Typography> */
+          </Typography>
+          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenUserMenu}
+              color="inherit"
+            >
+              <MenuIcon />
+            </IconButton>
+            <StyledMenu
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              open={!!anchorElUser}
+              onClose={handleCloseUserMenu}
+              sx={{
+                display: { xs: "block", md: "none" },
+              }}
+            >
+              <Link href="/atendimento">
+                <MenuItem>
+                  <Typography textAlign="center">Atendimentos</Typography>
+                </MenuItem>
+              </Link>
+              <Link href="/cadastro/cliente">
+                <MenuItem>
+                  <Typography textAlign="center">Clientes</Typography>
+                </MenuItem>
+              </Link>
+              {role === "ADMIN" && (
+                <>
+                  <Link href="/cadastro/tecnico">
+                    <MenuItem>
+                      <Badge variant="dot" color="error">
+                        <Typography textAlign="center">Técnicos</Typography>
+                      </Badge>
+                    </MenuItem>
+                  </Link>
+                  <Link href="/cadastro/loja">
+                    <MenuItem>
+                      <Badge variant="dot" color="error">
+                        <Typography textAlign="center">Revendas</Typography>
+                      </Badge>
+                    </MenuItem>
+                  </Link>
+                  <Link href="/cadastro/servico">
+                    <MenuItem>
+                      <Badge variant="dot" color="error">
+                        <Typography textAlign="center">Serviços</Typography>
+                      </Badge>
+                    </MenuItem>
+                  </Link>
+                  <Link href="/cadastro/usuario">
+                    <MenuItem>
+                      <Badge variant="dot" color="error">
+                        <Typography textAlign="center">Usuarios</Typography>
+                      </Badge>
+                    </MenuItem>
+                  </Link>
+                </>
+              )}
+              {!isTechnic && screenAssignment && (
+                <>
+                  <MenuItem>
+                    <select
+                      value={shopId ?? ""}
+                      onChange={(e) => {
+                        onChange({ key: "shopId", value: e.target.value });
+                      }}
+                      style={{ background: "rgb(30 41 59)" }}
+                      placeholder="Loja"
+                    >
+                      <option disabled value="">
+                        Revenda
+                      </option>
+                      {listShop?.data?.map((item) => (
+                        <option
+                          value={item.id}
+                          key={item.id}
+                          className=" text-white"
+                          onClick={() => {
+                            console.log(item.name);
+                          }}
+                        >
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </MenuItem>
+                  <MenuItem>
+                    <input
+                      value={dateActivity}
+                      onChange={(e) =>
+                        onChange({ key: "dateActivity", value: e.target.value })
+                      }
+                      type="date"
+                      style={{
+                        background: "rgb(30 41 59)",
+                        marginLeft: 20,
+                        color: "#FFF",
+                      }}
+                    />
+                  </MenuItem>
+                </>
+              )}
+              <MenuItem onClick={() => push("cadastro/usuario")}>
+                <LogoutIcon name="logout" />
+                <Typography textAlign="center">Sair</Typography>
+              </MenuItem>
+            </StyledMenu>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
+  );
 }
