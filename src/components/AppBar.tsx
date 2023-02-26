@@ -109,11 +109,15 @@ export function ResponsiveAppBar({
                 <Typography textAlign="center">Atendimentos</Typography>
               </MenuItem>
             </Link>
-            <Link href="/cadastro/cliente">
-              <MenuItem>
-                <Typography textAlign="center">Clientes</Typography>
-              </MenuItem>
-            </Link>
+            {role !== "TECH" && (
+              <Link href="/cadastro/cliente">
+                <MenuItem>
+                  <Badge variant="dot" color="success">
+                    <Typography textAlign="center">Clientes</Typography>
+                  </Badge>
+                </MenuItem>
+              </Link>
+            )}
             {role === "ADMIN" && (
               <>
                 <Link href="/cadastro/tecnico">

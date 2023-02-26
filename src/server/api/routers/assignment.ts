@@ -70,16 +70,34 @@ export const assignmentRouter = createTRPCRouter({
     }),
   getAssignments: protectedProcedure
     .input(
-      z.object({ shopId: z.string().nullable(), dateActivity: z.string() })
+      z.object({
+        shopId: z.string().nullable(),
+        dateActivity: z.string(),
+        technicId: z.string().optional(),
+      })
     )
     .query(async ({ ctx, input }) => {
-      if (!input.shopId || !moment(input.dateActivity).isValid()) return;
+      const technicId = ctx.session.user?.TechnicUser?.[0]?.id;
+      if (
+        (!input.shopId && !technicId) ||
+        !moment(input.dateActivity).isValid()
+      )
+        return;
       const technics = await ctx.prisma.assignment.findMany({
         where: {
           dateActivity: new Date(
             moment(input.dateActivity).format("YYYY-MM-DD")
           ),
-          shopId: input.shopId,
+          shopId: technicId ? undefined : input.shopId ?? "",
+          technicId: technicId ? technicId : undefined,
+          OR: [
+            {
+              status: technicId ? "IN_PROGRESS" : undefined,
+            },
+            {
+              status: technicId ? "PENDING" : undefined,
+            },
+          ],
         },
         include: {
           technic: true,
@@ -101,7 +119,8 @@ export const assignmentRouter = createTRPCRouter({
       });
       const allPendingAssignments = await ctx.prisma.assignment.findMany({
         where: {
-          shopId: input.shopId,
+          shopId: technicId ? undefined : input.shopId ?? "",
+          technicId: technicId ? technicId : undefined,
           dateActivity: {
             lt: new Date(moment(input.dateActivity).format("YYYY-MM-DD")),
           },
@@ -129,7 +148,7 @@ export const assignmentRouter = createTRPCRouter({
           },
         },
       });
-
+      console.log(allPendingAssignments);
       const data: {
         techId: string;
         assignments: typeof technics;

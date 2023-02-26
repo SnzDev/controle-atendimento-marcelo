@@ -4,13 +4,26 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const technicRouter = createTRPCRouter({
   getAll: protectedProcedure
-    .input(z.object({ name: z.string().optional() }))
+    .input(
+      z.object({
+        name: z.string().optional(),
+        haveUser: z.boolean().optional(),
+      })
+    )
     .query(({ ctx, input }) => {
       return ctx.prisma.technic.findMany({
         where: {
           name: {
             contains: input.name,
           },
+          userId:
+            input.haveUser === undefined
+              ? undefined
+              : input.haveUser
+              ? {
+                  not: null,
+                }
+              : null,
         },
       });
     }),
@@ -46,6 +59,24 @@ export const technicRouter = createTRPCRouter({
         await ctx.prisma.log.create({
           data: {
             description: `Atualizou o tecnico de Id: ${update.id}!`,
+            flag: "SUCCESS",
+            userId: ctx.session.user.id,
+          },
+        });
+      return update;
+    }),
+  updateUserId: protectedProcedure
+    .input(z.object({ id: z.string(), userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, userId } = input;
+      const update = await ctx.prisma.technic.update({
+        where: { id },
+        data: { userId },
+      });
+      if (update)
+        await ctx.prisma.log.create({
+          data: {
+            description: `Adcionou o usuario: ${userId} ao técnico: ${update.id}!`,
             flag: "SUCCESS",
             userId: ctx.session.user.id,
           },

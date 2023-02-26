@@ -17,6 +17,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import type { AssignmentStatus } from "@prisma/client";
 import moment from "moment";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
@@ -70,6 +71,7 @@ interface HandleChangeFilterAssignment {
   value: string;
 }
 export default function Assignments() {
+  const session = useSession();
   const queryClient = api.useContext();
   const [isVisibleModalCreate, setIsVisibleModalCreate] = useState(false);
   const [parent] = useAutoAnimate(/* optional config */);
@@ -182,7 +184,7 @@ export default function Assignments() {
           screenAssignment
         />
 
-        <div className=" mt-16 flex w-full flex-1 flex-row  gap-4 overflow-x-scroll px-4">
+        <div className="mt-16 flex w-full flex-1 flex-row gap-4 overflow-x-scroll px-4">
           {listAssignments.data?.map(({ techId, assignments }) => (
             <TableContainer
               key={techId}
@@ -276,8 +278,9 @@ export default function Assignments() {
                                       oldTechnicId: assignment.technicId,
                                     })
                                   }
-                                  className={`rounded  p-2 text-slate-50  
-                               ${changeStatusColor(assignment.status)}
+                                  className={`rounded p-2 text-slate-50 ${changeStatusColor(
+                                    assignment.status
+                                  )}
                                 `}
                                 >
                                   {changeStatusPortuguese({
@@ -330,54 +333,61 @@ export default function Assignments() {
                               </div>
                             </div>
 
-                            <div className="flex flex-row items-center justify-between font-bold text-blue-500">
+                            <div className="flex flex-row items-center justify-between font-bold capitalize text-blue-500">
                               {assignment.service.name}
 
-                              <div className="flex flex-row gap-3">
-                                {!isActivityBeforeActivityDay && (
-                                  <>
-                                    <button
-                                      onClick={(event) =>
-                                        !isActivityBeforeActivityDay &&
-                                        handleOpenMenuChangeTechnic({
-                                          status: assignment.status,
-                                          event,
-                                          id: assignment.id,
-                                          oldTechnicId: techId,
-                                        })
-                                      }
-                                      className="text-blue-500"
-                                    >
-                                      <Image
-                                        alt="technical_icon"
-                                        src="/icons/Technical.svg"
-                                        width={16}
-                                        height={16}
-                                      />
-                                    </button>
-                                    <IconButton
-                                      onClick={() =>
-                                        positionUp.mutate({ id: assignment.id })
-                                      }
-                                      color="primary"
-                                      component="label"
-                                    >
-                                      <ArrowUpwardIcon />
-                                    </IconButton>
-                                    <IconButton
-                                      onClick={() =>
-                                        positionDown.mutate({
-                                          id: assignment.id,
-                                        })
-                                      }
-                                      color="primary"
-                                      component="label"
-                                    >
-                                      <ArrowDownwardIcon />
-                                    </IconButton>
-                                  </>
-                                )}
-                              </div>
+                              {session.data?.user.role === "TECH" &&
+                                ` - ${assignment.shop.name?.toLowerCase()}`}
+
+                              {session.data?.user.role !== "TECH" && (
+                                <div className="flex flex-row gap-3">
+                                  {!isActivityBeforeActivityDay && (
+                                    <>
+                                      <button
+                                        onClick={(event) =>
+                                          !isActivityBeforeActivityDay &&
+                                          handleOpenMenuChangeTechnic({
+                                            status: assignment.status,
+                                            event,
+                                            id: assignment.id,
+                                            oldTechnicId: techId,
+                                          })
+                                        }
+                                        className="text-blue-500"
+                                      >
+                                        <Image
+                                          alt="technical_icon"
+                                          src="/icons/Technical.svg"
+                                          width={16}
+                                          height={16}
+                                        />
+                                      </button>
+                                      <IconButton
+                                        onClick={() =>
+                                          positionUp.mutate({
+                                            id: assignment.id,
+                                          })
+                                        }
+                                        color="primary"
+                                        component="label"
+                                      >
+                                        <ArrowUpwardIcon />
+                                      </IconButton>
+                                      <IconButton
+                                        onClick={() =>
+                                          positionDown.mutate({
+                                            id: assignment.id,
+                                          })
+                                        }
+                                        color="primary"
+                                        component="label"
+                                      >
+                                        <ArrowDownwardIcon />
+                                      </IconButton>
+                                    </>
+                                  )}
+                                </div>
+                              )}
                             </div>
                             {!!assignment.observation.length && (
                               <Observation

@@ -14,7 +14,7 @@ import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Chip, Fab, Modal } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form/dist/types";
 import Swal from "sweetalert2";
 import { z } from "zod";
@@ -23,6 +23,7 @@ import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
 import { colorRoles } from "../../utils/utils";
 import { UserRole } from "@prisma/client";
+import Autocomplete from "@mui/material/Autocomplete";
 
 function User() {
   const [selectedId, setSelectedId] = useState("");
@@ -32,6 +33,7 @@ function User() {
 
   const queryCtx = api.useContext();
   const list = api.user.getAll.useQuery({ name: nameDebounced });
+
   const inactive = api.user.inativate.useMutation({
     onSuccess: () => {
       void queryCtx.user.getAll.invalidate();
@@ -202,25 +204,45 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
   const queryCtx = api.useContext();
   const schemaValidation = z
     .object({
+      id: z.string().optional(),
       name: z
         .string({ required_error: "Obrigatório" })
         .min(3, "No minímo 3 caracteres"),
       email: z
         .string({ required_error: "Obrigatório" })
         .email("Email inválido"),
+      technicId: z.object({ id: z.string(), label: z.string() }).optional(),
       role: z.enum([UserRole.ADMIN, UserRole.TECH, UserRole.USER]),
-      password: z
-        .string({ required_error: "Obrigatório" })
-        .min(8, "No minímo 8 caracteres"),
-      confirmPassword: z
-        .string({ required_error: "Obrigatório" })
-        .min(8, "No minímo 8 caracteres"),
+      password: z.string().optional(),
+      confirmPassword: z.string().optional(),
     })
     .superRefine((input, ctx) => {
-      const { password, confirmPassword } = input;
+      const { password, confirmPassword, id } = input;
+
+      if (!id) {
+        if (!password)
+          return ctx.addIssue({
+            path: ["password"],
+            message: "Obrigatório",
+            code: "custom",
+          });
+
+        if (password.length < 8)
+          return ctx.addIssue({
+            path: ["password"],
+            message: "No mínimo 8 caracteres",
+            code: "custom",
+          });
+      }
+      if (password && password.length < 8)
+        return ctx.addIssue({
+          path: ["password"],
+          message: "No mínimo 8 caracteres",
+          code: "custom",
+        });
 
       if (password !== confirmPassword) {
-        ctx.addIssue({
+        return ctx.addIssue({
           path: ["confirmPassword"],
           message: "As senhas não conferem",
           code: "custom",
@@ -232,6 +254,9 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
+    control,
     formState: { errors },
   } = useForm<FieldValues>({
     defaultValues: {
@@ -239,12 +264,26 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
     },
     resolver: zodResolver(schemaValidation),
   });
-  const create = api.user.create.useMutation();
-  const onSubmit: SubmitHandler<FieldValues> = ({
+
+  const role = watch("role");
+  const listTechnic = api.technic.getAll.useQuery({ haveUser: false });
+  const create = api.user.create.useMutation({
+    onSuccess: () => queryCtx.user.getAll.invalidate(),
+  });
+  const updateUserId = api.technic.updateUserId.useMutation({
+    onSuccess: () => queryCtx.technic.getAll.invalidate(),
+  });
+
+  const onSubmit: SubmitHandler<FieldValues> = async ({
     confirmPassword,
+    technicId,
+    password,
     ...data
   }) => {
-    create.mutate(data);
+    if (!password) return;
+    const userCreated = await create.mutateAsync({ password, ...data });
+    if (data.role === "TECH" && technicId && userCreated)
+      updateUserId.mutate({ id: technicId.id, userId: userCreated.id });
     onClose();
     reset();
   };
@@ -319,6 +358,10 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
             />
             <select
               {...register("role")}
+              onChange={async (e) => {
+                setValue("technicId", undefined);
+                await register("role").onChange(e);
+              }}
               className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
               placeholder="Usuário"
             >
@@ -333,6 +376,57 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
             </p>
           )}
         </div>
+
+        {role === "TECH" && (
+          <Controller
+            control={control}
+            name="technicId"
+            render={({ field: { onChange, ...field } }) => (
+              <Autocomplete
+                {...field}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(_e, v) => onChange(v)}
+                disablePortal
+                id="combo-box-demo"
+                style={{ color: "black" }}
+                options={
+                  listTechnic.data
+                    ?.filter((item) => !item.deletedAt)
+                    ?.map(({ id, name }) => {
+                      return { id, label: name };
+                    }) ?? []
+                }
+                renderInput={(params) => (
+                  <div ref={params.InputProps.ref}>
+                    <p className=" text-base font-semibold text-stone-100">
+                      Técnico
+                    </p>
+                    <span className="flex flex-row items-center pl-1.5">
+                      <Image
+                        src="/icons/User.svg"
+                        className="z-10 mr-[-32px]"
+                        width={24}
+                        height={24}
+                        alt="Logo AcesseNet"
+                      />
+                      <input
+                        type="text"
+                        {...params.inputProps}
+                        className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
+                      />
+                    </span>
+                    {errors.technicId && (
+                      <p className="text-sm font-semibold text-red-500">
+                        {errors.technicId.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+                noOptionsText="Não encontrado"
+              />
+            )}
+          />
+        )}
 
         <div>
           <p className="text-base font-semibold text-stone-100">Senha</p>

@@ -20,7 +20,6 @@ import { z } from "zod";
 import { ResponsiveAppBar } from "../../components/AppBar";
 import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
-import { UserRole } from "@prisma/client";
 
 function Service() {
   const [selectedId, setSelectedId] = useState("");
@@ -192,41 +191,23 @@ function Service() {
 interface ModalCreateProps {
   isOpen: boolean;
   onClose: () => void;
-  userId?: string;
+  clientId?: string;
 }
-const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
+const ModalCreate = ({ clientId, isOpen, onClose }: ModalCreateProps) => {
   const queryCtx = api.useContext();
-  const schemaValidation = z
-    .object({
-      name: z
-        .string({ required_error: "Obrigatório" })
-        .min(3, "No minímo 3 caracteres"),
-      email: z
-        .string({ required_error: "Obrigatório" })
-        .email("Email inválido"),
-      role: z.enum([UserRole.TECH]).default(UserRole.TECH),
-      password: z
-        .string({ required_error: "Obrigatório" })
-        .min(8, "No minímo 8 caracteres"),
-      confirmPassword: z
-        .string({ required_error: "Obrigatório" })
-        .min(8, "No minímo 8 caracteres"),
-    })
-    .superRefine((input, ctx) => {
-      const { password, confirmPassword } = input;
 
-      if (password !== confirmPassword) {
-        ctx.addIssue({
-          path: ["confirmPassword"],
-          message: "As senhas não conferem",
-          code: "custom",
-        });
-      }
-    });
+  const schemaValidation = z.object({
+    id: z.string().optional(),
+    name: z
+      .string({ required_error: "Obrigatório" })
+      .min(3, "No minímo 3 caracteres"),
+  });
   type FieldValues = z.infer<typeof schemaValidation>;
+
   const {
     register,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors },
   } = useForm<FieldValues>({
@@ -235,14 +216,69 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
     },
     resolver: zodResolver(schemaValidation),
   });
-  const create = api.user.create.useMutation();
-  const onSubmit: SubmitHandler<FieldValues> = ({
-    confirmPassword,
-    ...data
-  }) => {
-    create.mutate(data);
+
+  const create = api.technic.create.useMutation({
+    onSuccess: () => {
+      void queryCtx.technic.getAll.invalidate();
+      void Swal.fire({
+        icon: "success",
+        title: "Técnico cadastrado com sucesso!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      reset();
+    },
+    onError: () => {
+      void Swal.fire({
+        icon: "error",
+        title: "Falha ao cadastrar técnico!",
+        text: "Algo deu errado",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    },
+  });
+  const update = api.technic.update.useMutation({
+    onSuccess: () => {
+      void queryCtx.technic.getAll.invalidate();
+      void Swal.fire({
+        icon: "success",
+        title: "Técnico atualizado com sucesso!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      reset();
+    },
+    onError: () => {
+      void Swal.fire({
+        icon: "error",
+        title: "Falha ao editar técnico!",
+        text: "Algo deu errado",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    },
+  });
+
+  api.technic.findOne.useQuery(
+    { id: clientId ?? "" },
+    {
+      enabled: !!clientId,
+      onSuccess: (data) => {
+        setValue("id", data?.id);
+        setValue("name", data?.name ?? "");
+      },
+    }
+  );
+
+  const onSubmit: SubmitHandler<FieldValues> = ({ id, name }) => {
+    if (id) {
+      update.mutate({ id, name });
+      return onClose();
+    }
+
+    create.mutate({ name });
     onClose();
-    reset();
   };
 
   return (
@@ -252,141 +288,40 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
       onClose={onClose}
     >
       <form
+        onSubmit={handleSubmit(onSubmit)}
         className="flex w-fit flex-col items-center justify-center gap-2 rounded bg-slate-800 px-10 py-5 shadow-md "
-        onSubmit={handleSubmit(onSubmit, (error) => console.log(error))}
       >
-        <div>
-          <p className="text-base font-semibold text-stone-100">Nome</p>
-          <span className="row flex items-center">
+        <div className="flex flex-col justify-end">
+          <p className="text-base font-semibold text-stone-100">
+            Nome do técnico
+          </p>
+          <span className="row flex items-center pl-1.5">
             <Image
               src="/icons/User.svg"
               className="z-10 mr-[-32px]"
               width={24}
               height={24}
-              alt="Logo AcesseNet"
+              alt="icone usuário"
             />
             <input
               {...register("name")}
               className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
               type="text"
-              placeholder="Maria José de Sousa Sauro"
             />
           </span>
           {errors.name && (
-            <p className="text-base font-semibold text-red-500">
+            <p className="text-sm font-semibold text-red-500">
               {errors.name.message}
             </p>
           )}
         </div>
-
-        <div>
-          <p className="text-base font-semibold text-stone-100">E-mail</p>
-          <span className="row flex items-center">
-            <Image
-              src="/icons/EnvelopeSimple.svg"
-              className="z-10 mr-[-32px]"
-              width={24}
-              height={24}
-              alt="Logo AcesseNet"
-            />
-            <input
-              {...register("email")}
-              className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
-              type="email"
-              placeholder="exemplo@exemplo.com.br"
-            />
-          </span>
-          {errors.email && (
-            <p className="text-base font-semibold text-red-500">
-              {errors.email.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <p className="text-base font-semibold text-stone-100">Cargo</p>
-          <span className="row flex items-center">
-            <Image
-              src="/icons/EnvelopeSimple.svg"
-              className="z-10 mr-[-32px]"
-              width={24}
-              height={24}
-              alt="Logo AcesseNet"
-            />
-            <select
-              {...register("role")}
-              className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
-              placeholder="Usuário"
-              disabled
-            >
-              <option defaultChecked value={UserRole.TECH}>
-                Técnico
-              </option>
-            </select>
-          </span>
-          {errors.role && (
-            <p className="text-base font-semibold text-red-500">
-              {errors.role.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <p className="text-base font-semibold text-stone-100">Senha</p>
-          <span className="row flex items-center">
-            <Image
-              src="/icons/Lock.svg"
-              className="z-10 mr-[-32px]"
-              width={24}
-              height={24}
-              alt="Logo AcesseNet"
-            />
-            <input
-              {...register("password")}
-              className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
-              type="password"
-              placeholder="*****************"
-            />
-          </span>
-          {errors.password && (
-            <p className="text-base font-semibold text-red-500">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <p className="text-base font-semibold text-stone-100">
-            Confirmar senha
-          </p>
-          <span className="row flex items-center">
-            <Image
-              src="/icons/Lock.svg"
-              className="z-10 mr-[-32px]"
-              width={24}
-              height={24}
-              alt="Logo AcesseNet"
-            />
-            <input
-              {...register("confirmPassword")}
-              className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
-              type="password"
-              placeholder="*****************"
-            />
-          </span>
-          {errors.confirmPassword && (
-            <p className="text-base font-semibold text-red-500">
-              {errors.confirmPassword.message}
-            </p>
-          )}
-        </div>
-        <div className="row flex justify-center">
+        <div className="flex flex-row justify-center">
           <button
             type="submit"
-            disabled={create.isLoading}
             className="h-10 w-40 rounded bg-blue-600 p-2 font-semibold text-stone-100 hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+            disabled={create.isLoading || update.isLoading}
           >
-            {create.isLoading ? (
+            {create.isLoading || update.isLoading ? (
               <CircularProgress color="inherit" size="25px" />
             ) : (
               "Salvar"
@@ -397,4 +332,5 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
     </Modal>
   );
 };
+
 export default Service;
