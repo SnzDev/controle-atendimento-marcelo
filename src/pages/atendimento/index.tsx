@@ -168,15 +168,17 @@ export default function Assignments() {
         <style></style>
       </Head>
       <main className="flex min-h-screen flex-1 flex-col items-center overflow-y-hidden bg-black ">
-        <Fab
-          onClick={() => setIsVisibleModalCreate(true)}
-          sx={{ position: "absolute", right: 10, bottom: 10 }}
-          className="bg-blue-500"
-          color="primary"
-          aria-label="add"
-        >
-          <AddIcon />
-        </Fab>
+        {!session?.data?.user?.TechnicUser?.[0] && (
+          <Fab
+            onClick={() => setIsVisibleModalCreate(true)}
+            sx={{ position: "absolute", right: 10, bottom: 10 }}
+            className="bg-blue-500"
+            color="primary"
+            aria-label="add"
+          >
+            <AddIcon />
+          </Fab>
+        )}
         <ResponsiveAppBar
           shopId={filterAssignment.shopId}
           dateActivity={filterAssignment.dateActivity}

@@ -94,7 +94,10 @@ function User() {
           <AddIcon />
         </Fab>
 
-        <TableContainer className="relative flex w-fit overflow-y-scroll rounded-lg bg-slate-800 shadow">
+        <TableContainer
+          sx={{ width: "fit-content" }}
+          className="relative flex overflow-y-scroll rounded-lg bg-slate-800 shadow"
+        >
           <Table className="relative" aria-label="simple table">
             <TableHead className="sticky top-0 bg-slate-800">
               <TableRow>

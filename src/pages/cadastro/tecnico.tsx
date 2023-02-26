@@ -90,7 +90,10 @@ function Service() {
         >
           <AddIcon />
         </Fab>
-        <TableContainer className="relative flex w-fit overflow-y-scroll rounded-lg bg-slate-800 shadow">
+        <TableContainer
+          sx={{ width: "fit-content" }}
+          className="relative flex overflow-y-scroll rounded-lg bg-slate-800 shadow"
+        >
           <Table className="relative" aria-label="simple table">
             <TableHead className="sticky top-0 bg-slate-800">
               <TableRow>
@@ -155,21 +158,21 @@ function Service() {
                             setSelectedId(item.id);
                             setModalCreate(true);
                           }}
-                          className="w-20 rounded bg-yellow-600 p-2 font-semibold transition-colors hover:bg-yellow-700"
+                          className="w-20 rounded bg-yellow-600 p-2 font-semibold text-stone-100 transition-colors hover:bg-yellow-700"
                         >
                           Editar
                         </button>
                         {item.deletedAt ? (
                           <button
                             onClick={() => active.mutate({ id: item.id })}
-                            className="w-20 rounded bg-green-700 p-2 font-semibold transition-colors hover:bg-green-800"
+                            className="w-20 rounded bg-green-700 p-2 font-semibold text-stone-100 transition-colors hover:bg-green-800"
                           >
                             Ativar
                           </button>
                         ) : (
                           <button
                             onClick={() => inactive.mutate({ id: item.id })}
-                            className="w-20 rounded bg-red-500 p-2 font-semibold transition-colors hover:bg-red-600"
+                            className="w-20 rounded bg-red-500 p-2 font-semibold text-stone-100 transition-colors hover:bg-red-600"
                           >
                             Inativar
                           </button>
