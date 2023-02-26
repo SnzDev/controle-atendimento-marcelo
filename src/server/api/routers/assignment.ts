@@ -83,6 +83,7 @@ export const assignmentRouter = createTRPCRouter({
         !moment(input.dateActivity).isValid()
       )
         return;
+
       const technics = await ctx.prisma.assignment.findMany({
         where: {
           dateActivity: new Date(
@@ -90,14 +91,16 @@ export const assignmentRouter = createTRPCRouter({
           ),
           shopId: technicId ? undefined : input.shopId ?? "",
           technicId: technicId ? technicId : undefined,
-          OR: [
-            {
-              status: technicId ? "IN_PROGRESS" : undefined,
-            },
-            {
-              status: technicId ? "PENDING" : undefined,
-            },
-          ],
+          OR: technicId
+            ? [
+                {
+                  status: "IN_PROGRESS",
+                },
+                {
+                  status: "PENDING",
+                },
+              ]
+            : undefined,
         },
         include: {
           technic: true,
@@ -117,6 +120,7 @@ export const assignmentRouter = createTRPCRouter({
           position: "asc",
         },
       });
+      console.log(technics);
       const allPendingAssignments = await ctx.prisma.assignment.findMany({
         where: {
           shopId: technicId ? undefined : input.shopId ?? "",
