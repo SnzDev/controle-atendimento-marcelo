@@ -94,10 +94,13 @@ function Service() {
           <Table className="relative" aria-label="simple table">
             <TableHead className="sticky top-0 bg-slate-800">
               <TableRow>
-                <TableCell className="text-lg font-bold text-stone-100">
+                <TableCell
+                  sx={{ color: "#f1f5f9" }}
+                  className="text-lg font-bold"
+                >
                   Técnicos
                 </TableCell>
-                <TableCell className="text-stone-100" width="10%">
+                <TableCell sx={{ color: "#f1f5f9" }} width="10%">
                   <span className="row flex items-center pl-1.5 ">
                     <Image
                       src="/icons/Search.svg"
@@ -131,7 +134,8 @@ function Service() {
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
                     <TableCell
-                      className="text-md capitalize text-stone-100"
+                      sx={{ color: "#f1f5f9" }}
+                      className="text-md capitalize"
                       scope="row"
                     >
                       {item.name.toLowerCase()}
@@ -144,7 +148,7 @@ function Service() {
                         />
                       )}
                     </TableCell>
-                    <TableCell className=" text-stone-100">
+                    <TableCell>
                       <div className="flex justify-end gap-4">
                         <button
                           onClick={() => {
