@@ -142,6 +142,7 @@ export default function Assignments() {
   const changeTechnic = api.assignment.changeTechnic.useMutation({
     onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
   });
+  const listTechnic = api.technic.getAll.useQuery({});
   const handleChangeStatus = ({ id, status }: HandleChangeStatusProps) => {
     if (!id || !status) return handleCloseMenuStatus();
 
@@ -158,6 +159,10 @@ export default function Assignments() {
       });
     handleCloseMenuChangeTechnic();
   };
+  const changeStatusWhenFinalized =
+    (anchorMenuStatus.status !== "FINALIZED" &&
+      anchorMenuStatus.status !== "CANCELED") ||
+    session?.data?.user.role === "ADMIN";
   console.log(filterAssignment);
   return (
     <>
@@ -416,16 +421,16 @@ export default function Assignments() {
           onClose={handleCloseMenuChangeTechnic}
           TransitionComponent={Fade}
         >
-          {listAssignments.data?.map((item) => {
-            const technicName = item.assignments[0]?.technic.name;
-            if (item.techId !== anchorMenuChangeTechnic.oldTechnicId)
+          {listTechnic.data?.map((item) => {
+            const technicName = item.name;
+            if (item.id !== anchorMenuChangeTechnic.oldTechnicId)
               return (
                 <MenuItem
-                  key={item.techId}
+                  key={item.id}
                   onClick={() =>
                     handleChangeTechnic({
                       id: anchorMenuChangeTechnic.id,
-                      technicId: item.techId,
+                      technicId: item.id,
                     })
                   }
                 >
@@ -441,7 +446,7 @@ export default function Assignments() {
             "aria-labelledby": "fade-button",
           }}
           anchorEl={anchorMenuStatus.anchor}
-          open={!!anchorMenuStatus.anchor}
+          open={!!anchorMenuStatus.anchor && changeStatusWhenFinalized}
           onClose={handleCloseMenuStatus}
           TransitionComponent={Fade}
         >
