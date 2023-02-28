@@ -17,6 +17,7 @@ import * as React from "react";
 import { api } from "../utils/api";
 import { StyledMenu } from "./StyledMenu";
 import MenuIcon from "@mui/icons-material/MenuOutlined";
+import AssignmentDrawer from "./AssignmentDrawer";
 
 type ResponsiveAppBarProps =
   | {
@@ -43,9 +44,9 @@ export function ResponsiveAppBar({
   screenAssignment,
 }: ResponsiveAppBarProps) {
   const { push } = useRouter();
+
   const { data } = useSession();
   const isTechnic = data?.user.role === "TECH";
-  const technic = data?.user.TechnicUser?.[0];
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
@@ -120,13 +121,6 @@ export function ResponsiveAppBar({
             )}
             {role === "ADMIN" && (
               <>
-                <Link href="/cadastro/tecnico">
-                  <MenuItem>
-                    <Badge variant="dot" color="error">
-                      <Typography textAlign="center">Técnicos</Typography>
-                    </Badge>
-                  </MenuItem>
-                </Link>
                 <Link href="/cadastro/loja">
                   <MenuItem>
                     <Badge variant="dot" color="error">
@@ -303,13 +297,6 @@ export function ResponsiveAppBar({
               </Link>
               {role === "ADMIN" && (
                 <>
-                  <Link href="/cadastro/tecnico">
-                    <MenuItem>
-                      <Badge variant="dot" color="error">
-                        <Typography textAlign="center">Técnicos</Typography>
-                      </Badge>
-                    </MenuItem>
-                  </Link>
                   <Link href="/cadastro/loja">
                     <MenuItem>
                       <Badge variant="dot" color="error">
@@ -377,6 +364,7 @@ export function ResponsiveAppBar({
                   </MenuItem>
                 </>
               )}
+
               <MenuItem onClick={() => push("cadastro/usuario")}>
                 <LogoutIcon name="logout" />
                 <Typography textAlign="center">Sair</Typography>
@@ -385,6 +373,7 @@ export function ResponsiveAppBar({
           </Box>
         </Toolbar>
       </Container>
+      {!isTechnic && <AssignmentDrawer />}
     </AppBar>
   );
 }

@@ -5,7 +5,7 @@ async function main() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     data: {
       password: "$2b$10$wMFsVv4ayIA8JHNoQ6BGqui3tEoYXtVAAFxqPn0cRXXHN2oIPY2mq",
-      email: "admin@gmail.com",
+      userName: "admin@gmail.com",
       name: "Admin",
       role: "ADMIN",
     },

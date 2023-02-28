@@ -17,7 +17,7 @@ export const assignmentRouter = createTRPCRouter({
           id: z.string({ required_error: "Obrigatório" }),
           label: z.string().optional(),
         }),
-        technic: z.object({
+        user: z.object({
           id: z.string({ required_error: "Obrigatório" }),
           label: z.string().optional(),
         }),
@@ -36,7 +36,7 @@ export const assignmentRouter = createTRPCRouter({
       const date = moment(input.dateActivity).format("YYYY-MM-DD");
       const lastPosition = await ctx.prisma.assignment.findFirst({
         where: {
-          technicId: input.technic.id,
+          userId: input.user.id,
           shopId: input.shop.id,
           dateActivity: new Date(date),
         },
@@ -52,7 +52,7 @@ export const assignmentRouter = createTRPCRouter({
           dateActivity: new Date(date),
           serviceId: input.service.id,
           position,
-          technicId: input.technic.id,
+          userId: input.user.id,
           status: "PENDING",
           shopId: input.shop.id,
         },
@@ -73,13 +73,14 @@ export const assignmentRouter = createTRPCRouter({
       z.object({
         shopId: z.string().nullable(),
         dateActivity: z.string(),
-        technicId: z.string().optional(),
+        userId: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const technicId = ctx.session.user?.TechnicUser?.[0]?.id;
+      const isTechnic = ctx.session.user.role === "TECH";
+      const userId = input.userId ?? ctx.session.user.id;
       if (
-        (!input.shopId && !technicId) ||
+        (!input.shopId && !userId && !isTechnic) ||
         !moment(input.dateActivity).isValid()
       )
         return;
@@ -89,9 +90,9 @@ export const assignmentRouter = createTRPCRouter({
           dateActivity: new Date(
             moment(input.dateActivity).format("YYYY-MM-DD")
           ),
-          shopId: technicId ? undefined : input.shopId ?? "",
-          technicId: technicId ? technicId : undefined,
-          OR: technicId
+          shopId: isTechnic || input.userId ? undefined : input.shopId ?? "",
+          userId: isTechnic || input.userId ? userId : undefined,
+          OR: isTechnic
             ? [
                 {
                   status: "IN_PROGRESS",
@@ -103,7 +104,7 @@ export const assignmentRouter = createTRPCRouter({
             : undefined,
         },
         include: {
-          technic: true,
+          userAssignment: true,
           shop: true,
           service: true,
           client: true,
@@ -120,11 +121,10 @@ export const assignmentRouter = createTRPCRouter({
           position: "asc",
         },
       });
-      console.log(technics);
       const allPendingAssignments = await ctx.prisma.assignment.findMany({
         where: {
-          shopId: technicId ? undefined : input.shopId ?? "",
-          technicId: technicId ? technicId : undefined,
+          shopId: isTechnic || userId ? undefined : input.shopId ?? "",
+          userId: isTechnic || userId ? userId : undefined,
           dateActivity: {
             lt: new Date(moment(input.dateActivity).format("YYYY-MM-DD")),
           },
@@ -138,7 +138,7 @@ export const assignmentRouter = createTRPCRouter({
           ],
         },
         include: {
-          technic: true,
+          userAssignment: true,
           shop: true,
           service: true,
           client: true,
@@ -154,36 +154,36 @@ export const assignmentRouter = createTRPCRouter({
       });
       console.log(allPendingAssignments);
       const data: {
-        techId: string;
+        userId: string;
         assignments: typeof technics;
       }[] = [];
 
       allPendingAssignments?.map((item) => {
-        const index = data.findIndex((data) => data.techId === item.technicId);
+        const index = data.findIndex((data) => data.userId === item.userId);
         if (index !== -1)
           if (data[index]?.assignments)
             return (data[index] = {
-              techId: item.technicId,
+              userId: item.userId,
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               //@ts-ignore
               assignments: [...data?.[index]?.assignments, item],
             });
 
-        data.push({ techId: item.technicId, assignments: [item] });
+        data.push({ userId: item.userId, assignments: [item] });
       });
 
       technics?.map((item) => {
-        const index = data.findIndex((data) => data.techId === item.technicId);
+        const index = data.findIndex((data) => data.userId === item.userId);
         if (index !== -1)
           if (data[index]?.assignments)
             return (data[index] = {
-              techId: item.technicId,
+              userId: item.userId,
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               //@ts-ignore
               assignments: [...data?.[index]?.assignments, item],
             });
 
-        data.push({ techId: item.technicId, assignments: [item] });
+        data.push({ userId: item.userId, assignments: [item] });
       });
 
       return data;
@@ -202,7 +202,7 @@ export const assignmentRouter = createTRPCRouter({
 
       const assignmentUp = await ctx.prisma.assignment.findFirst({
         where: {
-          technicId: assignment.technicId,
+          userId: assignment.userId,
           shopId: assignment.shopId,
           dateActivity: assignment.dateActivity,
           position: assignment.position - 1,
@@ -252,7 +252,7 @@ export const assignmentRouter = createTRPCRouter({
 
       const assignmentDown = await ctx.prisma.assignment.findFirst({
         where: {
-          technicId: assignment.technicId,
+          userId: assignment.userId,
           shopId: assignment.shopId,
           dateActivity: assignment.dateActivity,
           position: assignment.position + 1,
@@ -327,7 +327,7 @@ export const assignmentRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        technicId: z.string(),
+        userId: z.string(),
         dateActivity: z.string().optional(),
       })
     )
@@ -335,13 +335,21 @@ export const assignmentRouter = createTRPCRouter({
       const assignment = await ctx.prisma.assignment.findUnique({
         where: { id: input.id },
         include: {
-          technic: true,
+          userAssignment: true,
         },
       });
       if (!assignment) return;
+      const actualTechnic = await ctx.prisma.user.findUnique({
+        where: { id: assignment.userId },
+      });
+      const newTechnic = await ctx.prisma.user.findUnique({
+        where: { id: input.userId },
+      });
+      if (!actualTechnic || !newTechnic) return;
+
       const allAssignmentsBehind = await ctx.prisma.assignment.findMany({
         where: {
-          technicId: assignment.technicId,
+          userId: assignment.userId,
           dateActivity: assignment.dateActivity,
           shopId: assignment.shopId,
           position: {
@@ -364,7 +372,7 @@ export const assignmentRouter = createTRPCRouter({
         where: {
           shopId: assignment?.shopId,
           dateActivity: assignment?.dateActivity,
-          technicId: input.technicId,
+          userId: input.userId,
         },
         orderBy: {
           position: "desc",
@@ -374,14 +382,14 @@ export const assignmentRouter = createTRPCRouter({
       const data = await ctx.prisma.assignment.update({
         where: { id: input.id },
         data: {
-          technicId: input.technicId,
+          userId: input.userId,
           position: (lastPosition?.[0]?.position ?? 0) + 1,
           dateActivity: input.dateActivity
             ? new Date(input.dateActivity)
             : assignment?.dateActivity,
         },
         include: {
-          technic: true,
+          userAssignment: true,
         },
       });
 
@@ -391,7 +399,7 @@ export const assignmentRouter = createTRPCRouter({
           userId: ctx.session.user.id,
           description: input.dateActivity
             ? `Fixou na data ${moment(input.dateActivity).format("DD/MM/YYYY")}`
-            : `Trocou do técnico ${assignment.technic.name} para o técnico ${data.technic.name}`,
+            : `Trocou do usuário ${actualTechnic.name} para o usuário ${newTechnic.name}`,
         },
       });
 
