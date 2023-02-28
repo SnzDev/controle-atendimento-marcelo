@@ -36,9 +36,9 @@ export const userRouter = createTRPCRouter({
         name: z
           .string({ required_error: "Obrigatório" })
           .min(3, "No minímo 3 caracteres"),
-        email: z
+        userName: z
           .string({ required_error: "Obrigatório" })
-          .email("Email inválido"),
+          .min(3, "No minímo 3 caracteres"),
         password: z
           .string({ required_error: "Obrigatório" })
           .min(8, "No minímo 8 caracteres"),
@@ -47,12 +47,12 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input: { password, ...input } }) => {
       const existsUserWithEmail = await ctx.prisma.user.findFirst({
-        where: { email: input.email },
+        where: { userName: input.userName },
       });
       if (existsUserWithEmail)
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "E-mail já em uso",
+          message: "Usuário já em uso",
         });
       const saltRounds = 10;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call

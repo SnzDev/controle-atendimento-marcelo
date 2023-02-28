@@ -1,6 +1,5 @@
 import { createTRPCRouter } from "./trpc";
 import { serviceRouter } from "./routers/service";
-import { technicRouter } from "./routers/technic";
 import { shopRouter } from "./routers/shop";
 import { clientRouter } from "./routers/client";
 import { assignmentRouter } from "./routers/assignment";
@@ -14,7 +13,6 @@ import { observationRouter } from "./routers/observation";
  */
 export const appRouter = createTRPCRouter({
   service: serviceRouter,
-  technic: technicRouter,
   shop: shopRouter,
   clients: clientRouter,
   assignment: assignmentRouter,

@@ -34,7 +34,9 @@ const Login = ({
   const { query } = useRouter();
   const loginError = query?.error;
   const schemaValidation = z.object({
-    email: z.string({ required_error: "Obrigatório" }).email("E-mail inválido"),
+    userName: z
+      .string({ required_error: "Obrigatório" })
+      .min(3, "No mínimo 3 caracteres"),
     password: z
       .string({ required_error: "Obrigatório" })
       .min(8, "Mínimo 8 caracteres"),
@@ -48,11 +50,14 @@ const Login = ({
   } = useForm<FieldValues>({
     resolver: zodResolver(schemaValidation),
   });
-  const onSubmit: SubmitHandler<FieldValues> = async ({ email, password }) => {
+  const onSubmit: SubmitHandler<FieldValues> = async ({
+    userName,
+    password,
+  }) => {
     await signIn("credentials", {
       redirect: true,
       callbackUrl: "/atendimento",
-      email,
+      userName,
       password,
     });
   };
@@ -89,7 +94,7 @@ const Login = ({
           {/* <input name="csrfToken" type="hidden" defaultValue={csrfToken} /> */}
           <div>
             <p className="pt-8 text-base font-semibold text-stone-100">
-              Endereço de e-mail
+              Usuário
             </p>
             <span className="row flex items-center pl-1.5">
               <Image
@@ -100,14 +105,14 @@ const Login = ({
                 alt="Logo AcesseNet"
               />
               <input
-                {...register("email")}
+                {...register("userName")}
                 className="my-2 w-80 items-center rounded bg-stone-900 p-2 pl-10 text-stone-100"
-                type="email"
+                type="text"
                 placeholder="exemplo@exemplo.com.br"
               />
             </span>
-            {errors.email && (
-              <p className=" text-red-500 ">{errors.email.message}</p>
+            {errors.userName && (
+              <p className=" text-red-500 ">{errors.userName.message}</p>
             )}
           </div>
 

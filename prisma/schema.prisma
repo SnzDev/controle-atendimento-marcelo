@@ -43,19 +43,19 @@ model Session {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
+  name          String
+  email         String?   @unique
+  userName      String    @unique
   password      String?
   emailVerified DateTime?
   image         String?
   role          UserRole  @default(USER)
 
-  accounts   Account[]
-  sessions   Session[]
-  Cient      Client[]
-  Assignment Assignment[]
-  Service    Service[]
-  Shop       Shop[]
+  accounts Account[]
+  sessions Session[]
+  Cient    Client[]
+  Service  Service[]
+  Shop     Shop[]
 
   createdAt                  DateTime            @default(now())
   updatedAt                  DateTime            @updatedAt
@@ -69,8 +69,8 @@ model User {
   ObservationDeletedBy       Observation[]       @relation("ObservationUserAction")
   HistoryAssignmentAction    HistoryAssignment[] @relation("HistoryAssignmentUserDeletedBy")
   HistoryAssignmentDeletedBy HistoryAssignment[] @relation("HistoryAssignmentUserAction")
-  TechnicDeletedBy           Technic[]           @relation("TechnicUserDeletedBy")
-  TechnicUser                Technic[]           @relation("TechnicUser")
+  AssignmentUser             Assignment[]        @relation("AssignmentUser")
+  AssignmentDeletedBy        Assignment[]        @relation("AssignmentDeletedBy")
 }
 
 model VerificationToken {
@@ -103,19 +103,6 @@ model Client {
   Assignment Assignment[]
 }
 
-model Technic {
-  id            String       @id @default(cuid())
-  name          String
-  userId        String?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  deletedAt     DateTime?
-  deletedBy     String?
-  userTechnic   User?        @relation("TechnicUser", fields: [userId], references: [id], onDelete: Cascade)
-  userDeletedBy User?        @relation("TechnicUserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  Assignment    Assignment[]
-}
-
 model Shop {
   id         String       @id @default(cuid())
   name       String
@@ -128,27 +115,28 @@ model Shop {
 }
 
 model Assignment {
-  id                String              @id @default(cuid())
-  shopId            String
-  clientId          String
-  technicId         String
-  serviceId         String
-  informations      String?
-  dateActivity      DateTime            @db.Date
-  position          Int
-  status            AssignmentStatus
-  finalizedAt       DateTime?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  deletedAt         DateTime?
-  deletedBy         String?
-  user              User?               @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
-  shop              Shop                @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  client            Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  service           Service             @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  technic           Technic             @relation(fields: [technicId], references: [id], onDelete: Cascade)
-  observation       Observation[]
-  HistoryAssignment HistoryAssignment[]
+  id                      String              @id @default(cuid())
+  shopId                  String
+  clientId                String
+  userId                  String
+  serviceId               String
+  informations            String?
+  dateActivity            DateTime            @db.Date
+  position                Int
+  status                  AssignmentStatus
+  createdAt               DateTime            @default(now())
+  inProgressAt            DateTime?
+  finalizedAt             DateTime?
+  updatedAt               DateTime            @updatedAt
+  deletedAt               DateTime?
+  deletedBy               String?
+  userAssignment          User                @relation("AssignmentUser", fields: [userId], references: [id], onDelete: Cascade)
+  userAssignmentDeletedBy User?               @relation("AssignmentDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  shop                    Shop                @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  client                  Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service                 Service             @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  observation             Observation[]
+  HistoryAssignment       HistoryAssignment[]
 }
 
 model HistoryAssignment {

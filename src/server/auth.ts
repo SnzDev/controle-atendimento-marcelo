@@ -1,4 +1,6 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import type { User } from "@prisma/client";
+import * as bcrypt from "bcrypt";
 import type { GetServerSidePropsContext } from "next";
 import {
   getServerSession,
@@ -6,11 +8,7 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
-import * as bcrypt from "bcrypt";
-import { env } from "../env/server.mjs";
 import { prisma } from "./db";
-import type { Technic, User } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types.
@@ -21,9 +19,7 @@ import type { Technic, User } from "@prisma/client";
  **/
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: Omit<User, "password"> & {
-      TechnicUser?: Technic[];
-    } & DefaultSession["user"];
+    user: Omit<User, "password"> & DefaultSession["user"];
   }
 
   // interface User {
@@ -40,11 +36,11 @@ declare module "next-auth" {
  **/
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    async session({ session }) {
+    async session({ session, token }) {
+      console.log(token.sub);
       if (session.user) {
         const data = await prisma.user.findUnique({
-          where: { email: session.user.email },
-          include: { TechnicUser: true },
+          where: { id: token.sub },
         });
 
         if (!data) return session;
@@ -52,10 +48,10 @@ export const authOptions: NextAuthOptions = {
         session.user = user;
         // session.user.role = user.role; <-- put other properties on the session here
       }
-      console.log(session.user);
       return session;
     },
   },
+
   session: {
     strategy: "jwt",
     // Seconds - How long until an idle session expires and is no longer valid.
@@ -63,31 +59,20 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
-    }),
-    // DiscordProvider({
-    //   clientId: env.DISCORD_CLIENT_ID,
-    //   clientSecret: env.DISCORD_CLIENT_SECRET,
-    // }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-          placeholder: "fulano@exemplo.com",
+        userName: {
+          label: "Usuário",
+          type: "text",
+          placeholder: "nome.sobrenome",
         },
-        password: { label: "Password", type: "password" },
+        password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
         const data = await prisma.user.findUnique({
           where: {
-            email: credentials?.email,
-          },
-          include: {
-            TechnicUser: true,
+            userName: credentials?.userName,
           },
         });
         if (data && data.password && credentials?.password) {

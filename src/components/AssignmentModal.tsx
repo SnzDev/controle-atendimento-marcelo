@@ -19,7 +19,7 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
       inputValue: z.string().optional(),
       label: z.string(),
     }),
-    technic: z.object({
+    user: z.object({
       id: z.string({ required_error: "Obrigatório" }),
       label: z.string().optional(),
     }),
@@ -48,7 +48,7 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
         id: "",
         label: "",
       },
-      technic: {
+      user: {
         id: "",
         label: "",
       },
@@ -73,22 +73,7 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
   const createAssignment = api.assignment.create.useMutation({
     onSuccess: () => {
       void queryCtx.assignment.getAssignments.invalidate();
-      void Swal.fire({
-        icon: "success",
-        title: "Atendimento cadastrado com sucesso!",
-        showConfirmButton: false,
-        timer: 1500,
-      });
       reset();
-    },
-    onError: () => {
-      void Swal.fire({
-        icon: "error",
-        title: "Falha ao cadastrar atendimento!",
-        text: "Algo deu errado",
-        showConfirmButton: false,
-        timer: 1500,
-      });
     },
   });
 
@@ -105,7 +90,7 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
   });
 
   const listClients = api.clients.getAll.useQuery({});
-  const listTechnic = api.technic.getAll.useQuery({});
+  const listUser = api.user.getAll.useQuery({});
   const listShop = api.shop.getAll.useQuery({});
   const listService = api.service.getAll.useQuery({});
 
@@ -217,9 +202,9 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                         className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
                       />
                     </span>
-                    {errors.technic && (
+                    {errors.client && (
                       <p className="text-sm font-semibold text-red-500">
-                        {errors.technic.message}
+                        {errors.client.message}
                       </p>
                     )}
                   </div>
@@ -231,7 +216,7 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
 
           <Controller
             control={control}
-            name="technic"
+            name="user"
             render={({ field: { onChange, ...field } }) => (
               <Autocomplete
                 {...field}
@@ -241,16 +226,16 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                 id="combo-box-demo"
                 style={{ color: "black" }}
                 options={
-                  listTechnic.data
+                  listUser.data
                     ?.filter((item) => !item.deletedAt)
                     ?.map(({ id, name }) => {
-                      return { id, label: name };
+                      return { id, label: name ?? "" };
                     }) ?? []
                 }
                 renderInput={(params) => (
                   <div ref={params.InputProps.ref}>
                     <p className=" text-base font-semibold text-stone-100">
-                      Técnico
+                      Usuário
                     </p>
                     <span className="flex flex-row items-center pl-1.5">
                       <Image
@@ -266,9 +251,9 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                         className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
                       />
                     </span>
-                    {errors.technic && (
+                    {errors.user && (
                       <p className="text-sm font-semibold text-red-500">
-                        {errors.technic.message}
+                        {errors.user.message}
                       </p>
                     )}
                   </div>
@@ -315,9 +300,9 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                         className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
                       />
                     </span>
-                    {errors.technic && (
+                    {errors.service && (
                       <p className="text-sm font-semibold text-red-500">
-                        {errors.technic.message}
+                        {errors.service.message}
                       </p>
                     )}
                   </div>
@@ -363,9 +348,9 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                         className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100"
                       />
                     </span>
-                    {errors.technic && (
+                    {errors.shop && (
                       <p className="text-sm font-semibold text-red-500">
-                        {errors.technic.message}
+                        {errors.shop.message}
                       </p>
                     )}
                   </div>
@@ -391,9 +376,9 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                     className="my-2 w-80 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 text-stone-100"
                   />
                 </span>
-                {errors.technic && (
+                {errors.dateActivity && (
                   <p className="text-sm font-semibold text-red-500">
-                    {errors.technic.message}
+                    {errors.dateActivity.message}
                   </p>
                 )}
               </div>

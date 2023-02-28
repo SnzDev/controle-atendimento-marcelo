@@ -48,17 +48,17 @@ interface AnchorMenuChangeTechnic {
   anchor: null | HTMLElement;
   id: string | null;
   status: AssignmentStatus | null;
-  oldTechnicId: string | null;
+  oldUserId: string | null;
 }
 
 interface HandleOpenMenuProps {
   event: React.MouseEvent<HTMLButtonElement>;
   id: string;
   status: AssignmentStatus | null;
-  oldTechnicId: string | null;
+  oldUserId: string | null;
 }
 interface HandleChangeTechnicProps {
-  technicId: string | null;
+  userId: string | null;
   id: string | null;
 }
 interface FilterAssignment {
@@ -90,23 +90,23 @@ export default function Assignments() {
       anchor: null,
       id: null,
       status: null,
-      oldTechnicId: null,
+      oldUserId: null,
     });
 
   const handleOpenMenuChangeTechnic = ({
     status,
     event: { currentTarget: anchor },
     id,
-    oldTechnicId,
+    oldUserId: oldTechnicId,
   }: HandleOpenMenuProps) => {
-    setAnchorMenuChangeTechnic({ anchor, id, status, oldTechnicId });
+    setAnchorMenuChangeTechnic({ anchor, id, status, oldUserId: oldTechnicId });
   };
   const handleCloseMenuChangeTechnic = () => {
     setAnchorMenuChangeTechnic({
       anchor: null,
       id: null,
       status: null,
-      oldTechnicId: null,
+      oldUserId: null,
     });
   };
   const handleOpenMenuStatus = ({
@@ -129,6 +129,8 @@ export default function Assignments() {
     dateActivity,
   });
 
+  const listUser = api.user.getAll.useQuery({});
+
   const positionUp = api.assignment.positionUp.useMutation({
     onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
   });
@@ -142,27 +144,28 @@ export default function Assignments() {
   const changeTechnic = api.assignment.changeTechnic.useMutation({
     onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
   });
-  const listTechnic = api.technic.getAll.useQuery({});
   const handleChangeStatus = ({ id, status }: HandleChangeStatusProps) => {
     if (!id || !status) return handleCloseMenuStatus();
 
     changeStatus.mutate({ id, status });
     handleCloseMenuStatus();
   };
-  const handleChangeTechnic = ({ id, technicId }: HandleChangeTechnicProps) => {
-    if (!id || !technicId) return handleCloseMenuStatus();
+  const handleChangeTechnic = ({ id, userId }: HandleChangeTechnicProps) => {
+    if (!id || !userId) return handleCloseMenuStatus();
 
     if (anchorMenuChangeTechnic.id)
       changeTechnic.mutate({
         id: anchorMenuChangeTechnic.id,
-        technicId,
+        userId,
       });
     handleCloseMenuChangeTechnic();
   };
+  const role = session?.data?.user.role;
+  const sessionUserId = session?.data?.user.id;
   const changeStatusWhenFinalized =
     (anchorMenuStatus.status !== "FINALIZED" &&
       anchorMenuStatus.status !== "CANCELED") ||
-    session?.data?.user.role === "ADMIN";
+    role === "ADMIN";
   console.log(filterAssignment);
   return (
     <>
@@ -173,7 +176,7 @@ export default function Assignments() {
         <style></style>
       </Head>
       <main className="flex min-h-screen flex-1 flex-col items-center overflow-y-hidden bg-black ">
-        {!session?.data?.user?.TechnicUser?.[0] && (
+        {role !== "TECH" && (
           <Fab
             onClick={() => setIsVisibleModalCreate(true)}
             sx={{ position: "absolute", right: 10, bottom: 10 }}
@@ -192,224 +195,229 @@ export default function Assignments() {
         />
 
         <div className="mt-16 flex w-full flex-1 flex-row gap-4 overflow-x-scroll px-4">
-          {listAssignments.data?.map(({ techId, assignments }) => (
-            <TableContainer
-              key={techId}
-              sx={{
-                overflowY: "scroll",
-                position: "relative",
-                marginTop: "16px",
-                backgroundColor: "rgb(30 41 59)",
-              }}
-              className="max-h-[800px] min-w-[350px] max-w-[400px] rounded-lg shadow"
-            >
-              <Table aria-label="simple table">
-                <TableHead className="sticky top-0 z-10 bg-slate-800">
-                  <TableRow>
-                    <TableCell
-                      align="center"
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 16,
-                        fontWeight: "bold",
-                        fontSize: 24,
-                        color: "rgb(248 250 252)",
-                        border: "none",
-                      }}
-                    >
-                      <Image
-                        alt="technical_icon"
-                        src="/icons/Technical.svg"
-                        width={24}
-                        height={24}
-                      />
-                      {assignments[0]?.technic.name}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody ref={parent}>
-                  {assignments.map((assignment) => {
-                    const now = moment();
-                    const dateNow = moment(now).format("YYYY-MM-DD");
-                    const finalizedAt = moment(assignment.finalizedAt);
-                    const createdAt = moment(assignment.createdAt);
-                    const dateActivity = moment(assignment.dateActivity).utc();
-                    const diffHour = now.diff(createdAt, "hours");
-                    const diffMinutes = now.diff(createdAt, "minutes");
-                    const diffFinalizedHour = finalizedAt.diff(
-                      createdAt,
-                      "hours"
-                    );
-                    const diffFinalizedMinutes = finalizedAt.diff(
-                      createdAt,
-                      "minutes"
-                    );
-                    const isActivityBeforeActivityDay = moment(
-                      dateActivity.format("YYYY-MM-DD")
-                    ).isBefore(filterAssignment.dateActivity, "day");
+          {listAssignments.data?.map(({ userId, assignments }) => {
+            if (userId === sessionUserId) return;
+            return (
+              <TableContainer
+                key={userId}
+                sx={{
+                  overflowY: "scroll",
+                  position: "relative",
+                  marginTop: "16px",
+                  backgroundColor: "rgb(30 41 59)",
+                }}
+                className="max-h-[800px] min-w-[350px] max-w-[400px] rounded-lg shadow"
+              >
+                <Table aria-label="simple table">
+                  <TableHead className="sticky top-0 z-10 bg-slate-800">
+                    <TableRow>
+                      <TableCell
+                        align="center"
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 16,
+                          fontWeight: "bold",
+                          fontSize: 24,
+                          color: "rgb(248 250 252)",
+                          border: "none",
+                        }}
+                      >
+                        <Image
+                          alt="technical_icon"
+                          src="/icons/Technical.svg"
+                          width={24}
+                          height={24}
+                        />
+                        {assignments[0]?.userAssignment.name}
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody ref={parent}>
+                    {assignments.map((assignment) => {
+                      const now = moment();
+                      const dateNow = moment(now).format("YYYY-MM-DD");
+                      const finalizedAt = moment(assignment.finalizedAt);
+                      const createdAt = moment(assignment.createdAt);
+                      const dateActivity = moment(
+                        assignment.dateActivity
+                      ).utc();
+                      const diffHour = now.diff(createdAt, "hours");
+                      const diffMinutes = now.diff(createdAt, "minutes");
+                      const diffFinalizedHour = finalizedAt.diff(
+                        createdAt,
+                        "hours"
+                      );
+                      const diffFinalizedMinutes = finalizedAt.diff(
+                        createdAt,
+                        "minutes"
+                      );
+                      const isActivityBeforeActivityDay = moment(
+                        dateActivity.format("YYYY-MM-DD")
+                      ).isBefore(filterAssignment.dateActivity, "day");
 
-                    return (
-                      <TableRow key={assignment.id}>
-                        <TableCell
-                          sx={{
-                            border: isActivityBeforeActivityDay
-                              ? undefined
-                              : "none",
-                            borderWidth: "2px",
-                            borderColor: "rebeccapurple",
-                            padding: 1,
-                          }}
-                        >
-                          <div className="rounded bg-slate-700 p-2 drop-shadow-md">
-                            <div className="flex flex-row justify-between">
-                              <span className="flex items-center gap-1 overflow-ellipsis text-lg font-bold capitalize text-slate-50 ">
-                                <StatusHistoryModal
-                                  historyAssignment={
-                                    assignment.HistoryAssignment
-                                  }
-                                />
-                                {assignment.client.name}
-                              </span>
-                              <div className="flex flex-row gap-1">
-                                <button
-                                  aria-label="fade-button"
-                                  onClick={(event) =>
-                                    !isActivityBeforeActivityDay &&
-                                    handleOpenMenuStatus({
-                                      status: assignment.status,
-                                      event,
-                                      id: assignment.id,
-                                      oldTechnicId: assignment.technicId,
-                                    })
-                                  }
-                                  className={`rounded p-2 text-slate-50 ${changeStatusColor(
-                                    assignment.status
-                                  )}
+                      return (
+                        <TableRow key={assignment.id}>
+                          <TableCell
+                            sx={{
+                              border: isActivityBeforeActivityDay
+                                ? undefined
+                                : "none",
+                              borderWidth: "2px",
+                              borderColor: "rebeccapurple",
+                              padding: 1,
+                            }}
+                          >
+                            <div className="rounded bg-slate-700 p-2 drop-shadow-md">
+                              <div className="flex flex-row justify-between">
+                                <span className="flex items-center gap-1 overflow-ellipsis text-lg font-bold capitalize text-slate-50 ">
+                                  <StatusHistoryModal
+                                    historyAssignment={
+                                      assignment.HistoryAssignment
+                                    }
+                                  />
+                                  {assignment.client.name}
+                                </span>
+                                <div className="flex flex-row gap-1">
+                                  <button
+                                    aria-label="fade-button"
+                                    onClick={(event) =>
+                                      !isActivityBeforeActivityDay &&
+                                      handleOpenMenuStatus({
+                                        status: assignment.status,
+                                        event,
+                                        id: assignment.id,
+                                        oldUserId: assignment.userId,
+                                      })
+                                    }
+                                    className={`rounded p-2 text-slate-50 ${changeStatusColor(
+                                      assignment.status
+                                    )}
                                 `}
-                                >
-                                  {changeStatusPortuguese({
-                                    status: assignment.status,
-                                    isUppercase: true,
-                                  })}
-                                </button>
-                              </div>
-                            </div>
-                            <div className="mt-1 flex flex-row items-center justify-between font-bold text-slate-500">
-                              <div className="flex flex-row items-center gap-0 ">
-                                <AccessTimeIcon />
-                                {createdAt.format("DD/MM HH:mm")}
-                              </div>
-                              <div className="flex flex-row items-center gap-0 ">
-                                <EventIcon />
-                                {dateActivity.format("DD/MM")}
-                              </div>
-                              <div className="flex flex-row items-center gap-1 ">
-                                <AccessAlarmIcon />
-                                {assignment.finalizedAt
-                                  ? diffFinalizedHour
-                                    ? `${diffFinalizedHour} H`
-                                    : `${diffFinalizedMinutes} M`
-                                  : diffHour
-                                  ? `${diffHour} H`
-                                  : `${diffMinutes} M`}
-                              </div>
-                              <div className="flex">
-                                {
-                                  isActivityBeforeActivityDay ? (
-                                    <button
-                                      onClick={() =>
-                                        changeTechnic.mutate({
-                                          id: assignment.id,
-                                          technicId: assignment.technicId,
-                                          dateActivity:
-                                            filterAssignment.dateActivity,
-                                        })
-                                      }
-                                      className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700"
-                                    >
-                                      Fixar
-                                    </button>
-                                  ) : null
-                                  // <button className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700">
-                                  //   Adiar
-                                  // </button>
-                                }
-                              </div>
-                            </div>
-
-                            <div className="flex flex-row items-center justify-between font-bold capitalize text-blue-500">
-                              {assignment.service.name}
-
-                              {session.data?.user.role === "TECH" &&
-                                ` - ${assignment.shop.name?.toLowerCase()}`}
-
-                              {session.data?.user.role !== "TECH" && (
-                                <div className="flex flex-row gap-3">
-                                  {!isActivityBeforeActivityDay && (
-                                    <>
-                                      <button
-                                        onClick={(event) =>
-                                          !isActivityBeforeActivityDay &&
-                                          handleOpenMenuChangeTechnic({
-                                            status: assignment.status,
-                                            event,
-                                            id: assignment.id,
-                                            oldTechnicId: techId,
-                                          })
-                                        }
-                                        className="text-blue-500"
-                                      >
-                                        <Image
-                                          alt="technical_icon"
-                                          src="/icons/Technical.svg"
-                                          width={16}
-                                          height={16}
-                                        />
-                                      </button>
-                                      <IconButton
-                                        onClick={() =>
-                                          positionUp.mutate({
-                                            id: assignment.id,
-                                          })
-                                        }
-                                        color="primary"
-                                        component="label"
-                                      >
-                                        <ArrowUpwardIcon />
-                                      </IconButton>
-                                      <IconButton
-                                        onClick={() =>
-                                          positionDown.mutate({
-                                            id: assignment.id,
-                                          })
-                                        }
-                                        color="primary"
-                                        component="label"
-                                      >
-                                        <ArrowDownwardIcon />
-                                      </IconButton>
-                                    </>
-                                  )}
+                                  >
+                                    {changeStatusPortuguese({
+                                      status: assignment.status,
+                                      isUppercase: true,
+                                    })}
+                                  </button>
                                 </div>
+                              </div>
+                              <div className="mt-1 flex flex-row items-center justify-between font-bold text-slate-500">
+                                <div className="flex flex-row items-center gap-0 ">
+                                  <AccessTimeIcon />
+                                  {createdAt.format("DD/MM HH:mm")}
+                                </div>
+                                <div className="flex flex-row items-center gap-0 ">
+                                  <EventIcon />
+                                  {dateActivity.format("DD/MM")}
+                                </div>
+                                <div className="flex flex-row items-center gap-1 ">
+                                  <AccessAlarmIcon />
+                                  {assignment.finalizedAt
+                                    ? diffFinalizedHour
+                                      ? `${diffFinalizedHour} H`
+                                      : `${diffFinalizedMinutes} M`
+                                    : diffHour
+                                    ? `${diffHour} H`
+                                    : `${diffMinutes} M`}
+                                </div>
+                                <div className="flex">
+                                  {
+                                    isActivityBeforeActivityDay ? (
+                                      <button
+                                        onClick={() =>
+                                          changeTechnic.mutate({
+                                            id: assignment.id,
+                                            userId: assignment.userId,
+                                            dateActivity:
+                                              filterAssignment.dateActivity,
+                                          })
+                                        }
+                                        className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700"
+                                      >
+                                        Fixar
+                                      </button>
+                                    ) : null
+                                    // <button className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700">
+                                    //   Adiar
+                                    // </button>
+                                  }
+                                </div>
+                              </div>
+
+                              <div className="flex flex-row items-center justify-between font-bold capitalize text-blue-500">
+                                {assignment.service.name}
+
+                                {session.data?.user.role === "TECH" &&
+                                  ` - ${assignment.shop.name?.toLowerCase()}`}
+
+                                {session.data?.user.role !== "TECH" && (
+                                  <div className="flex flex-row gap-3">
+                                    {!isActivityBeforeActivityDay && (
+                                      <>
+                                        <button
+                                          onClick={(event) =>
+                                            !isActivityBeforeActivityDay &&
+                                            handleOpenMenuChangeTechnic({
+                                              status: assignment.status,
+                                              event,
+                                              id: assignment.id,
+                                              oldUserId: userId,
+                                            })
+                                          }
+                                          className="text-blue-500"
+                                        >
+                                          <Image
+                                            alt="technical_icon"
+                                            src="/icons/Technical.svg"
+                                            width={16}
+                                            height={16}
+                                          />
+                                        </button>
+                                        <IconButton
+                                          onClick={() =>
+                                            positionUp.mutate({
+                                              id: assignment.id,
+                                            })
+                                          }
+                                          color="primary"
+                                          component="label"
+                                        >
+                                          <ArrowUpwardIcon />
+                                        </IconButton>
+                                        <IconButton
+                                          onClick={() =>
+                                            positionDown.mutate({
+                                              id: assignment.id,
+                                            })
+                                          }
+                                          color="primary"
+                                          component="label"
+                                        >
+                                          <ArrowDownwardIcon />
+                                        </IconButton>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              {!!assignment.observation.length && (
+                                <Observation
+                                  observation={assignment.observation}
+                                />
                               )}
                             </div>
-                            {!!assignment.observation.length && (
-                              <Observation
-                                observation={assignment.observation}
-                              />
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ))}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            );
+          })}
         </div>
         <StyledMenu
           id="fade-menu"
@@ -421,20 +429,20 @@ export default function Assignments() {
           onClose={handleCloseMenuChangeTechnic}
           TransitionComponent={Fade}
         >
-          {listTechnic.data?.map((item) => {
-            const technicName = item.name;
-            if (item.id !== anchorMenuChangeTechnic.oldTechnicId)
+          {listUser.data?.map((item) => {
+            const userName = item.name;
+            if (item.id !== anchorMenuChangeTechnic.oldUserId)
               return (
                 <MenuItem
                   key={item.id}
                   onClick={() =>
                     handleChangeTechnic({
                       id: anchorMenuChangeTechnic.id,
-                      technicId: item.id,
+                      userId: item.id,
                     })
                   }
                 >
-                  {technicName}
+                  {userName}
                 </MenuItem>
               );
           })}

@@ -14,7 +14,7 @@ import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Chip, Fab, Modal } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form/dist/types";
 import Swal from "sweetalert2";
 import { z } from "zod";
@@ -23,7 +23,6 @@ import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
 import { colorRoles } from "../../utils/utils";
 import { UserRole } from "@prisma/client";
-import Autocomplete from "@mui/material/Autocomplete";
 
 function User() {
   const [selectedId, setSelectedId] = useState("");
@@ -215,10 +214,9 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
       name: z
         .string({ required_error: "Obrigatório" })
         .min(3, "No minímo 3 caracteres"),
-      email: z
+      userName: z
         .string({ required_error: "Obrigatório" })
-        .email("Email inválido"),
-      technicId: z.object({ id: z.string(), label: z.string() }).optional(),
+        .min(3, "No minímo 3 caracteres"),
       role: z.enum([UserRole.ADMIN, UserRole.TECH, UserRole.USER]),
       password: z.string().optional(),
       confirmPassword: z.string().optional(),
@@ -261,9 +259,6 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
     register,
     handleSubmit,
     reset,
-    setValue,
-    watch,
-    control,
     formState: { errors },
   } = useForm<FieldValues>({
     defaultValues: {
@@ -272,25 +267,17 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
     resolver: zodResolver(schemaValidation),
   });
 
-  const role = watch("role");
-  const listTechnic = api.technic.getAll.useQuery({ haveUser: false });
   const create = api.user.create.useMutation({
     onSuccess: () => queryCtx.user.getAll.invalidate(),
   });
-  const updateUserId = api.technic.updateUserId.useMutation({
-    onSuccess: () => queryCtx.technic.getAll.invalidate(),
-  });
 
-  const onSubmit: SubmitHandler<FieldValues> = async ({
+  const onSubmit: SubmitHandler<FieldValues> = ({
     confirmPassword,
-    technicId,
     password,
     ...data
   }) => {
     if (!password) return;
-    const userCreated = await create.mutateAsync({ password, ...data });
-    if (data.role === "TECH" && technicId && userCreated)
-      updateUserId.mutate({ id: technicId.id, userId: userCreated.id });
+    create.mutate({ password, ...data });
     onClose();
     reset();
   };
@@ -340,15 +327,15 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
               alt="Logo AcesseNet"
             />
             <input
-              {...register("email")}
+              {...register("userName")}
               className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
-              type="email"
-              placeholder="exemplo@exemplo.com.br"
+              type="text"
+              placeholder="usuario.nome"
             />
           </span>
-          {errors.email && (
+          {errors.userName && (
             <p className="text-base font-semibold text-red-500">
-              {errors.email.message}
+              {errors.userName.message}
             </p>
           )}
         </div>
@@ -365,10 +352,6 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
             />
             <select
               {...register("role")}
-              onChange={async (e) => {
-                setValue("technicId", undefined);
-                await register("role").onChange(e);
-              }}
               className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
               placeholder="Usuário"
             >
@@ -383,57 +366,6 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
             </p>
           )}
         </div>
-
-        {role === "TECH" && (
-          <Controller
-            control={control}
-            name="technicId"
-            render={({ field: { onChange, ...field } }) => (
-              <Autocomplete
-                {...field}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                onChange={(_e, v) => onChange(v)}
-                disablePortal
-                id="combo-box-demo"
-                style={{ color: "black" }}
-                options={
-                  listTechnic.data
-                    ?.filter((item) => !item.deletedAt)
-                    ?.map(({ id, name }) => {
-                      return { id, label: name };
-                    }) ?? []
-                }
-                renderInput={(params) => (
-                  <div ref={params.InputProps.ref}>
-                    <p className=" text-base font-semibold text-stone-100">
-                      Técnico
-                    </p>
-                    <span className="flex flex-row items-center pl-1.5">
-                      <Image
-                        src="/icons/User.svg"
-                        className="z-10 mr-[-32px]"
-                        width={24}
-                        height={24}
-                        alt="Logo AcesseNet"
-                      />
-                      <input
-                        type="text"
-                        {...params.inputProps}
-                        className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
-                      />
-                    </span>
-                    {errors.technicId && (
-                      <p className="text-sm font-semibold text-red-500">
-                        {errors.technicId.message}
-                      </p>
-                    )}
-                  </div>
-                )}
-                noOptionsText="Não encontrado"
-              />
-            )}
-          />
-        )}
 
         <div>
           <p className="text-base font-semibold text-stone-100">Senha</p>
