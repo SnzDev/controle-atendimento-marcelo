@@ -44,7 +44,6 @@ export function ResponsiveAppBar({
   screenAssignment,
 }: ResponsiveAppBarProps) {
   const { push } = useRouter();
-  const [isVisibleDrawer, setIsVisibleDrawer] = React.useState(false);
 
   const { data } = useSession();
   const isTechnic = data?.user.role === "TECH";
@@ -224,14 +223,6 @@ export function ResponsiveAppBar({
               open={!!anchorElUser}
               onClose={handleCloseUserMenu}
             >
-              {!isTechnic && (
-                <MenuItem
-                  sx={{ color: "#FFF" }}
-                  onClick={() => setIsVisibleDrawer(true)}
-                >
-                  <Typography textAlign="center">Atividades</Typography>
-                </MenuItem>
-              )}
               <MenuItem sx={{ color: "#FFF" }} onClick={handleLogout}>
                 <LogoutIcon name="logout" />
                 <Typography textAlign="center">Sair</Typography>
@@ -373,14 +364,7 @@ export function ResponsiveAppBar({
                   </MenuItem>
                 </>
               )}
-              {!isTechnic && (
-                <MenuItem
-                  sx={{ color: "#FFF" }}
-                  onClick={() => setIsVisibleDrawer(true)}
-                >
-                  <Typography textAlign="center">Atividades</Typography>
-                </MenuItem>
-              )}
+
               <MenuItem onClick={() => push("cadastro/usuario")}>
                 <LogoutIcon name="logout" />
                 <Typography textAlign="center">Sair</Typography>
@@ -389,12 +373,7 @@ export function ResponsiveAppBar({
           </Box>
         </Toolbar>
       </Container>
-      {!isTechnic && (
-        <AssignmentDrawer
-          isVisible={isVisibleDrawer}
-          onClose={() => setIsVisibleDrawer(false)}
-        />
-      )}
+      {!isTechnic && <AssignmentDrawer />}
     </AppBar>
   );
 }

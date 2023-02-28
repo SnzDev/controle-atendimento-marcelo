@@ -5,7 +5,6 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import EventIcon from "@mui/icons-material/Event";
 import { IconButton } from "@mui/material";
-import Drawer from "@mui/material/Drawer";
 import Fade from "@mui/material/Fade";
 import MenuItem from "@mui/material/MenuItem";
 import Table from "@mui/material/Table";
@@ -67,14 +66,11 @@ interface HandleChangeFilterAssignment {
   key: "shopId" | "dateActivity";
   value: string;
 }
-interface AssignmentDrawerProps {
-  isVisible: boolean;
-  onClose: () => void;
-}
-export default function AssignmentDrawer({
-  isVisible,
-  onClose,
-}: AssignmentDrawerProps) {
+// interface AssignmentDrawerProps {
+//   isVisible: boolean;
+//   onClose: () => void;
+// }
+export default function AssignmentDrawer() {
   const session = useSession();
   const queryClient = api.useContext();
   const [parent] = useAutoAnimate(/* optional config */);
@@ -170,15 +166,14 @@ export default function AssignmentDrawer({
       anchorMenuStatus.status !== "CANCELED") ||
     role === "ADMIN";
   return (
-    <Drawer anchor="right" open={isVisible} onClose={onClose}>
-      <div className=" flex w-96 flex-1 flex-row gap-4 overflow-x-scroll bg-black px-4">
+    <div className="fixed left-0 h-full pt-[64px]">
+      <div className=" overflow-x-scrol flex h-full w-fit flex-1 flex-row gap-4 bg-slate-900 p-4">
         {listAssignments.data?.map(({ userId, assignments }) => (
           <TableContainer
             key={userId}
             sx={{
               overflowY: "scroll",
               position: "relative",
-              marginTop: "16px",
               backgroundColor: "rgb(30 41 59)",
             }}
             className="max-h-[800px] min-w-[350px] max-w-[400px] rounded-lg shadow"
@@ -472,6 +467,6 @@ export default function AssignmentDrawer({
           </MenuItem>
         )}
       </StyledMenu>
-    </Drawer>
+    </div>
   );
 }

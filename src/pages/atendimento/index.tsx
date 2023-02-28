@@ -194,9 +194,13 @@ export default function Assignments() {
           screenAssignment
         />
 
-        <div className="mt-16 flex w-full flex-1 flex-row gap-4 overflow-x-scroll px-4">
+        <div
+          className={`mt-16 flex w-full flex-1 flex-row gap-4 overflow-x-scroll px-4 ${
+            role !== "TECH" ? "pl-[25rem]" : ""
+          }`}
+        >
           {listAssignments.data?.map(({ userId, assignments }) => {
-            if (userId === sessionUserId) return;
+            if (userId === sessionUserId && role !== "TECH") return;
             return (
               <TableContainer
                 key={userId}
@@ -238,7 +242,7 @@ export default function Assignments() {
                   <TableBody ref={parent}>
                     {assignments.map((assignment) => {
                       const now = moment();
-                      const dateNow = moment(now).format("YYYY-MM-DD");
+                      // const dateNow = moment(now).format("YYYY-MM-DD");
                       const finalizedAt = moment(assignment.finalizedAt);
                       const createdAt = moment(assignment.createdAt);
                       const dateActivity = moment(
@@ -353,53 +357,51 @@ export default function Assignments() {
                                 {session.data?.user.role === "TECH" &&
                                   ` - ${assignment.shop.name?.toLowerCase()}`}
 
-                                {session.data?.user.role !== "TECH" && (
+                                {!isActivityBeforeActivityDay && (
                                   <div className="flex flex-row gap-3">
-                                    {!isActivityBeforeActivityDay && (
-                                      <>
-                                        <button
-                                          onClick={(event) =>
-                                            !isActivityBeforeActivityDay &&
-                                            handleOpenMenuChangeTechnic({
-                                              status: assignment.status,
-                                              event,
-                                              id: assignment.id,
-                                              oldUserId: userId,
-                                            })
-                                          }
-                                          className="text-blue-500"
-                                        >
-                                          <Image
-                                            alt="technical_icon"
-                                            src="/icons/Technical.svg"
-                                            width={16}
-                                            height={16}
-                                          />
-                                        </button>
-                                        <IconButton
-                                          onClick={() =>
-                                            positionUp.mutate({
-                                              id: assignment.id,
-                                            })
-                                          }
-                                          color="primary"
-                                          component="label"
-                                        >
-                                          <ArrowUpwardIcon />
-                                        </IconButton>
-                                        <IconButton
-                                          onClick={() =>
-                                            positionDown.mutate({
-                                              id: assignment.id,
-                                            })
-                                          }
-                                          color="primary"
-                                          component="label"
-                                        >
-                                          <ArrowDownwardIcon />
-                                        </IconButton>
-                                      </>
+                                    {session.data?.user.role !== "TECH" && (
+                                      <button
+                                        onClick={(event) =>
+                                          !isActivityBeforeActivityDay &&
+                                          handleOpenMenuChangeTechnic({
+                                            status: assignment.status,
+                                            event,
+                                            id: assignment.id,
+                                            oldUserId: userId,
+                                          })
+                                        }
+                                        className="text-blue-500"
+                                      >
+                                        <Image
+                                          alt="technical_icon"
+                                          src="/icons/Technical.svg"
+                                          width={16}
+                                          height={16}
+                                        />
+                                      </button>
                                     )}
+                                    <IconButton
+                                      onClick={() =>
+                                        positionUp.mutate({
+                                          id: assignment.id,
+                                        })
+                                      }
+                                      color="primary"
+                                      component="label"
+                                    >
+                                      <ArrowUpwardIcon />
+                                    </IconButton>
+                                    <IconButton
+                                      onClick={() =>
+                                        positionDown.mutate({
+                                          id: assignment.id,
+                                        })
+                                      }
+                                      color="primary"
+                                      component="label"
+                                    >
+                                      <ArrowDownwardIcon />
+                                    </IconButton>
                                   </div>
                                 )}
                               </div>

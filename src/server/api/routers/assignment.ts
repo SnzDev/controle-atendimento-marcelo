@@ -78,7 +78,7 @@ export const assignmentRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const isTechnic = ctx.session.user.role === "TECH";
-      const userId = ctx.session.user.id;
+      const userId = input.userId ?? ctx.session.user.id;
       if (
         (!input.shopId && !userId && !isTechnic) ||
         !moment(input.dateActivity).isValid()
@@ -90,8 +90,8 @@ export const assignmentRouter = createTRPCRouter({
           dateActivity: new Date(
             moment(input.dateActivity).format("YYYY-MM-DD")
           ),
-          shopId: isTechnic || userId ? undefined : input.shopId ?? "",
-          userId: isTechnic || userId ? userId : undefined,
+          shopId: isTechnic || input.userId ? undefined : input.shopId ?? "",
+          userId: isTechnic || input.userId ? userId : undefined,
           OR: isTechnic
             ? [
                 {
@@ -121,7 +121,6 @@ export const assignmentRouter = createTRPCRouter({
           position: "asc",
         },
       });
-      console.log(technics);
       const allPendingAssignments = await ctx.prisma.assignment.findMany({
         where: {
           shopId: isTechnic || userId ? undefined : input.shopId ?? "",
