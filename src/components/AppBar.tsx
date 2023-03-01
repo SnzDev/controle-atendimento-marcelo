@@ -373,7 +373,7 @@ function ResponsiveAppBar({
                   <Typography textAlign="center">Resumo Diário</Typography>
                 </MenuItem>
               )}
-              <MenuItem onClick={() => push("cadastro/usuario")}>
+              <MenuItem sx={{ color: "#FFF" }} onClick={handleLogout}>
                 <LogoutIcon name="logout" />
                 <Typography textAlign="center">Sair</Typography>
               </MenuItem>
