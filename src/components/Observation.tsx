@@ -1,7 +1,7 @@
 import type * as prisma from "@prisma/client";
 import moment from "moment";
 import EditIcon from "@mui/icons-material/Edit";
-import { useState } from "react";
+import React, { useState } from "react";
 import SaveIcon from "@mui/icons-material/Save";
 import { api } from "../utils/api";
 
@@ -19,7 +19,7 @@ interface HandleChangeObservation {
   key: "id" | "observation";
   value: string | null;
 }
-export const Observation = ({ observation }: ObservationProps) => {
+const Observation = ({ observation }: ObservationProps) => {
   const queryClient = api.useContext();
 
   const [editObservation, setEditObservation] = useState<EditObservation>({
@@ -117,3 +117,5 @@ export const Observation = ({ observation }: ObservationProps) => {
     </div>
   );
 };
+
+export default React.memo(Observation);

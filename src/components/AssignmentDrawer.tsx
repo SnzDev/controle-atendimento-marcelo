@@ -19,8 +19,8 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import * as React from "react";
 import { useState } from "react";
-import { Observation } from "../components/Observation";
-import { StatusHistoryModal } from "../components/StatusHistoryModal";
+import Observation from "../components/Observation";
+import StatusHistoryModal from "../components/StatusHistoryModal";
 import { StyledMenu } from "../components/StyledMenu";
 import useDebounce from "../hooks/useDebounce";
 import { api } from "../utils/api";
@@ -70,7 +70,7 @@ interface HandleChangeFilterAssignment {
 //   isVisible: boolean;
 //   onClose: () => void;
 // }
-export default function AssignmentDrawer() {
+function AssignmentDrawer() {
   const session = useSession();
   const queryClient = api.useContext();
   const [parent] = useAutoAnimate(/* optional config */);
@@ -470,3 +470,4 @@ export default function AssignmentDrawer() {
     </div>
   );
 }
+export default React.memo(AssignmentDrawer);

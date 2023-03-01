@@ -4,15 +4,15 @@ import moment from "moment";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form/dist/types";
-import Swal from "sweetalert2";
 import { z } from "zod";
 import { api } from "../utils/api";
 import { Modal } from "@mui/material";
+import React from "react";
 interface AssignmentModalProps {
   isVisible: boolean;
   onClose: () => void;
 }
-export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
+function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
   const schemaValidation = z.object({
     client: z.object({
       id: z.string().optional(),
@@ -406,3 +406,5 @@ export function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
     </Modal>
   );
 }
+
+export default React.memo(AssignmentModal);

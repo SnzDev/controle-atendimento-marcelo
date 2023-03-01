@@ -3,7 +3,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import { Modal } from "@mui/material";
 import type { HistoryAssignment, User } from "@prisma/client";
 import moment from "moment";
-import { useState } from "react";
+import React, { useState } from "react";
 
 interface StatusHistoryModal {
   historyAssignment: (HistoryAssignment & {
@@ -11,13 +11,10 @@ interface StatusHistoryModal {
   })[];
 }
 
-export const StatusHistoryModal = ({
-  historyAssignment,
-}: StatusHistoryModal) => {
+const StatusHistoryModal = ({ historyAssignment }: StatusHistoryModal) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
-  const _toggle = () => setIsOpen((old) => !old);
   return (
     <>
       <button
@@ -56,3 +53,5 @@ export const StatusHistoryModal = ({
     </>
   );
 };
+
+export default React.memo(StatusHistoryModal);

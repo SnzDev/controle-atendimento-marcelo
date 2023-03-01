@@ -22,10 +22,10 @@ import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
 import ResponsiveAppBar from "../../components/AppBar";
-import { AssignmentModal } from "../../components/AssignmentModal";
+import AssignmentModal from "../../components/AssignmentModal";
 import SummaryModal from "../../components/SummaryModal";
-import { Observation } from "../../components/Observation";
-import { StatusHistoryModal } from "../../components/StatusHistoryModal";
+import Observation from "../../components/Observation";
+import StatusHistoryModal from "../../components/StatusHistoryModal";
 import { StyledMenu } from "../../components/StyledMenu";
 import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
@@ -180,7 +180,6 @@ export default function Assignments() {
     (anchorMenuStatus.status !== "FINALIZED" &&
       anchorMenuStatus.status !== "CANCELED") ||
     role === "ADMIN";
-  console.log(shopId);
   return (
     <>
       <Head>
