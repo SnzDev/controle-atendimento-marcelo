@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form/dist/types";
 import Swal from "sweetalert2";
 import { z } from "zod";
-import { ResponsiveAppBar } from "../../components/AppBar";
+import ResponsiveAppBar from "../../components/AppBar";
 import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
 import { colorRoles } from "../../utils/utils";

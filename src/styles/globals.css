@@ -24,3 +24,7 @@
 body {
   background-color: black;
 }
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

@@ -405,4 +405,26 @@ export const assignmentRouter = createTRPCRouter({
 
       return data;
     }),
+  getSummary: protectedProcedure
+    .input(
+      z.object({
+        dateActivity: z.string(),
+        shopId: z.string(),
+      })
+    )
+    .query(async ({ input: { dateActivity, shopId }, ctx }) => {
+      const data = await ctx.prisma.assignment.findMany({
+        where: {
+          dateActivity: new Date(dateActivity),
+          shopId,
+          status: "FINALIZED",
+        },
+      });
+      if (!data)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Ná há atendimentos",
+        });
+      return data;
+    }),
 });

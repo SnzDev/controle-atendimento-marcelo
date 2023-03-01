@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form/dist/types";
 import Swal from "sweetalert2";
 import { z } from "zod";
-import { ResponsiveAppBar } from "../../components/AppBar";
+import ResponsiveAppBar from "../../components/AppBar";
 import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
 
@@ -90,7 +90,10 @@ function Service() {
         >
           <AddIcon />
         </Fab>
-        <TableContainer sx={{width: 'fit-content'}} className="relative flex overflow-y-scroll rounded-lg bg-slate-800 shadow">
+        <TableContainer
+          sx={{ width: "fit-content" }}
+          className="relative flex overflow-y-scroll rounded-lg bg-slate-800 shadow"
+        >
           <Table className="relative" aria-label="simple table">
             <TableHead className="sticky top-0 bg-slate-800">
               <TableRow>

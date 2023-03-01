@@ -166,7 +166,7 @@ export default function AssignmentDrawer() {
       anchorMenuStatus.status !== "CANCELED") ||
     role === "ADMIN";
   return (
-    <div className="fixed left-0 h-full pt-[64px]">
+    <div className="fixed left-0 top-[64px] h-full pb-[64px]">
       <div className=" overflow-x-scrol flex h-full w-fit flex-1 flex-row gap-4 bg-slate-900 p-4">
         {listAssignments.data?.map(({ userId, assignments }) => (
           <TableContainer

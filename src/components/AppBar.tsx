@@ -1,5 +1,6 @@
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Badge, Menu } from "@mui/material";
+import MenuIcon from "@mui/icons-material/MenuOutlined";
+import { Badge } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -15,13 +16,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import * as React from "react";
 import { api } from "../utils/api";
-import { StyledMenu } from "./StyledMenu";
-import MenuIcon from "@mui/icons-material/MenuOutlined";
 import AssignmentDrawer from "./AssignmentDrawer";
+import { StyledMenu } from "./StyledMenu";
 
 type ResponsiveAppBarProps =
   | {
       screenAssignment: true;
+      openModalSummary: () => void;
       shopId: string | null;
       dateActivity: string;
       onChange: (props: HandleChange) => void;
@@ -29,6 +30,7 @@ type ResponsiveAppBarProps =
   | {
       screenAssignment?: false;
       shopId?: string | null;
+      openModalSummary: () => void;
       dateActivity?: string;
       onChange?: (props: HandleChange) => void;
     };
@@ -37,11 +39,12 @@ interface HandleChange {
   key: "shopId" | "dateActivity";
   value: string;
 }
-export function ResponsiveAppBar({
+function ResponsiveAppBar({
   dateActivity,
   onChange,
   shopId,
   screenAssignment,
+  openModalSummary,
 }: ResponsiveAppBarProps) {
   const { push } = useRouter();
 
@@ -145,13 +148,13 @@ export function ResponsiveAppBar({
               </>
             )}
             {!isTechnic && screenAssignment && (
-              <Box sx={{ ml: 10, display: "flex" }}>
+              <div className="ml-5 flex gap-5">
                 <select
                   value={shopId ?? ""}
                   onChange={(e) => {
                     onChange({ key: "shopId", value: e.target.value });
                   }}
-                  style={{ background: "rgb(30 41 59)" }}
+                  className="rounded-md border-slate-100 bg-slate-700 p-2 text-slate-100 shadow-lg"
                   placeholder="Loja"
                 >
                   <option value="">Revenda</option>
@@ -159,7 +162,6 @@ export function ResponsiveAppBar({
                     <option
                       value={item.id}
                       key={item.id}
-                      className=" text-white"
                       onClick={() => {
                         console.log(item.name);
                       }}
@@ -174,14 +176,10 @@ export function ResponsiveAppBar({
                   onChange={(e) =>
                     onChange({ key: "dateActivity", value: e.target.value })
                   }
+                  className="rounded-md border-slate-100 bg-slate-700 p-2 text-slate-100 shadow-lg"
                   type="date"
-                  style={{
-                    background: "rgb(30 41 59)",
-                    marginLeft: 20,
-                    color: "#FFF",
-                  }}
                 />
-              </Box>
+              </div>
             )}
           </Box>
           <Box sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}>
@@ -223,6 +221,11 @@ export function ResponsiveAppBar({
               open={!!anchorElUser}
               onClose={handleCloseUserMenu}
             >
+              {!isTechnic && (
+                <MenuItem onClick={openModalSummary}>
+                  <Typography textAlign="center">Resumo Diário</Typography>
+                </MenuItem>
+              )}
               <MenuItem sx={{ color: "#FFF" }} onClick={handleLogout}>
                 <LogoutIcon name="logout" />
                 <Typography textAlign="center">Sair</Typography>
@@ -365,6 +368,11 @@ export function ResponsiveAppBar({
                 </>
               )}
 
+              {!isTechnic && (
+                <MenuItem onClick={openModalSummary}>
+                  <Typography textAlign="center">Resumo Diário</Typography>
+                </MenuItem>
+              )}
               <MenuItem onClick={() => push("cadastro/usuario")}>
                 <LogoutIcon name="logout" />
                 <Typography textAlign="center">Sair</Typography>
@@ -377,3 +385,5 @@ export function ResponsiveAppBar({
     </AppBar>
   );
 }
+
+export default React.memo(ResponsiveAppBar);

@@ -21,8 +21,9 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
-import { ResponsiveAppBar } from "../../components/AppBar";
+import ResponsiveAppBar from "../../components/AppBar";
 import { AssignmentModal } from "../../components/AssignmentModal";
+import SummaryModal from "../../components/SummaryModal";
 import { Observation } from "../../components/Observation";
 import { StatusHistoryModal } from "../../components/StatusHistoryModal";
 import { StyledMenu } from "../../components/StyledMenu";
@@ -74,12 +75,13 @@ export default function Assignments() {
   const session = useSession();
   const queryClient = api.useContext();
   const [isVisibleModalCreate, setIsVisibleModalCreate] = useState(false);
+  const [isOpenModalSummary, setIsOpenModalSummary] = useState(false);
   const [parent] = useAutoAnimate(/* optional config */);
   const [filterAssignment, setFilterAssignment] = useState<FilterAssignment>({
     shopId: null,
     dateActivity: moment().format("YYYY-MM-DD"),
   });
-  const { shopId, dateActivity } = useDebounce(filterAssignment, 1000);
+  const { shopId, dateActivity } = useDebounce(filterAssignment, 300);
   const [anchorMenuStatus, setAnchorMenuStatus] = useState<AnchorMenuStatus>({
     anchor: null,
     id: null,
@@ -132,17 +134,29 @@ export default function Assignments() {
   const listUser = api.user.getAll.useQuery({});
 
   const positionUp = api.assignment.positionUp.useMutation({
-    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
+    onSuccess: async () => {
+      await queryClient.assignment.getAssignments.invalidate();
+      await queryClient.assignment.getSummary.invalidate();
+    },
   });
   const positionDown = api.assignment.positionDown.useMutation({
-    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
+    onSuccess: async () => {
+      await queryClient.assignment.getAssignments.invalidate();
+      await queryClient.assignment.getSummary.invalidate();
+    },
   });
 
   const changeStatus = api.assignment.changeStatus.useMutation({
-    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
+    onSuccess: async () => {
+      await queryClient.assignment.getAssignments.invalidate();
+      await queryClient.assignment.getSummary.invalidate();
+    },
   });
   const changeTechnic = api.assignment.changeTechnic.useMutation({
-    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
+    onSuccess: async () => {
+      await queryClient.assignment.getAssignments.invalidate();
+      await queryClient.assignment.getSummary.invalidate();
+    },
   });
   const handleChangeStatus = ({ id, status }: HandleChangeStatusProps) => {
     if (!id || !status) return handleCloseMenuStatus();
@@ -166,7 +180,7 @@ export default function Assignments() {
     (anchorMenuStatus.status !== "FINALIZED" &&
       anchorMenuStatus.status !== "CANCELED") ||
     role === "ADMIN";
-  console.log(filterAssignment);
+  console.log(shopId);
   return (
     <>
       <Head>
@@ -188,6 +202,7 @@ export default function Assignments() {
           </Fab>
         )}
         <ResponsiveAppBar
+          openModalSummary={() => setIsOpenModalSummary(true)}
           shopId={filterAssignment.shopId}
           dateActivity={filterAssignment.dateActivity}
           onChange={handleChangeFilter}
@@ -513,6 +528,12 @@ export default function Assignments() {
         <AssignmentModal
           isVisible={isVisibleModalCreate}
           onClose={() => setIsVisibleModalCreate(false)}
+        />
+        <SummaryModal
+          shopId={shopId ?? ""}
+          dateActivity={dateActivity}
+          isVisible={isOpenModalSummary}
+          onClose={() => setIsOpenModalSummary(false)}
         />
       </main>
     </>
