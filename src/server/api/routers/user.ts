@@ -72,6 +72,56 @@ export const userRouter = createTRPCRouter({
         });
       return created;
     }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string({ required_error: "Obrigatório" }),
+        name: z
+          .string({ required_error: "Obrigatório" })
+          .min(3, "No minímo 3 caracteres"),
+        userName: z
+          .string({ required_error: "Obrigatório" })
+          .min(3, "No minímo 3 caracteres"),
+        password: z
+          .string()
+          .optional()
+          .refine((val) => !val || (val && val.length >= 8)),
+        role: z.enum([UserRole.ADMIN, UserRole.TECH, UserRole.USER]),
+      })
+    )
+    .mutation(async ({ ctx, input: { password, ...input } }) => {
+      const existsUserWithEmail = await ctx.prisma.user.findFirst({
+        where: { userName: input.userName, id: { not: input.id } },
+      });
+      if (existsUserWithEmail)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Usuário já em uso",
+        });
+
+      const saltRounds = 10;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      const encryptedPassword = bcrypt.hashSync(password ?? "", saltRounds);
+
+      const updated = await ctx.prisma.user.update({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data: { password: password ? encryptedPassword : undefined, ...input },
+        where: {
+          id: input.id,
+        },
+      });
+
+      if (updated)
+        await ctx.prisma.log.create({
+          data: {
+            description: `Criou o usuario de Id: ${updated.id}!`,
+            flag: "SUCCESS",
+            userId: ctx.session.user.id,
+          },
+        });
+      return updated;
+    }),
+
   inativate: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {

@@ -259,6 +259,7 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FieldValues>({
     defaultValues: {
@@ -267,15 +268,36 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
     resolver: zodResolver(schemaValidation),
   });
 
+  api.user.findOne.useQuery(
+    { id: userId ?? "" },
+    {
+      enabled: !!userId,
+      onSuccess: (data) => {
+        setValue("id", data?.id);
+        setValue("name", data?.name);
+        setValue("userName", data?.userName);
+        setValue("role", data?.role);
+      },
+    }
+  );
   const create = api.user.create.useMutation({
+    onSuccess: () => queryCtx.user.getAll.invalidate(),
+  });
+  const update = api.user.update.useMutation({
     onSuccess: () => queryCtx.user.getAll.invalidate(),
   });
 
   const onSubmit: SubmitHandler<FieldValues> = ({
     confirmPassword,
     password,
+    id,
     ...data
   }) => {
+    if (id) {
+      update.mutate({ password, id, ...data });
+      onClose();
+      return reset();
+    }
     if (!password) return;
     create.mutate({ password, ...data });
     onClose();

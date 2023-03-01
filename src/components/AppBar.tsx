@@ -29,10 +29,10 @@ type ResponsiveAppBarProps =
     }
   | {
       screenAssignment?: false;
-      shopId?: string | null;
-      openModalSummary: () => void;
-      dateActivity?: string;
-      onChange?: (props: HandleChange) => void;
+      shopId?: undefined;
+      dateActivity?: undefined;
+      onChange?: undefined;
+      openModalSummary?: undefined;
     };
 
 interface HandleChange {
@@ -221,7 +221,7 @@ function ResponsiveAppBar({
               open={!!anchorElUser}
               onClose={handleCloseUserMenu}
             >
-              {!isTechnic && (
+              {!isTechnic && screenAssignment && (
                 <MenuItem onClick={openModalSummary}>
                   <Typography textAlign="center">Resumo Diário</Typography>
                 </MenuItem>
@@ -368,7 +368,7 @@ function ResponsiveAppBar({
                 </>
               )}
 
-              {!isTechnic && (
+              {!isTechnic && screenAssignment && (
                 <MenuItem onClick={openModalSummary}>
                   <Typography textAlign="center">Resumo Diário</Typography>
                 </MenuItem>

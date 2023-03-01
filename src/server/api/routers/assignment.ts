@@ -102,6 +102,9 @@ export const assignmentRouter = createTRPCRouter({
                 },
               ]
             : undefined,
+          deletedAt: {
+            equals: null,
+          },
         },
         include: {
           userAssignment: true,
@@ -136,6 +139,9 @@ export const assignmentRouter = createTRPCRouter({
               status: "PENDING",
             },
           ],
+          deletedAt: {
+            equals: null,
+          },
         },
         include: {
           userAssignment: true,
@@ -192,7 +198,9 @@ export const assignmentRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const assignment = await ctx.prisma.assignment.findUnique({
-        where: { id: input.id },
+        where: {
+          id: input.id,
+        },
       });
       if (!assignment)
         throw new TRPCError({
@@ -206,6 +214,9 @@ export const assignmentRouter = createTRPCRouter({
           shopId: assignment.shopId,
           dateActivity: assignment.dateActivity,
           position: assignment.position - 1,
+          deletedAt: {
+            equals: null,
+          },
         },
       });
       if (!assignmentUp)
@@ -214,7 +225,9 @@ export const assignmentRouter = createTRPCRouter({
           message: "Atendimento já encontra-se em primeiro",
         });
       await ctx.prisma.assignment.update({
-        where: { id: assignmentUp.id },
+        where: {
+          id: assignmentUp.id,
+        },
         data: {
           position: assignmentUp.position + 1,
         },
@@ -256,6 +269,9 @@ export const assignmentRouter = createTRPCRouter({
           shopId: assignment.shopId,
           dateActivity: assignment.dateActivity,
           position: assignment.position + 1,
+          deletedAt: {
+            equals: null,
+          },
         },
       });
       if (!assignmentDown)
@@ -418,6 +434,9 @@ export const assignmentRouter = createTRPCRouter({
           dateActivity: new Date(dateActivity),
           shopId,
           status: "FINALIZED",
+          deletedAt: {
+            equals: null,
+          },
         },
       });
       if (!data)
