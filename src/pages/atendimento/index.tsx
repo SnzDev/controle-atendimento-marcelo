@@ -289,6 +289,7 @@ export default function Assignments() {
                                 )}
                               </div>
                               <Observation
+                                assignmentId={assignment.id}
                                 observation={assignment.observation}
                               />
                             </div>

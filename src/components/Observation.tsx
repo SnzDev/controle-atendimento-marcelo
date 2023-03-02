@@ -18,19 +18,31 @@ interface ObservationProps {
   observation: (prisma.Observation & {
     userAction: prisma.User;
   })[];
+  assignmentId: string;
 }
-const Observation = ({ observation }: ObservationProps) => {
+const Observation = ({ observation, assignmentId }: ObservationProps) => {
   const [editObservation, setEditObservation] = useState<EditObservation>({
     id: null,
     observation: null,
   });
+  const [isNew, setIsNew] = useState(false);
   const handleChangeObservation = (props: HandleChangeObservation) => {
     setEditObservation((old) => {
       return { ...old, [props.key]: props.value };
     });
   };
+  const resetObservationFields = () => {
+    setEditObservation({ id: null, observation: null });
+    setIsNew(false);
+  };
   const queryClient = api.useContext();
   const updateObservation = api.observation.update.useMutation({
+    onSuccess: async () => {
+      await queryClient.assignment.getAssignments.invalidate();
+      await queryClient.observation.getAll.invalidate();
+    },
+  });
+  const createObservation = api.observation.create.useMutation({
     onSuccess: async () => {
       await queryClient.assignment.getAssignments.invalidate();
       await queryClient.observation.getAll.invalidate();
@@ -51,10 +63,10 @@ const Observation = ({ observation }: ObservationProps) => {
                 {moment(item.updatedAt).format("DD/MM HH:mm")}:{" "}
                 {item.userAction.name}:
               </p>
-              <p className="flex flex-row justify-between rounded border border-slate-800 bg-slate-600 px-5 py-3 text-sm font-light text-slate-200">
+              <p className="flex flex-row justify-between gap-2 rounded border border-slate-800 bg-slate-600 px-5 py-3 text-sm font-light text-slate-200">
                 <textarea
                   rows={5}
-                  className="my-2  items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2  text-stone-100"
+                  className="my-2 flex-1 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2  text-stone-100"
                   value={editObservation.observation ?? ""}
                   onChange={(e) =>
                     handleChangeObservation({
@@ -63,29 +75,20 @@ const Observation = ({ observation }: ObservationProps) => {
                     })
                   }
                 ></textarea>
-                <button>
-                  <SaveIcon
-                    onClick={() => {
-                      updateObservation
-                        .mutateAsync({
-                          id: editObservation.id ?? "",
-                          observation: editObservation.observation ?? "",
-                        })
-                        .then(() => {
-                          handleChangeObservation({
-                            key: "id",
-                            value: null,
-                          });
-                          handleChangeObservation({
-                            key: "observation",
-                            value: null,
-                          });
-                        })
-                        .catch((e) => {
-                          console.log(e);
-                        });
-                    }}
-                  />
+                <button
+                  onClick={() => {
+                    updateObservation
+                      .mutateAsync({
+                        id: editObservation.id ?? "",
+                        observation: editObservation.observation ?? "",
+                      })
+                      .then(() => resetObservationFields())
+                      .catch((e) => {
+                        console.log(e);
+                      });
+                  }}
+                >
+                  <SaveIcon />
                 </button>
               </p>
             </div>
@@ -105,6 +108,7 @@ const Observation = ({ observation }: ObservationProps) => {
                         key: "observation",
                         value: item.observation,
                       });
+                      setIsNew(false);
                     }}
                   />
                 </button>
@@ -112,16 +116,59 @@ const Observation = ({ observation }: ObservationProps) => {
             </div>
           )
         )}
-        {observation.length === 0 && (
-          <div className="flex flex-col gap-2 px-5">
-            <p className="text-sm font-bold text-slate-200">
-              Não há Observações no momento
+
+        {isNew ? (
+          <div className="mt-2 flex flex-col gap-2 px-5">
+            <p className="text-sm font-bold text-slate-200">Nova Observação:</p>
+            <p className="flex flex-row justify-between gap-2 rounded border border-slate-800 bg-slate-600 px-5 py-3 text-sm font-light text-slate-200">
+              <textarea
+                rows={5}
+                className="my-2  flex-1 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2  text-stone-100"
+                value={editObservation.observation ?? ""}
+                onChange={(e) =>
+                  handleChangeObservation({
+                    key: "observation",
+                    value: e.target.value ?? "",
+                  })
+                }
+              ></textarea>
+              <button
+                onClick={() => {
+                  createObservation
+                    .mutateAsync({
+                      observation: editObservation.observation ?? "",
+                      assignmentId,
+                    })
+                    .then(() => resetObservationFields())
+                    .catch((e) => {
+                      console.log(e);
+                    });
+                }}
+              >
+                <SaveIcon />
+              </button>
             </p>
           </div>
+        ) : (
+          <>
+            {observation.length === 0 && (
+              <div className="flex flex-col gap-2 px-5">
+                <p className="text-sm font-bold text-slate-200">
+                  Não há Observações no momento
+                </p>
+              </div>
+            )}
+            <button
+              className="mt-2 flex w-full flex-1 items-center justify-center rounded-md bg-slate-800 py-1 font-bold text-slate-300 shadow-lg transition-colors hover:bg-slate-900 active:bg-slate-600"
+              onClick={() => {
+                resetObservationFields();
+                setIsNew(true);
+              }}
+            >
+              <Add width={22} height={22} /> Adcionar nova observação
+            </button>
+          </>
         )}
-        <button className="mt-2 flex w-full flex-1 items-center justify-center rounded-md bg-slate-800 py-1 font-bold text-slate-300 shadow-lg transition-colors hover:bg-slate-900 active:bg-slate-600">
-          <Add width={22} height={22} /> Adcionar nova observação
-        </button>
       </details>
     </div>
   );
