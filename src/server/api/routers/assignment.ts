@@ -127,10 +127,10 @@ export const assignmentRouter = createTRPCRouter({
       });
       const allPendingAssignments = await ctx.prisma.assignment.findMany({
         where: {
-          shopId: isTechnic || userId ? undefined : input.shopId ?? "",
-          userId: isTechnic || userId ? userId : undefined,
+          shopId: isTechnic || input.userId ? undefined : input.shopId ?? "",
+          userId: isTechnic || input.userId ? userId : undefined,
           dateActivity: {
-            lt: new Date(moment(input.dateActivity).format("YYYY-MM-DD")),
+            lt: new Date(input.dateActivity),
           },
           OR: [
             {

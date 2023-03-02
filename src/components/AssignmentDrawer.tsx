@@ -108,7 +108,7 @@ function AssignmentDrawer() {
                   );
                   const isActivityBeforeActivityDay = moment(
                     dateActivity.format("YYYY-MM-DD")
-                  ).isBefore(dateActivity, "day");
+                  ).isBefore(today, "day");
 
                   return (
                     <TableRow key={assignment.id}>
