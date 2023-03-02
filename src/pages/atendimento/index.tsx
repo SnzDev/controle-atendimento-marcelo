@@ -30,6 +30,7 @@ import { StyledMenu } from "../../components/StyledMenu";
 import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
 import { changeStatusColor, changeStatusPortuguese } from "../../utils/utils";
+import ChangeTechnic from "../../components/Menus/ChangeTechnic";
 interface AnchorMenuStatus {
   anchor: null | HTMLElement;
   id: string | null;
@@ -45,23 +46,7 @@ interface HandleChangeStatusProps {
   status: AssignmentStatus | null;
   id: string | null;
 }
-interface AnchorMenuChangeTechnic {
-  anchor: null | HTMLElement;
-  id: string | null;
-  status: AssignmentStatus | null;
-  oldUserId: string | null;
-}
 
-interface HandleOpenMenuProps {
-  event: React.MouseEvent<HTMLButtonElement>;
-  id: string;
-  status: AssignmentStatus | null;
-  oldUserId: string | null;
-}
-interface HandleChangeTechnicProps {
-  userId: string | null;
-  id: string | null;
-}
 interface FilterAssignment {
   shopId: string | null;
   dateActivity: string;
@@ -87,37 +72,7 @@ export default function Assignments() {
     id: null,
     status: null,
   });
-  const [anchorMenuChangeTechnic, setAnchorMenuChangeTechnic] =
-    useState<AnchorMenuChangeTechnic>({
-      anchor: null,
-      id: null,
-      status: null,
-      oldUserId: null,
-    });
 
-  const handleOpenMenuChangeTechnic = ({
-    status,
-    event: { currentTarget: anchor },
-    id,
-    oldUserId: oldTechnicId,
-  }: HandleOpenMenuProps) => {
-    setAnchorMenuChangeTechnic({ anchor, id, status, oldUserId: oldTechnicId });
-  };
-  const handleCloseMenuChangeTechnic = () => {
-    setAnchorMenuChangeTechnic({
-      anchor: null,
-      id: null,
-      status: null,
-      oldUserId: null,
-    });
-  };
-  const handleOpenMenuStatus = ({
-    status,
-    event: { currentTarget: anchor },
-    id,
-  }: HandleOpenMenuProps) => {
-    setAnchorMenuStatus({ anchor, id, status });
-  };
   const handleCloseMenuStatus = () => {
     setAnchorMenuStatus({ anchor: null, id: null, status: null });
   };
@@ -130,8 +85,6 @@ export default function Assignments() {
     shopId,
     dateActivity,
   });
-
-  const listUser = api.user.getAll.useQuery({});
 
   const positionUp = api.assignment.positionUp.useMutation({
     onSuccess: async () => {
@@ -164,15 +117,12 @@ export default function Assignments() {
     changeStatus.mutate({ id, status });
     handleCloseMenuStatus();
   };
-  const handleChangeTechnic = ({ id, userId }: HandleChangeTechnicProps) => {
-    if (!id || !userId) return handleCloseMenuStatus();
-
-    if (anchorMenuChangeTechnic.id)
-      changeTechnic.mutate({
-        id: anchorMenuChangeTechnic.id,
-        userId,
-      });
-    handleCloseMenuChangeTechnic();
+  const handleOpenMenuStatus = ({
+    status,
+    event: { currentTarget: anchor },
+    id,
+  }: HandleOpenMenuProps) => {
+    setAnchorMenuStatus({ anchor, id, status });
   };
   const role = session?.data?.user.role;
   const sessionUserId = session?.data?.user.id;
@@ -307,7 +257,6 @@ export default function Assignments() {
                                         status: assignment.status,
                                         event,
                                         id: assignment.id,
-                                        oldUserId: assignment.userId,
                                       })
                                     }
                                     className={`rounded p-2 text-slate-50 ${changeStatusColor(
@@ -374,25 +323,10 @@ export default function Assignments() {
                                 {!isActivityBeforeActivityDay && (
                                   <div className="flex flex-row gap-3">
                                     {session.data?.user.role !== "TECH" && (
-                                      <button
-                                        onClick={(event) =>
-                                          !isActivityBeforeActivityDay &&
-                                          handleOpenMenuChangeTechnic({
-                                            status: assignment.status,
-                                            event,
-                                            id: assignment.id,
-                                            oldUserId: userId,
-                                          })
-                                        }
-                                        className="text-blue-500"
-                                      >
-                                        <Image
-                                          alt="technical_icon"
-                                          src="/icons/Technical.svg"
-                                          width={16}
-                                          height={16}
-                                        />
-                                      </button>
+                                      <ChangeTechnic
+                                        assignmentId={assignment.id}
+                                        userId={assignment.userId}
+                                      />
                                     )}
                                     <IconButton
                                       onClick={() =>
@@ -435,34 +369,6 @@ export default function Assignments() {
             );
           })}
         </div>
-        <StyledMenu
-          id="fade-menu"
-          MenuListProps={{
-            "aria-labelledby": "fade-button",
-          }}
-          anchorEl={anchorMenuChangeTechnic.anchor}
-          open={!!anchorMenuChangeTechnic.anchor}
-          onClose={handleCloseMenuChangeTechnic}
-          TransitionComponent={Fade}
-        >
-          {listUser.data?.map((item) => {
-            const userName = item.name;
-            if (item.id !== anchorMenuChangeTechnic.oldUserId)
-              return (
-                <MenuItem
-                  key={item.id}
-                  onClick={() =>
-                    handleChangeTechnic({
-                      id: anchorMenuChangeTechnic.id,
-                      userId: item.id,
-                    })
-                  }
-                >
-                  {userName}
-                </MenuItem>
-              );
-          })}
-        </StyledMenu>
 
         <StyledMenu
           id="fade-menu"
