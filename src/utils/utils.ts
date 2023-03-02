@@ -11,6 +11,7 @@ export function changeStatusPortuguese(props: ChangeStatusPortugueseProps) {
     IN_PROGRESS: "EM ANDAMENTO",
     FINALIZED: "FINALIZADO",
     CANCELED: "CANCELADO",
+    INACTIVE: "INATIVO",
   };
 
   return props.isUppercase
@@ -24,6 +25,7 @@ export function changeStatusColor(status: AssignmentStatus) {
     IN_PROGRESS: "bg-blue-600 hover:bg-blue-700",
     FINALIZED: "bg-green-600 hover:bg-green-700",
     CANCELED: "bg-red-600 hover:bg-red-700",
+    INACTIVE: "bg-red-600 hover:bg-red-700",
   };
   return colors[status];
 }

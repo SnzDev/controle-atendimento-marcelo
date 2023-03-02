@@ -1,5 +1,6 @@
 import { Fade, MenuItem } from "@mui/material";
 import { AssignmentStatus, UserRole } from "@prisma/client";
+import { useSession } from "next-auth/react";
 import React from "react";
 import { api } from "../../utils/api";
 import { StyledMenu } from "../StyledMenu";
@@ -7,7 +8,7 @@ import { StyledMenu } from "../StyledMenu";
 interface ChangeServiceProps {
   serviceId: string;
   assignmentId: string;
-  role?: UserRole;
+  shopName: string;
 }
 const ChangeService = (props: ChangeServiceProps) => {
   const [anchor, setAnchor] = React.useState<HTMLElement | null>(null);
@@ -24,15 +25,18 @@ const ChangeService = (props: ChangeServiceProps) => {
       await queryClient.assignment.getSummary.invalidate();
     },
   });
+  const session = useSession();
+  const userSession = session.data?.user;
   return (
     <>
       <button
         onClick={(event) =>
-          props.role !== "TECH" && setAnchor(event.currentTarget)
+          userSession?.role !== "TECH" && setAnchor(event.currentTarget)
         }
         className="font-bold capitalize text-blue-500"
       >
         {serviceName}
+        {userSession?.role === "TECH" && ` - ${props.shopName?.toLowerCase()}`}
       </button>
       <StyledMenu
         id="fade-menu"

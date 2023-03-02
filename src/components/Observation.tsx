@@ -1,15 +1,10 @@
 import type * as prisma from "@prisma/client";
 import moment from "moment";
-import EditIcon from "@mui/icons-material/Edit";
+import { Edit, Add } from "@mui/icons-material";
 import React, { useState } from "react";
 import SaveIcon from "@mui/icons-material/Save";
 import { api } from "../utils/api";
 
-interface ObservationProps {
-  observation: (prisma.Observation & {
-    userAction: prisma.User;
-  })[];
-}
 interface EditObservation {
   id: string | null;
   observation: string | null;
@@ -19,9 +14,12 @@ interface HandleChangeObservation {
   key: "id" | "observation";
   value: string | null;
 }
+interface ObservationProps {
+  observation: (prisma.Observation & {
+    userAction: prisma.User;
+  })[];
+}
 const Observation = ({ observation }: ObservationProps) => {
-  const queryClient = api.useContext();
-
   const [editObservation, setEditObservation] = useState<EditObservation>({
     id: null,
     observation: null,
@@ -31,6 +29,7 @@ const Observation = ({ observation }: ObservationProps) => {
       return { ...old, [props.key]: props.value };
     });
   };
+  const queryClient = api.useContext();
   const updateObservation = api.observation.update.useMutation({
     onSuccess: async () => {
       await queryClient.assignment.getAssignments.invalidate();
@@ -99,7 +98,7 @@ const Observation = ({ observation }: ObservationProps) => {
               <p className="flex flex-row justify-between rounded border border-slate-800 bg-slate-600 px-5 py-3 text-sm font-light text-slate-200">
                 {item.observation}
                 <button>
-                  <EditIcon
+                  <Edit
                     onClick={() => {
                       handleChangeObservation({ key: "id", value: item.id });
                       handleChangeObservation({
@@ -113,6 +112,16 @@ const Observation = ({ observation }: ObservationProps) => {
             </div>
           )
         )}
+        {observation.length === 0 && (
+          <div className="flex flex-col gap-2 px-5">
+            <p className="text-sm font-bold text-slate-200">
+              Não há Observações no momento
+            </p>
+          </div>
+        )}
+        <button className="mt-2 flex w-full flex-1 items-center justify-center rounded-md bg-slate-800 py-1 font-bold text-slate-300 shadow-lg transition-colors hover:bg-slate-900 active:bg-slate-600">
+          <Add width={22} height={22} /> Adcionar nova observação
+        </button>
       </details>
     </div>
   );

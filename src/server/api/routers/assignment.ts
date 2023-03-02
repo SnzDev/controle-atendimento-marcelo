@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { Assignment } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import moment from "moment";
 import { z } from "zod";
@@ -307,7 +308,13 @@ export const assignmentRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        status: z.enum(["PENDING", "IN_PROGRESS", "FINALIZED", "CANCELED"]),
+        status: z.enum([
+          "PENDING",
+          "IN_PROGRESS",
+          "FINALIZED",
+          "CANCELED",
+          "INACTIVE",
+        ]),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -320,12 +327,23 @@ export const assignmentRouter = createTRPCRouter({
           message: "Não existe esse atendimento",
         });
 
-      const data = await ctx.prisma.assignment.update({
+      let data: Partial<Assignment> = { status: input.status };
+      if (input.status === "FINALIZED")
+        data = { ...data, finalizedAt: new Date() };
+      if (input.status === "CANCELED")
+        data = { ...data, canceledAt: new Date() };
+      if (input.status === "IN_PROGRESS")
+        data = { ...data, inProgressAt: new Date() };
+      if (input.status === "INACTIVE")
+        data = {
+          ...data,
+          deletedAt: new Date(),
+          deletedBy: ctx.session.user.id,
+        };
+
+      const response = await ctx.prisma.assignment.update({
         where: { id: input.id },
-        data:
-          input.status === "FINALIZED"
-            ? { status: input.status, finalizedAt: new Date() }
-            : { status: input.status },
+        data,
       });
 
       await ctx.prisma.historyAssignment.create({
@@ -337,7 +355,7 @@ export const assignmentRouter = createTRPCRouter({
           })} para ${changeStatusPortuguese({ status: input.status })}`,
         },
       });
-      return data;
+      return response;
     }),
   changeTechnic: protectedProcedure
     .input(

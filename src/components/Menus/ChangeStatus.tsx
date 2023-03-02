@@ -1,10 +1,10 @@
 import { Fade, MenuItem } from "@mui/material";
-import type { AssignmentStatus } from "@prisma/client";
+import type { AssignmentStatus, UserRole } from "@prisma/client";
 import React from "react";
 import { api } from "../../utils/api";
 import { changeStatusColor, changeStatusPortuguese } from "../../utils/utils";
 import { StyledMenu } from "../StyledMenu";
-
+import { useSession } from "next-auth/react";
 interface ChangeStatusProps {
   actualStatus: AssignmentStatus;
   assignmentId: string;
@@ -12,10 +12,11 @@ interface ChangeStatusProps {
 const ChangeStatus = (props: ChangeStatusProps) => {
   const [anchor, setAnchor] = React.useState<HTMLElement | null>(null);
   const status: AssignmentStatus[] = [
-    "CANCELED",
-    "FINALIZED",
-    "IN_PROGRESS",
     "PENDING",
+    "IN_PROGRESS",
+    "FINALIZED",
+    "CANCELED",
+    "INACTIVE",
   ];
   const queryClient = api.useContext();
   const changeStatus = api.assignment.changeStatus.useMutation({
@@ -24,6 +25,8 @@ const ChangeStatus = (props: ChangeStatusProps) => {
       await queryClient.assignment.getSummary.invalidate();
     },
   });
+  const session = useSession();
+  const userSession = session.data?.user;
   return (
     <>
       <button
@@ -48,6 +51,13 @@ const ChangeStatus = (props: ChangeStatusProps) => {
         TransitionComponent={Fade}
       >
         {status?.map((status) => {
+          if (userSession?.role !== "ADMIN" && status === "INACTIVE") return;
+          if (
+            props.actualStatus === "CANCELED" ||
+            (props.actualStatus === "FINALIZED" &&
+              userSession?.role !== "ADMIN")
+          )
+            return;
           if (status !== props.actualStatus)
             return (
               <MenuItem

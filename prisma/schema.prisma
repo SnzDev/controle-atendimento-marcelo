@@ -127,6 +127,7 @@ model Assignment {
   createdAt               DateTime            @default(now())
   inProgressAt            DateTime?
   finalizedAt             DateTime?
+  canceledAt              DateTime?
   updatedAt               DateTime            @updatedAt
   deletedAt               DateTime?
   deletedBy               String?
@@ -184,6 +185,7 @@ enum AssignmentStatus {
   IN_PROGRESS
   FINALIZED
   CANCELED
+  INACTIVE
 }
 
 enum UserRole {

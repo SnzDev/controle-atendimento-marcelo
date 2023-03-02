@@ -253,11 +253,8 @@ export default function Assignments() {
                                 <ChangeService
                                   serviceId={assignment.serviceId}
                                   assignmentId={assignment.id}
+                                  shopName={assignment.shop.name}
                                 />
-
-                                {session.data?.user.role === "TECH" &&
-                                  ` - ${assignment.shop.name?.toLowerCase()}`}
-
                                 {!isActivityBeforeActivityDay && (
                                   <div className="flex flex-row gap-3">
                                     {session.data?.user.role !== "TECH" && (
@@ -291,11 +288,9 @@ export default function Assignments() {
                                   </div>
                                 )}
                               </div>
-                              {!!assignment.observation.length && (
-                                <Observation
-                                  observation={assignment.observation}
-                                />
-                              )}
+                              <Observation
+                                observation={assignment.observation}
+                              />
                             </div>
                           </TableCell>
                         </TableRow>
