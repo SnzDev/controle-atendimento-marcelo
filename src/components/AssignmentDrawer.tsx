@@ -5,67 +5,23 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import EventIcon from "@mui/icons-material/Event";
 import { IconButton } from "@mui/material";
-import Fade from "@mui/material/Fade";
-import MenuItem from "@mui/material/MenuItem";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import type { AssignmentStatus } from "@prisma/client";
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import * as React from "react";
-import { useState } from "react";
 import Observation from "../components/Observation";
 import StatusHistoryModal from "../components/StatusHistoryModal";
-import { StyledMenu } from "../components/StyledMenu";
-import useDebounce from "../hooks/useDebounce";
 import { api } from "../utils/api";
-import { changeStatusColor, changeStatusPortuguese } from "../utils/utils";
-interface AnchorMenuStatus {
-  anchor: null | HTMLElement;
-  id: string | null;
-  status: AssignmentStatus | null;
-}
+import ChangeService from "./Menus/ChangeService";
+import ChangeStatus from "./Menus/ChangeStatus";
+import ChangeTechnic from "./Menus/ChangeTechnic";
 
-interface HandleOpenMenuProps {
-  event: React.MouseEvent<HTMLButtonElement>;
-  id: string;
-  status: AssignmentStatus | null;
-}
-interface HandleChangeStatusProps {
-  status: AssignmentStatus | null;
-  id: string | null;
-}
-interface AnchorMenuChangeTechnic {
-  anchor: null | HTMLElement;
-  id: string | null;
-  status: AssignmentStatus | null;
-  oldUserId: string | null;
-}
-
-interface HandleOpenMenuProps {
-  event: React.MouseEvent<HTMLButtonElement>;
-  id: string;
-  status: AssignmentStatus | null;
-  oldUserId: string | null;
-}
-interface HandleChangeTechnicProps {
-  userId: string | null;
-  id: string | null;
-}
-interface FilterAssignment {
-  shopId: string | null;
-  dateActivity: string;
-}
-
-interface HandleChangeFilterAssignment {
-  key: "shopId" | "dateActivity";
-  value: string;
-}
 // interface AssignmentDrawerProps {
 //   isVisible: boolean;
 //   onClose: () => void;
@@ -74,62 +30,8 @@ function AssignmentDrawer() {
   const session = useSession();
   const queryClient = api.useContext();
   const [parent] = useAutoAnimate(/* optional config */);
-  const [filterAssignment, setFilterAssignment] = useState<FilterAssignment>({
-    shopId: null,
-    dateActivity: moment().format("YYYY-MM-DD"),
-  });
-  const { shopId, dateActivity } = useDebounce(filterAssignment, 1000);
-  const [anchorMenuStatus, setAnchorMenuStatus] = useState<AnchorMenuStatus>({
-    anchor: null,
-    id: null,
-    status: null,
-  });
-  const [anchorMenuChangeTechnic, setAnchorMenuChangeTechnic] =
-    useState<AnchorMenuChangeTechnic>({
-      anchor: null,
-      id: null,
-      status: null,
-      oldUserId: null,
-    });
 
-  const handleOpenMenuChangeTechnic = ({
-    status,
-    event: { currentTarget: anchor },
-    id,
-    oldUserId: oldTechnicId,
-  }: HandleOpenMenuProps) => {
-    setAnchorMenuChangeTechnic({ anchor, id, status, oldUserId: oldTechnicId });
-  };
-  const handleCloseMenuChangeTechnic = () => {
-    setAnchorMenuChangeTechnic({
-      anchor: null,
-      id: null,
-      status: null,
-      oldUserId: null,
-    });
-  };
-  const handleOpenMenuStatus = ({
-    status,
-    event: { currentTarget: anchor },
-    id,
-  }: HandleOpenMenuProps) => {
-    setAnchorMenuStatus({ anchor, id, status });
-  };
-  const handleCloseMenuStatus = () => {
-    setAnchorMenuStatus({ anchor: null, id: null, status: null });
-  };
-  const handleChangeFilter = ({ key, value }: HandleChangeFilterAssignment) =>
-    setFilterAssignment((old) => {
-      return { ...old, [key]: value };
-    });
-
-  const listAssignments = api.assignment.getAssignments.useQuery({
-    userId: session?.data?.user.id,
-    shopId: null,
-    dateActivity: moment().format("YYYY-MM-DD"),
-  });
-
-  const listUser = api.user.getAll.useQuery({});
+  const today = moment().format("YYYY-MM-DD");
 
   const positionUp = api.assignment.positionUp.useMutation({
     onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
@@ -138,33 +40,15 @@ function AssignmentDrawer() {
     onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
   });
 
-  const changeStatus = api.assignment.changeStatus.useMutation({
-    onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
-  });
   const changeTechnic = api.assignment.changeTechnic.useMutation({
     onSuccess: () => queryClient.assignment.getAssignments.invalidate(),
   });
-  const handleChangeStatus = ({ id, status }: HandleChangeStatusProps) => {
-    if (!id || !status) return handleCloseMenuStatus();
+  const listAssignments = api.assignment.getAssignments.useQuery({
+    userId: session?.data?.user.id,
+    shopId: null,
+    dateActivity: today,
+  });
 
-    changeStatus.mutate({ id, status });
-    handleCloseMenuStatus();
-  };
-  const handleChangeTechnic = ({ id, userId }: HandleChangeTechnicProps) => {
-    if (!id || !userId) return handleCloseMenuStatus();
-
-    if (anchorMenuChangeTechnic.id)
-      changeTechnic.mutate({
-        id: anchorMenuChangeTechnic.id,
-        userId,
-      });
-    handleCloseMenuChangeTechnic();
-  };
-  const role = session?.data?.user.role;
-  const changeStatusWhenFinalized =
-    (anchorMenuStatus.status !== "FINALIZED" &&
-      anchorMenuStatus.status !== "CANCELED") ||
-    role === "ADMIN";
   return (
     <div className="fixed left-0 top-[64px] h-full pb-[64px]">
       <div className=" overflow-x-scrol flex h-full w-fit flex-1 flex-row gap-4 bg-slate-900 p-4">
@@ -208,7 +92,7 @@ function AssignmentDrawer() {
               <TableBody ref={parent}>
                 {assignments.map((assignment) => {
                   const now = moment();
-                  const dateNow = moment(now).format("YYYY-MM-DD");
+                  // const dateNow = moment(now).format("YYYY-MM-DD");
                   const finalizedAt = moment(assignment.finalizedAt);
                   const createdAt = moment(assignment.createdAt);
                   const dateActivity = moment(assignment.dateActivity).utc();
@@ -224,7 +108,7 @@ function AssignmentDrawer() {
                   );
                   const isActivityBeforeActivityDay = moment(
                     dateActivity.format("YYYY-MM-DD")
-                  ).isBefore(filterAssignment.dateActivity, "day");
+                  ).isBefore(dateActivity, "day");
 
                   return (
                     <TableRow key={assignment.id}>
@@ -247,27 +131,10 @@ function AssignmentDrawer() {
                               {assignment.client.name}
                             </span>
                             <div className="flex flex-row gap-1">
-                              <button
-                                aria-label="fade-button"
-                                onClick={(event) =>
-                                  !isActivityBeforeActivityDay &&
-                                  handleOpenMenuStatus({
-                                    status: assignment.status,
-                                    event,
-                                    id: assignment.id,
-                                    oldUserId: assignment.userId,
-                                  })
-                                }
-                                className={`rounded p-2 text-slate-50 ${changeStatusColor(
-                                  assignment.status
-                                )}
-                                `}
-                              >
-                                {changeStatusPortuguese({
-                                  status: assignment.status,
-                                  isUppercase: true,
-                                })}
-                              </button>
+                              <ChangeStatus
+                                actualStatus={assignment.status}
+                                assignmentId={assignment.id}
+                              />
                             </div>
                           </div>
                           <div className="mt-1 flex flex-row items-center justify-between font-bold text-slate-500">
@@ -290,85 +157,66 @@ function AssignmentDrawer() {
                                 : `${diffMinutes} M`}
                             </div>
                             <div className="flex">
-                              {
-                                isActivityBeforeActivityDay ? (
-                                  <button
-                                    onClick={() =>
-                                      changeTechnic.mutate({
-                                        id: assignment.id,
-                                        userId: assignment.userId,
-                                        dateActivity:
-                                          filterAssignment.dateActivity,
-                                      })
-                                    }
-                                    className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700"
-                                  >
-                                    Fixar
-                                  </button>
-                                ) : null
-                                // <button className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700">
-                                //   Adiar
-                                // </button>
-                              }
+                              {isActivityBeforeActivityDay ? (
+                                <button
+                                  onClick={() =>
+                                    changeTechnic.mutate({
+                                      id: assignment.id,
+                                      userId: assignment.userId,
+                                      dateActivity: today,
+                                    })
+                                  }
+                                  className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700"
+                                >
+                                  Fixar
+                                </button>
+                              ) : null}
                             </div>
                           </div>
 
                           <div className="flex flex-row items-center justify-between font-bold capitalize text-blue-500">
-                            {assignment.service.name}{" "}
-                            {assignment.shop.name?.toLowerCase()}
-                            {session.data?.user.role !== "TECH" && (
-                              <div className="flex flex-row">
-                                {!isActivityBeforeActivityDay && (
-                                  <>
-                                    <button
-                                      onClick={(event) =>
-                                        !isActivityBeforeActivityDay &&
-                                        handleOpenMenuChangeTechnic({
-                                          status: assignment.status,
-                                          event,
-                                          id: assignment.id,
-                                          oldUserId: userId,
-                                        })
-                                      }
-                                      className="text-blue-500"
-                                    >
-                                      <Image
-                                        alt="technical_icon"
-                                        src="/icons/Technical.svg"
-                                        width={22}
-                                        height={22}
-                                      />
-                                    </button>
-                                    <IconButton
-                                      onClick={() =>
-                                        positionUp.mutate({
-                                          id: assignment.id,
-                                        })
-                                      }
-                                      color="primary"
-                                      component="label"
-                                    >
-                                      <ArrowUpwardIcon />
-                                    </IconButton>
-                                    <IconButton
-                                      onClick={() =>
-                                        positionDown.mutate({
-                                          id: assignment.id,
-                                        })
-                                      }
-                                      color="primary"
-                                      component="label"
-                                    >
-                                      <ArrowDownwardIcon />
-                                    </IconButton>
-                                  </>
+                            <ChangeService
+                              serviceId={assignment.serviceId}
+                              assignmentId={assignment.id}
+                              shopName={assignment.shop.name}
+                            />
+                            {!isActivityBeforeActivityDay && (
+                              <div className="flex flex-row gap-3">
+                                {session.data?.user.role !== "TECH" && (
+                                  <ChangeTechnic
+                                    assignmentId={assignment.id}
+                                    userId={assignment.userId}
+                                  />
                                 )}
+                                <IconButton
+                                  onClick={() =>
+                                    positionUp.mutate({
+                                      id: assignment.id,
+                                    })
+                                  }
+                                  color="primary"
+                                  component="label"
+                                >
+                                  <ArrowUpwardIcon />
+                                </IconButton>
+                                <IconButton
+                                  onClick={() =>
+                                    positionDown.mutate({
+                                      id: assignment.id,
+                                    })
+                                  }
+                                  color="primary"
+                                  component="label"
+                                >
+                                  <ArrowDownwardIcon />
+                                </IconButton>
                               </div>
                             )}
                           </div>
-                          {!!assignment.observation.length && (
-                            <Observation observation={assignment.observation} />
-                          )}
+                          <Observation
+                            assignmentId={assignment.id}
+                            observation={assignment.observation}
+                          />
                         </div>
                       </TableCell>
                     </TableRow>
@@ -379,94 +227,6 @@ function AssignmentDrawer() {
           </TableContainer>
         ))}
       </div>
-      <StyledMenu
-        id="fade-menu"
-        MenuListProps={{
-          "aria-labelledby": "fade-button",
-        }}
-        anchorEl={anchorMenuChangeTechnic.anchor}
-        open={!!anchorMenuChangeTechnic.anchor}
-        onClose={handleCloseMenuChangeTechnic}
-        TransitionComponent={Fade}
-      >
-        {listUser.data?.map((item) => {
-          const userName = item.name;
-          if (item.id !== anchorMenuChangeTechnic.oldUserId)
-            return (
-              <MenuItem
-                key={item.id}
-                onClick={() =>
-                  handleChangeTechnic({
-                    id: anchorMenuChangeTechnic.id,
-                    userId: item.id,
-                  })
-                }
-              >
-                {userName}
-              </MenuItem>
-            );
-        })}
-      </StyledMenu>
-
-      <StyledMenu
-        id="fade-menu"
-        MenuListProps={{
-          "aria-labelledby": "fade-button",
-        }}
-        anchorEl={anchorMenuStatus.anchor}
-        open={!!anchorMenuStatus.anchor && changeStatusWhenFinalized}
-        onClose={handleCloseMenuStatus}
-        TransitionComponent={Fade}
-      >
-        {anchorMenuStatus.status !== "PENDING" && (
-          <MenuItem
-            onClick={() =>
-              handleChangeStatus({
-                id: anchorMenuStatus.id,
-                status: "PENDING",
-              })
-            }
-          >
-            PENDENTE
-          </MenuItem>
-        )}
-        {anchorMenuStatus.status !== "IN_PROGRESS" && (
-          <MenuItem
-            onClick={() =>
-              handleChangeStatus({
-                id: anchorMenuStatus.id,
-                status: "IN_PROGRESS",
-              })
-            }
-          >
-            ANDAMENTO
-          </MenuItem>
-        )}
-        {anchorMenuStatus.status !== "FINALIZED" && (
-          <MenuItem
-            onClick={() =>
-              handleChangeStatus({
-                id: anchorMenuStatus.id,
-                status: "FINALIZED",
-              })
-            }
-          >
-            FINALIZADO
-          </MenuItem>
-        )}
-        {anchorMenuStatus.status !== "CANCELED" && (
-          <MenuItem
-            onClick={() =>
-              handleChangeStatus({
-                id: anchorMenuStatus.id,
-                status: "CANCELED",
-              })
-            }
-          >
-            CANCELADO
-          </MenuItem>
-        )}
-      </StyledMenu>
     </div>
   );
 }
