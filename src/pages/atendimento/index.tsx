@@ -1,21 +1,23 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import AddIcon from "@mui/icons-material/Add";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import EventIcon from "@mui/icons-material/Event";
-import { IconButton } from "@mui/material";
-import Fab from "@mui/material/Fab";
-import Fade from "@mui/material/Fade";
-import MenuItem from "@mui/material/MenuItem";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import type { AssignmentStatus } from "@prisma/client";
+import {
+  Event as EventIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+  Add as AddIcon,
+  AccessTime as AccessTimeIcon,
+  AccessAlarm as AccessAlarmIcon,
+} from "@mui/icons-material";
+import {
+  IconButton,
+  Fab,
+  Table,
+  TableCell,
+  TableBody,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -23,29 +25,14 @@ import Image from "next/image";
 import { useState } from "react";
 import ResponsiveAppBar from "../../components/AppBar";
 import AssignmentModal from "../../components/AssignmentModal";
-import SummaryModal from "../../components/SummaryModal";
+import ChangeService from "../../components/Menus/ChangeService";
+import ChangeStatus from "../../components/Menus/ChangeStatus";
+import ChangeTechnic from "../../components/Menus/ChangeTechnic";
 import Observation from "../../components/Observation";
 import StatusHistoryModal from "../../components/StatusHistoryModal";
-import { StyledMenu } from "../../components/StyledMenu";
+import SummaryModal from "../../components/SummaryModal";
 import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../utils/api";
-import { changeStatusColor, changeStatusPortuguese } from "../../utils/utils";
-import ChangeTechnic from "../../components/Menus/ChangeTechnic";
-interface AnchorMenuStatus {
-  anchor: null | HTMLElement;
-  id: string | null;
-  status: AssignmentStatus | null;
-}
-
-interface HandleOpenMenuProps {
-  event: React.MouseEvent<HTMLButtonElement>;
-  id: string;
-  status: AssignmentStatus | null;
-}
-interface HandleChangeStatusProps {
-  status: AssignmentStatus | null;
-  id: string | null;
-}
 
 interface FilterAssignment {
   shopId: string | null;
@@ -67,15 +54,7 @@ export default function Assignments() {
     dateActivity: moment().format("YYYY-MM-DD"),
   });
   const { shopId, dateActivity } = useDebounce(filterAssignment, 300);
-  const [anchorMenuStatus, setAnchorMenuStatus] = useState<AnchorMenuStatus>({
-    anchor: null,
-    id: null,
-    status: null,
-  });
 
-  const handleCloseMenuStatus = () => {
-    setAnchorMenuStatus({ anchor: null, id: null, status: null });
-  };
   const handleChangeFilter = ({ key, value }: HandleChangeFilterAssignment) =>
     setFilterAssignment((old) => {
       return { ...old, [key]: value };
@@ -99,37 +78,14 @@ export default function Assignments() {
     },
   });
 
-  const changeStatus = api.assignment.changeStatus.useMutation({
-    onSuccess: async () => {
-      await queryClient.assignment.getAssignments.invalidate();
-      await queryClient.assignment.getSummary.invalidate();
-    },
-  });
   const changeTechnic = api.assignment.changeTechnic.useMutation({
     onSuccess: async () => {
       await queryClient.assignment.getAssignments.invalidate();
       await queryClient.assignment.getSummary.invalidate();
     },
   });
-  const handleChangeStatus = ({ id, status }: HandleChangeStatusProps) => {
-    if (!id || !status) return handleCloseMenuStatus();
-
-    changeStatus.mutate({ id, status });
-    handleCloseMenuStatus();
-  };
-  const handleOpenMenuStatus = ({
-    status,
-    event: { currentTarget: anchor },
-    id,
-  }: HandleOpenMenuProps) => {
-    setAnchorMenuStatus({ anchor, id, status });
-  };
   const role = session?.data?.user.role;
   const sessionUserId = session?.data?.user.id;
-  const changeStatusWhenFinalized =
-    (anchorMenuStatus.status !== "FINALIZED" &&
-      anchorMenuStatus.status !== "CANCELED") ||
-    role === "ADMIN";
   return (
     <>
       <Head>
@@ -249,26 +205,10 @@ export default function Assignments() {
                                   {assignment.client.name}
                                 </span>
                                 <div className="flex flex-row gap-1">
-                                  <button
-                                    aria-label="fade-button"
-                                    onClick={(event) =>
-                                      !isActivityBeforeActivityDay &&
-                                      handleOpenMenuStatus({
-                                        status: assignment.status,
-                                        event,
-                                        id: assignment.id,
-                                      })
-                                    }
-                                    className={`rounded p-2 text-slate-50 ${changeStatusColor(
-                                      assignment.status
-                                    )}
-                                `}
-                                  >
-                                    {changeStatusPortuguese({
-                                      status: assignment.status,
-                                      isUppercase: true,
-                                    })}
-                                  </button>
+                                  <ChangeStatus
+                                    actualStatus={assignment.status}
+                                    assignmentId={assignment.id}
+                                  />
                                 </div>
                               </div>
                               <div className="mt-1 flex flex-row items-center justify-between font-bold text-slate-500">
@@ -291,31 +231,29 @@ export default function Assignments() {
                                     : `${diffMinutes} M`}
                                 </div>
                                 <div className="flex">
-                                  {
-                                    isActivityBeforeActivityDay ? (
-                                      <button
-                                        onClick={() =>
-                                          changeTechnic.mutate({
-                                            id: assignment.id,
-                                            userId: assignment.userId,
-                                            dateActivity:
-                                              filterAssignment.dateActivity,
-                                          })
-                                        }
-                                        className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700"
-                                      >
-                                        Fixar
-                                      </button>
-                                    ) : null
-                                    // <button className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700">
-                                    //   Adiar
-                                    // </button>
-                                  }
+                                  {isActivityBeforeActivityDay ? (
+                                    <button
+                                      onClick={() =>
+                                        changeTechnic.mutate({
+                                          id: assignment.id,
+                                          userId: assignment.userId,
+                                          dateActivity:
+                                            filterAssignment.dateActivity,
+                                        })
+                                      }
+                                      className="text-blue-600 transition duration-300 ease-in-out hover:text-blue-700"
+                                    >
+                                      Fixar
+                                    </button>
+                                  ) : null}
                                 </div>
                               </div>
 
                               <div className="flex flex-row items-center justify-between font-bold capitalize text-blue-500">
-                                {assignment.service.name}
+                                <ChangeService
+                                  serviceId={assignment.serviceId}
+                                  assignmentId={assignment.id}
+                                />
 
                                 {session.data?.user.role === "TECH" &&
                                   ` - ${assignment.shop.name?.toLowerCase()}`}
@@ -369,66 +307,6 @@ export default function Assignments() {
             );
           })}
         </div>
-
-        <StyledMenu
-          id="fade-menu"
-          MenuListProps={{
-            "aria-labelledby": "fade-button",
-          }}
-          anchorEl={anchorMenuStatus.anchor}
-          open={!!anchorMenuStatus.anchor && changeStatusWhenFinalized}
-          onClose={handleCloseMenuStatus}
-          TransitionComponent={Fade}
-        >
-          {anchorMenuStatus.status !== "PENDING" && (
-            <MenuItem
-              onClick={() =>
-                handleChangeStatus({
-                  id: anchorMenuStatus.id,
-                  status: "PENDING",
-                })
-              }
-            >
-              PENDENTE
-            </MenuItem>
-          )}
-          {anchorMenuStatus.status !== "IN_PROGRESS" && (
-            <MenuItem
-              onClick={() =>
-                handleChangeStatus({
-                  id: anchorMenuStatus.id,
-                  status: "IN_PROGRESS",
-                })
-              }
-            >
-              ANDAMENTO
-            </MenuItem>
-          )}
-          {anchorMenuStatus.status !== "FINALIZED" && (
-            <MenuItem
-              onClick={() =>
-                handleChangeStatus({
-                  id: anchorMenuStatus.id,
-                  status: "FINALIZED",
-                })
-              }
-            >
-              FINALIZADO
-            </MenuItem>
-          )}
-          {anchorMenuStatus.status !== "CANCELED" && (
-            <MenuItem
-              onClick={() =>
-                handleChangeStatus({
-                  id: anchorMenuStatus.id,
-                  status: "CANCELED",
-                })
-              }
-            >
-              CANCELADO
-            </MenuItem>
-          )}
-        </StyledMenu>
 
         <AssignmentModal
           isVisible={isVisibleModalCreate}

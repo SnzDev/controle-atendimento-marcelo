@@ -446,4 +446,43 @@ export const assignmentRouter = createTRPCRouter({
         });
       return data;
     }),
+  changeService: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        serviceId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input: { serviceId, id } }) => {
+      const assignment = await ctx.prisma.assignment.findUnique({
+        where: { id },
+        include: { service: true },
+      });
+      if (!assignment)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Ná existe esse atendimento",
+        });
+      const service = await ctx.prisma.service.findUnique({
+        where: { id: serviceId },
+      });
+      if (!service)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Ná existe esse tipo de serviço",
+        });
+
+      const data = await ctx.prisma.assignment.update({
+        where: { id },
+        data: { serviceId },
+      });
+      await ctx.prisma.historyAssignment.create({
+        data: {
+          assignmentId: assignment.id,
+          userId: ctx.session.user.id,
+          description: `Trocou o tipo de serviço ${assignment.service.name} para o tipo serviço ${service.name}`,
+        },
+      });
+      return data;
+    }),
 });
