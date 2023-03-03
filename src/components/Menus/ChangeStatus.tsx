@@ -51,11 +51,10 @@ const ChangeStatus = (props: ChangeStatusProps) => {
         TransitionComponent={Fade}
       >
         {status?.map((status) => {
-          if (userSession?.role !== "ADMIN" && status === "INACTIVE") return;
           if (
-            props.actualStatus === "CANCELED" ||
-            (props.actualStatus === "FINALIZED" &&
-              userSession?.role !== "ADMIN")
+            (props.actualStatus === "CANCELED" ||
+              props.actualStatus === "FINALIZED") &&
+            userSession?.role !== "ADMIN"
           )
             return;
           if (status !== props.actualStatus)

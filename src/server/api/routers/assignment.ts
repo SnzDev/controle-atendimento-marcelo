@@ -214,7 +214,7 @@ export const assignmentRouter = createTRPCRouter({
           userId: assignment.userId,
           shopId: assignment.shopId,
           dateActivity: assignment.dateActivity,
-          position: assignment.position - 1,
+          position: { lt: assignment.position },
           deletedAt: {
             equals: null,
           },
@@ -230,22 +230,20 @@ export const assignmentRouter = createTRPCRouter({
           id: assignmentUp.id,
         },
         data: {
-          position: assignmentUp.position + 1,
+          position: assignment.position,
         },
       });
       const data = await ctx.prisma.assignment.update({
         where: { id: assignment.id },
         data: {
-          position: assignment.position - 1,
+          position: assignmentUp.position,
         },
       });
       await ctx.prisma.historyAssignment.create({
         data: {
           assignmentId: data.id,
           userId: ctx.session.user.id,
-          description: `Moveu para cima da posição ${
-            assignment.position
-          } para a posição ${assignment.position - 1}`,
+          description: `Moveu para cima da posição ${assignment.position} para a posição ${assignmentUp.position}`,
         },
       });
 
@@ -269,7 +267,7 @@ export const assignmentRouter = createTRPCRouter({
           userId: assignment.userId,
           shopId: assignment.shopId,
           dateActivity: assignment.dateActivity,
-          position: assignment.position + 1,
+          position: { gt: assignment.position },
           deletedAt: {
             equals: null,
           },
@@ -283,13 +281,13 @@ export const assignmentRouter = createTRPCRouter({
       await ctx.prisma.assignment.update({
         where: { id: assignmentDown.id },
         data: {
-          position: assignmentDown.position - 1,
+          position: assignment.position,
         },
       });
       const data = await ctx.prisma.assignment.update({
         where: { id: assignment.id },
         data: {
-          position: assignment.position + 1,
+          position: assignmentDown.position,
         },
       });
       await ctx.prisma.historyAssignment.create({
@@ -298,7 +296,7 @@ export const assignmentRouter = createTRPCRouter({
           userId: ctx.session.user.id,
           description: `Moveu para cima da posição ${
             assignment.position
-          } para a posição ${assignment.position + 1}`,
+          } para a posição ${assignmentDown.position + 1}`,
         },
       });
 
@@ -330,8 +328,6 @@ export const assignmentRouter = createTRPCRouter({
       let data: Partial<Assignment> = { status: input.status };
       if (input.status === "FINALIZED")
         data = { ...data, finalizedAt: new Date() };
-      if (input.status === "CANCELED")
-        data = { ...data, canceledAt: new Date() };
       if (input.status === "IN_PROGRESS")
         data = { ...data, inProgressAt: new Date() };
       if (input.status === "INACTIVE")

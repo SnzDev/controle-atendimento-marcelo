@@ -13,32 +13,43 @@ interface AssignmentModalProps {
   onClose: () => void;
 }
 function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
-  const schemaValidation = z.object({
-    client: z.object({
-      id: z.string().optional(),
-      inputValue: z.string().optional(),
-      label: z.string(),
-    }),
-    user: z.object({
-      id: z.string({ required_error: "Obrigatório" }),
-      label: z.string().optional(),
-    }),
-    shop: z.object({
-      id: z.string({ required_error: "Obrigatório" }),
-      label: z.string().optional(),
-    }),
-    service: z.object({
-      id: z.string({ required_error: "Obrigatório" }),
-      label: z.string().optional(),
-    }),
-    dateActivity: z.string(),
-    observation: z.string().optional(),
-  });
+  const schemaValidation = z
+    .object({
+      client: z.object({
+        id: z.string().optional(),
+        inputValue: z.string().optional(),
+        label: z.string(),
+      }),
+      user: z.object({
+        id: z.string({ required_error: "Obrigatório" }),
+        label: z.string().optional(),
+      }),
+      shop: z.object({
+        id: z.string({ required_error: "Obrigatório" }),
+        label: z.string().optional(),
+      }),
+      service: z.object({
+        id: z.string({ required_error: "Obrigatório" }),
+        label: z.string().optional(),
+      }),
+      dateActivity: z.string(),
+      observation: z.string().optional(),
+    })
+    .superRefine((input, ctx) => {
+      if (!input.client.id && !input.client.inputValue) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Necessário clicar em adicionar",
+          path: ["client"],
+        });
+      }
+    });
   type FieldValues = z.infer<typeof schemaValidation>;
   const {
     control,
     handleSubmit,
     reset,
+    watch,
     register,
     formState: { errors },
   } = useForm<FieldValues>({
@@ -80,6 +91,7 @@ function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
   const createObservation = api.observation.create.useMutation({
     onSuccess: () => {
       void queryCtx.observation.getAll.invalidate();
+      void queryCtx.assignment.getAssignments.invalidate();
     },
   });
 
@@ -161,7 +173,8 @@ function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
                   const { inputValue } = params;
                   // Suggest the creation of a new value
                   const isExisting = options.some(
-                    (option) => inputValue === option.label
+                    (option) =>
+                      inputValue?.toLowerCase() === option.label?.toLowerCase()
                   );
                   if (inputValue !== "" && !isExisting) {
                     filtered.push({
@@ -365,7 +378,7 @@ function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
             render={({ field: { onChange, ...field } }) => (
               <div>
                 <p className=" text-base font-semibold text-stone-100">
-                  Revenda
+                  Data do atendimento
                 </p>
                 <span className="flex flex-row items-center pl-1.5">
                   <div className="z-10 mr-[-32px] w-[24px]"></div>
