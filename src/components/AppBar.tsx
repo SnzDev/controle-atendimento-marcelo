@@ -16,7 +16,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import * as React from "react";
 import { api } from "../utils/api";
-import AssignmentDrawer from "./AssignmentDrawer";
 import { StyledMenu } from "./StyledMenu";
 
 type ResponsiveAppBarProps =
@@ -383,7 +382,6 @@ function ResponsiveAppBar({
           </Box>
         </Toolbar>
       </Container>
-      {!isTechnic && <AssignmentDrawer />}
     </AppBar>
   );
 }

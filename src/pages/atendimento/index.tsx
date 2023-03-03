@@ -24,6 +24,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
 import ResponsiveAppBar from "../../components/AppBar";
+import AssignmentDrawer from "../../components/AssignmentDrawer";
 import AssignmentModal from "../../components/AssignmentModal";
 import ChangeService from "../../components/Menus/ChangeService";
 import ChangeStatus from "../../components/Menus/ChangeStatus";
@@ -115,10 +116,10 @@ export default function Assignments() {
         />
 
         <div
-          className={`mt-16 flex w-full flex-1 flex-row gap-4 overflow-x-scroll px-4 ${
-            role !== "TECH" ? "pl-[25rem]" : ""
-          }`}
+          className={`mt-16 flex w-full flex-1 flex-row gap-4 overflow-x-scroll px-4`}
         >
+          {role !== "TECH" && <AssignmentDrawer />}
+
           {listAssignments.data?.map(({ userId, assignments }) => {
             if (userId === sessionUserId && role !== "TECH") return;
             return (
