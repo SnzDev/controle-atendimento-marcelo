@@ -36,7 +36,7 @@ function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
       observation: z.string().optional(),
     })
     .superRefine((input, ctx) => {
-      if (!input.client.id && !input.client.inputValue) {
+      if (!input.client.id && !input.client.label) {
         ctx.addIssue({
           code: "custom",
           message: "Necessário clicar em adicionar",
