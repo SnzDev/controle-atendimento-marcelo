@@ -4,7 +4,9 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const clientRouter = createTRPCRouter({
   getAll: protectedProcedure
-    .input(z.object({ name: z.string().optional() }))
+    .input(
+      z.object({ name: z.string().optional(), limit: z.number().optional() })
+    )
     .query(({ ctx, input }) => {
       return ctx.prisma.client.findMany({
         where: {
@@ -12,6 +14,7 @@ export const clientRouter = createTRPCRouter({
             contains: input.name,
           },
         },
+        take: input.limit,
       });
     }),
   findOne: protectedProcedure
