@@ -121,31 +121,29 @@ function ResponsiveAppBar({
                 </MenuItem>
               </Link>
             )}
-            {role === "ADMIN" && (
-              <>
-                <Link href="/cadastro/loja">
-                  <MenuItem>
-                    <Badge variant="dot" color="error">
-                      <Typography textAlign="center">Revendas</Typography>
-                    </Badge>
-                  </MenuItem>
-                </Link>
-                <Link href="/cadastro/servico">
-                  <MenuItem>
-                    <Badge variant="dot" color="error">
-                      <Typography textAlign="center">Serviços</Typography>
-                    </Badge>
-                  </MenuItem>
-                </Link>
-                <Link href="/cadastro/usuario">
-                  <MenuItem>
-                    <Badge variant="dot" color="error">
-                      <Typography textAlign="center">Usuarios</Typography>
-                    </Badge>
-                  </MenuItem>
-                </Link>
-              </>
-            )}
+            {role === "ADMIN" && [
+              <Link key="shop" href="/cadastro/loja">
+                <MenuItem>
+                  <Badge variant="dot" color="error">
+                    <Typography textAlign="center">Revendas</Typography>
+                  </Badge>
+                </MenuItem>
+              </Link>,
+              <Link key="service" href="/cadastro/servico">
+                <MenuItem>
+                  <Badge variant="dot" color="error">
+                    <Typography textAlign="center">Serviços</Typography>
+                  </Badge>
+                </MenuItem>
+              </Link>,
+              <Link key="user" href="/cadastro/usuario">
+                <MenuItem>
+                  <Badge variant="dot" color="error">
+                    <Typography textAlign="center">Usuarios</Typography>
+                  </Badge>
+                </MenuItem>
+              </Link>,
+            ]}
             {!isTechnic && screenAssignment && (
               <div className="ml-5 flex gap-5">
                 <select
@@ -299,34 +297,32 @@ function ResponsiveAppBar({
                   </MenuItem>
                 </Link>
               )}
-              {role === "ADMIN" && (
-                <>
-                  <Link href="/cadastro/loja">
-                    <MenuItem>
-                      <Badge variant="dot" color="error">
-                        <Typography textAlign="center">Revendas</Typography>
-                      </Badge>
-                    </MenuItem>
-                  </Link>
-                  <Link href="/cadastro/servico">
-                    <MenuItem>
-                      <Badge variant="dot" color="error">
-                        <Typography textAlign="center">Serviços</Typography>
-                      </Badge>
-                    </MenuItem>
-                  </Link>
-                  <Link href="/cadastro/usuario">
-                    <MenuItem>
-                      <Badge variant="dot" color="error">
-                        <Typography textAlign="center">Usuarios</Typography>
-                      </Badge>
-                    </MenuItem>
-                  </Link>
-                </>
-              )}
-              {!isTechnic && screenAssignment && (
-                <>
+              {role === "ADMIN" && [
+                <Link key="shop" href="/cadastro/loja">
                   <MenuItem>
+                    <Badge variant="dot" color="error">
+                      <Typography textAlign="center">Revendas</Typography>
+                    </Badge>
+                  </MenuItem>
+                </Link>,
+                <Link key="service" href="/cadastro/servico">
+                  <MenuItem>
+                    <Badge variant="dot" color="error">
+                      <Typography textAlign="center">Serviços</Typography>
+                    </Badge>
+                  </MenuItem>
+                </Link>,
+                <Link key="user" href="/cadastro/usuario">
+                  <MenuItem>
+                    <Badge variant="dot" color="error">
+                      <Typography textAlign="center">Usuarios</Typography>
+                    </Badge>
+                  </MenuItem>
+                </Link>,
+              ]}
+              {!isTechnic &&
+                screenAssignment && [
+                  <MenuItem key="shopSelector">
                     <select
                       value={shopId ?? ""}
                       onChange={(e) => {
@@ -351,8 +347,8 @@ function ResponsiveAppBar({
                         </option>
                       ))}
                     </select>
-                  </MenuItem>
-                  <MenuItem>
+                  </MenuItem>,
+                  <MenuItem key="dateSelector">
                     <input
                       value={dateActivity}
                       onChange={(e) =>
@@ -365,9 +361,8 @@ function ResponsiveAppBar({
                         color: "#FFF",
                       }}
                     />
-                  </MenuItem>
-                </>
-              )}
+                  </MenuItem>,
+                ]}
 
               {!isTechnic && screenAssignment && (
                 <MenuItem onClick={openModalSummary}>
