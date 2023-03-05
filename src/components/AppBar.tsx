@@ -156,13 +156,7 @@ function ResponsiveAppBar({
                 >
                   <option value="">Revenda</option>
                   {listShop?.data?.map((item) => (
-                    <option
-                      value={item.id}
-                      key={item.id}
-                      onClick={() => {
-                        console.log(item.name);
-                      }}
-                    >
+                    <option value={item.id} key={item.id}>
                       {item.name}
                     </option>
                   ))}
@@ -339,9 +333,6 @@ function ResponsiveAppBar({
                           value={item.id}
                           key={item.id}
                           className=" text-white"
-                          onClick={() => {
-                            console.log(item.name);
-                          }}
                         >
                           {item.name}
                         </option>

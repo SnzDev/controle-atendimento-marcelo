@@ -159,7 +159,6 @@ export const assignmentRouter = createTRPCRouter({
           },
         },
       });
-      console.log(allPendingAssignments);
       const data: {
         userId: string;
         assignments: typeof technics;
@@ -498,5 +497,55 @@ export const assignmentRouter = createTRPCRouter({
         },
       });
       return data;
+    }),
+
+  getAssignment: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        shopId: z.string().optional(),
+        dateActivity: z.string(),
+      })
+    )
+    .query(async ({ ctx, input: { userId, shopId, dateActivity } }) => {
+      const role = ctx.session.user.role;
+      const assignments = await ctx.prisma.assignment.findMany({
+        where: {
+          userId,
+          shopId,
+          deletedAt: null,
+          OR:
+            role === "TECH"
+              ? [
+                  {
+                    status: "IN_PROGRESS",
+                  },
+                  {
+                    status: "PENDING",
+                  },
+                ]
+              : [
+                  {
+                    dateActivity: { lt: new Date(dateActivity) },
+                    status: "PENDING",
+                  },
+                  {
+                    dateActivity: new Date(dateActivity),
+                  },
+                ],
+        },
+        include: {
+          observation: { include: { userAction: true } },
+          client: true,
+          HistoryAssignment: { include: { userAction: true } },
+          service: true,
+          shop: true,
+        },
+        orderBy: {
+          position: "asc",
+        },
+      });
+
+      return assignments;
     }),
 });

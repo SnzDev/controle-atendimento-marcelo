@@ -37,7 +37,6 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
-      console.log(token.sub);
       if (session.user) {
         const data = await prisma.user.findUnique({
           where: { id: token.sub },
