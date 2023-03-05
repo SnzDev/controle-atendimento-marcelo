@@ -1,5 +1,4 @@
 import { Fade, MenuItem } from "@mui/material";
-import { AssignmentStatus, UserRole } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import React from "react";
 import { api } from "../../utils/api";

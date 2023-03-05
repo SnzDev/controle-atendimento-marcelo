@@ -1,6 +1,4 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
-  Divider,
   Table,
   TableBody,
   TableCell,
