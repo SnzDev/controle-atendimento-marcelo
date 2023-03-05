@@ -10,7 +10,7 @@ import AssignmentColumn from "../../components/Assignment/AssignmentColumn";
 import AssignmentModal from "../../components/AssignmentModal";
 import SummaryModal from "../../components/SummaryModal";
 import useDebounce from "../../hooks/useDebounce";
-import useWindowDimensions from "../../hooks/useWindowDimensions";
+import { useWindowDimensions } from "../../hooks";
 import { api } from "../../utils/api";
 
 export interface FilterAssignment {
