@@ -21,7 +21,7 @@ import { SelectUser } from "../components/Select";
 import type {
   FilterAssignment,
   HandleChangeFilterAssignment,
-} from "../pages/atendimento/new";
+} from "../pages/atendimento";
 type ResponsiveAppBarProps =
   | {
       screenAssignment: true;
