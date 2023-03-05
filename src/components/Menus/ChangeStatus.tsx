@@ -8,6 +8,7 @@ import { StyledMenu } from "../StyledMenu";
 interface ChangeStatusProps {
   actualStatus: AssignmentStatus;
   assignmentId: string;
+  isToday?: boolean;
 }
 const ChangeStatus = (props: ChangeStatusProps) => {
   const [anchor, setAnchor] = React.useState<HTMLElement | null>(null);
@@ -31,7 +32,7 @@ const ChangeStatus = (props: ChangeStatusProps) => {
   return (
     <>
       <button
-        onClick={(event) => setAnchor(event.currentTarget)}
+        onClick={(event) => props.isToday && setAnchor(event.currentTarget)}
         className={`rounded p-2 text-slate-50 ${changeStatusColor(
           props.actualStatus
         )}`}

@@ -80,6 +80,9 @@ const AssignmentRows = (props: AssignmentRows) => {
         const isActivityBeforeActivityDay = moment(
           dateActivity.format("YYYY-MM-DD")
         ).isBefore(props.dateActivity, "day");
+        const isToday =
+          dateActivity.format("YYYY-MM-DD") ===
+          moment(props.dateActivity).format("YYYY-MM-DD");
 
         return (
           <TableRow key={assignment.id}>
@@ -101,6 +104,7 @@ const AssignmentRows = (props: AssignmentRows) => {
                   </span>
                   <div className="flex flex-row gap-1">
                     <ChangeStatus
+                      isToday={isToday}
                       actualStatus={assignment.status}
                       assignmentId={assignment.id}
                     />
