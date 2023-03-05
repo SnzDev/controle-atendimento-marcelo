@@ -49,7 +49,7 @@ function SelectUsers(props: SelectUsersProps) {
         id="demo-multiple-checkbox"
         multiple
         variant="standard"
-        value={props.value}
+        value={props?.value}
         onChange={handleChange}
         sx={{
           p: 0.5,
@@ -62,7 +62,7 @@ function SelectUsers(props: SelectUsersProps) {
         }}
         renderValue={(selected) =>
           listUsers.data
-            ?.filter((user) => selected.includes(user.id))
+            ?.filter((user) => selected?.includes(user.id))
             ?.map((user) => user.name)
             .join(", ")
         }

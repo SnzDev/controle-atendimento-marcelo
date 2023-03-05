@@ -16,6 +16,7 @@ const ChangeTechnic = (props: ChangeTechnicProps) => {
   const changeTechnic = api.assignment.changeTechnic.useMutation({
     onSuccess: async () => {
       await queryClient.assignment.getAssignments.invalidate();
+      await queryClient.assignment.getAssignment.invalidate();
       await queryClient.assignment.getSummary.invalidate();
     },
   });

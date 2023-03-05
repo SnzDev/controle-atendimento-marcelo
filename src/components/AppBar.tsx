@@ -148,10 +148,10 @@ function ResponsiveAppBar({
                     onChange &&
                       onChange({ key: "usersSelect", value: e ?? [] });
                   }}
-                  value={filterAssignment.usersSelect ?? []}
+                  value={filterAssignment?.usersSelect ?? []}
                 />
                 <select
-                  value={filterAssignment.shopId ?? ""}
+                  value={filterAssignment?.shopId ?? ""}
                   onChange={(e) => {
                     onChange &&
                       onChange({ key: "shopId", value: e.target.value });
@@ -168,7 +168,7 @@ function ResponsiveAppBar({
                 </select>
 
                 <input
-                  value={filterAssignment.dateActivity}
+                  value={filterAssignment?.dateActivity}
                   onChange={(e) =>
                     onChange({ key: "dateActivity", value: e.target.value })
                   }
@@ -323,7 +323,7 @@ function ResponsiveAppBar({
                 screenAssignment && [
                   <MenuItem key="shopSelector">
                     <select
-                      value={filterAssignment.shopId ?? ""}
+                      value={filterAssignment?.shopId ?? ""}
                       onChange={(e) => {
                         onChange({ key: "shopId", value: e.target.value });
                       }}
@@ -346,7 +346,7 @@ function ResponsiveAppBar({
                   </MenuItem>,
                   <MenuItem key="dateSelector">
                     <input
-                      value={filterAssignment.dateActivity}
+                      value={filterAssignment?.dateActivity}
                       onChange={(e) =>
                         onChange({ key: "dateActivity", value: e.target.value })
                       }

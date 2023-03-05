@@ -22,6 +22,7 @@ const ChangeService = (props: ChangeServiceProps) => {
   const changeService = api.assignment.changeService.useMutation({
     onSuccess: async () => {
       await queryClient.assignment.getAssignments.invalidate();
+      await queryClient.assignment.getAssignment.invalidate();
       await queryClient.assignment.getSummary.invalidate();
     },
   });

@@ -68,6 +68,7 @@ function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
   const createAssignment = api.assignment.create.useMutation({
     onSuccess: () => {
       void queryCtx.assignment.getAssignments.invalidate();
+      void queryCtx.assignment.getAssignment.invalidate();
       reset();
     },
   });
@@ -76,6 +77,7 @@ function AssignmentModal({ isVisible, onClose }: AssignmentModalProps) {
     onSuccess: () => {
       void queryCtx.observation.getAll.invalidate();
       void queryCtx.assignment.getAssignments.invalidate();
+      void queryCtx.assignment.getAssignment.invalidate();
     },
   });
 

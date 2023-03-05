@@ -1,10 +1,10 @@
 import { Fade, MenuItem } from "@mui/material";
-import type { AssignmentStatus, UserRole } from "@prisma/client";
+import type { AssignmentStatus } from "@prisma/client";
+import { useSession } from "next-auth/react";
 import React from "react";
 import { api } from "../../utils/api";
 import { changeStatusColor, changeStatusPortuguese } from "../../utils/utils";
 import { StyledMenu } from "../StyledMenu";
-import { useSession } from "next-auth/react";
 interface ChangeStatusProps {
   actualStatus: AssignmentStatus;
   assignmentId: string;
@@ -22,6 +22,7 @@ const ChangeStatus = (props: ChangeStatusProps) => {
   const changeStatus = api.assignment.changeStatus.useMutation({
     onSuccess: async () => {
       await queryClient.assignment.getAssignments.invalidate();
+      await queryClient.assignment.getAssignment.invalidate();
       await queryClient.assignment.getSummary.invalidate();
     },
   });

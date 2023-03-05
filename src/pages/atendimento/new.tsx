@@ -52,20 +52,26 @@ export default function Assignments() {
     });
 
   React.useEffect(() => {
-    const shopIdLocalStorage =
-      localStorage.getItem("@filterAssignment.shopId") ?? "";
-    handleChangeFilter({ key: "shopId", value: shopIdLocalStorage });
+    const shopIdLocalStorage = localStorage.getItem("@filterAssignment.shopId");
+    if (shopIdLocalStorage)
+      handleChangeFilter({ key: "shopId", value: shopIdLocalStorage });
 
-    const usersSelectLocalStorage =
-      localStorage.getItem("@filterAssignment.usersSelect")?.split(",") ?? [];
-    handleChangeFilter({ key: "usersSelect", value: usersSelectLocalStorage });
+    const usersSelectLocalStorage = localStorage
+      .getItem("@filterAssignment.usersSelect")
+      ?.split(",");
+    if (usersSelectLocalStorage)
+      handleChangeFilter({
+        key: "usersSelect",
+        value: usersSelectLocalStorage,
+      });
   }, []);
 
   const role = session?.data?.user.role;
   const sessionUserId = session?.data?.user.id;
   const sessionUserName = session?.data?.user.name;
   const listUsers = api.user.getAll.useQuery({});
-  const { height, width } = useWindowDimensions();
+  const { height } = useWindowDimensions();
+
   return (
     <>
       <Head>
