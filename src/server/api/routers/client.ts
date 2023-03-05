@@ -15,6 +15,7 @@ export const clientRouter = createTRPCRouter({
           },
         },
         take: input.limit,
+        orderBy: { name: "asc" },
       });
     }),
   findOne: protectedProcedure

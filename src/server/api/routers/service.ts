@@ -12,6 +12,7 @@ export const serviceRouter = createTRPCRouter({
             contains: input.name,
           },
         },
+        orderBy: { name: "asc" },
       });
     }),
   findOne: protectedProcedure

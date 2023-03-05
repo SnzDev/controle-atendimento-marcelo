@@ -13,6 +13,7 @@ export const userRouter = createTRPCRouter({
         where: {
           name: { contains: input.name },
         },
+        orderBy: { name: "asc" },
       });
     }),
   findOne: protectedProcedure

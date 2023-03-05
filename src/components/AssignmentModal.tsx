@@ -1,13 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Autocomplete, createFilterOptions } from "@mui/material";
+import { Autocomplete, Modal } from "@mui/material";
 import moment from "moment";
 import Image from "next/image";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form/dist/types";
 import { z } from "zod";
 import { api } from "../utils/api";
-import { Modal } from "@mui/material";
-import React from "react";
 import { SelectClient } from "./Select";
 interface AssignmentModalProps {
   isVisible: boolean;

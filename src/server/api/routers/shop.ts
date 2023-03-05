@@ -12,6 +12,7 @@ export const shopRouter = createTRPCRouter({
             contains: input.name,
           },
         },
+        orderBy: { name: "asc" },
       });
     }),
   findOne: protectedProcedure

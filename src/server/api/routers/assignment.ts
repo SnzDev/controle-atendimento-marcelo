@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Assignment } from "@prisma/client";
+import type { Assignment } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import moment from "moment";
 import { z } from "zod";
