@@ -105,7 +105,7 @@ export default function Assignments() {
               />
             )}
           </div>
-          <div className="flex  flex-row gap-2 overflow-x-scroll">
+          <div className="flex  flex-row gap-2 overflow-x-auto">
             {listUsers.data
               ?.filter((user) => filterAssignment.usersSelect.includes(user.id))
               ?.map(({ id, name }) => {
