@@ -1,3 +1,4 @@
-import SelectClient from "./Client";
+import SelectClient from "./Clients";
+import SelectUser from "./Users";
 
-export { SelectClient };
+export { SelectClient, SelectUser };

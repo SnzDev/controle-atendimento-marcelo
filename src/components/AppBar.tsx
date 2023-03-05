@@ -17,31 +17,28 @@ import { useRouter } from "next/router";
 import * as React from "react";
 import { api } from "../utils/api";
 import { StyledMenu } from "./StyledMenu";
-
+import { SelectUser } from "../components/Select";
+import type {
+  FilterAssignment,
+  HandleChangeFilterAssignment,
+} from "../pages/atendimento/new";
 type ResponsiveAppBarProps =
   | {
       screenAssignment: true;
       openModalSummary: () => void;
-      shopId: string | null;
-      dateActivity: string;
-      onChange: (props: HandleChange) => void;
+      filterAssignment: FilterAssignment;
+      onChange: (props: HandleChangeFilterAssignment) => void;
     }
   | {
       screenAssignment?: false;
-      shopId?: undefined;
-      dateActivity?: undefined;
+      filterAssignment?: FilterAssignment;
       onChange?: undefined;
       openModalSummary?: undefined;
     };
 
-interface HandleChange {
-  key: "shopId" | "dateActivity";
-  value: string;
-}
 function ResponsiveAppBar({
-  dateActivity,
   onChange,
-  shopId,
+  filterAssignment,
   screenAssignment,
   openModalSummary,
 }: ResponsiveAppBarProps) {
@@ -146,10 +143,18 @@ function ResponsiveAppBar({
             ]}
             {!isTechnic && screenAssignment && (
               <div className="ml-5 flex gap-5">
-                <select
-                  value={shopId ?? ""}
+                <SelectUser
                   onChange={(e) => {
-                    onChange({ key: "shopId", value: e.target.value });
+                    onChange &&
+                      onChange({ key: "usersSelect", value: e ?? [] });
+                  }}
+                  value={filterAssignment.usersSelect ?? []}
+                />
+                <select
+                  value={filterAssignment.shopId ?? ""}
+                  onChange={(e) => {
+                    onChange &&
+                      onChange({ key: "shopId", value: e.target.value });
                   }}
                   className="rounded-md border-slate-100 bg-slate-700 p-2 text-slate-100 shadow-lg"
                   placeholder="Loja"
@@ -163,7 +168,7 @@ function ResponsiveAppBar({
                 </select>
 
                 <input
-                  value={dateActivity}
+                  value={filterAssignment.dateActivity}
                   onChange={(e) =>
                     onChange({ key: "dateActivity", value: e.target.value })
                   }
@@ -318,7 +323,7 @@ function ResponsiveAppBar({
                 screenAssignment && [
                   <MenuItem key="shopSelector">
                     <select
-                      value={shopId ?? ""}
+                      value={filterAssignment.shopId ?? ""}
                       onChange={(e) => {
                         onChange({ key: "shopId", value: e.target.value });
                       }}
@@ -341,7 +346,7 @@ function ResponsiveAppBar({
                   </MenuItem>,
                   <MenuItem key="dateSelector">
                     <input
-                      value={dateActivity}
+                      value={filterAssignment.dateActivity}
                       onChange={(e) =>
                         onChange({ key: "dateActivity", value: e.target.value })
                       }

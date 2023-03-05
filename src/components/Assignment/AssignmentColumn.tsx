@@ -1,3 +1,4 @@
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
   Divider,
   Table,
@@ -49,11 +50,13 @@ const AssignmentColumn = (props: AssignmentColumn) => {
     (assignment) =>
       assignment.status === "FINALIZED" || assignment.status === "CANCELED"
   );
+  const [parent] = useAutoAnimate(/* optional config */);
 
   return (
     <>
       {!!assignments.data && assignments.data.length > 0 && (
         <TableContainer
+          ref={parent}
           sx={{
             position: "relative",
             backgroundColor: "rgb(30 41 59)",

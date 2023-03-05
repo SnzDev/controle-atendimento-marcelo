@@ -1,60 +1,42 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import {
-  Event as EventIcon,
-  ArrowUpward as ArrowUpwardIcon,
-  ArrowDownward as ArrowDownwardIcon,
-  Add as AddIcon,
-  AccessTime as AccessTimeIcon,
-  AccessAlarm as AccessAlarmIcon,
-} from "@mui/icons-material";
-import {
-  IconButton,
-  Fab,
-  Table,
-  TableCell,
-  TableBody,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
+import { Fab } from "@mui/material";
 
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ResponsiveAppBar from "../../components/AppBar";
 import AssignmentColumn from "../../components/Assignment/AssignmentColumn";
-import AssignmentDrawer from "../../components/AssignmentDrawer";
 import AssignmentModal from "../../components/AssignmentModal";
-import ChangeService from "../../components/Menus/ChangeService";
-import ChangeStatus from "../../components/Menus/ChangeStatus";
-import ChangeTechnic from "../../components/Menus/ChangeTechnic";
-import Observation from "../../components/Observation";
-import StatusHistoryModal from "../../components/StatusHistoryModal";
 import SummaryModal from "../../components/SummaryModal";
 import useDebounce from "../../hooks/useDebounce";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import { api } from "../../utils/api";
 
-interface FilterAssignment {
+export interface FilterAssignment {
   shopId: string | null;
   dateActivity: string;
+  usersSelect: string[];
 }
 
-interface HandleChangeFilterAssignment {
-  key: "shopId" | "dateActivity";
-  value: string;
-}
+export type HandleChangeFilterAssignment =
+  | {
+      key: "shopId" | "dateActivity";
+      value: string;
+    }
+  | {
+      key: "usersSelect";
+      value: string[];
+    };
 export default function Assignments() {
   const session = useSession();
   const queryClient = api.useContext();
   const [isVisibleModalCreate, setIsVisibleModalCreate] = useState(false);
   const [isOpenModalSummary, setIsOpenModalSummary] = useState(false);
-  const [parent] = useAutoAnimate(/* optional config */);
   const [filterAssignment, setFilterAssignment] = useState<FilterAssignment>({
     shopId: null,
     dateActivity: moment().format("YYYY-MM-DD"),
+    usersSelect: [],
   });
   const { shopId, dateActivity } = useDebounce(filterAssignment, 300);
 
@@ -62,7 +44,10 @@ export default function Assignments() {
     setFilterAssignment((old) => {
       const oldLocalStorage = localStorage.getItem(`@filterAssignment.${key}`);
       value !== oldLocalStorage &&
-        localStorage.setItem(`@filterAssignment.${key}`, value);
+        localStorage.setItem(
+          `@filterAssignment.${key}`,
+          typeof value === "string" ? value : value.join(",")
+        );
       return { ...old, [key]: value };
     });
 
@@ -70,11 +55,15 @@ export default function Assignments() {
     const shopIdLocalStorage =
       localStorage.getItem("@filterAssignment.shopId") ?? "";
     handleChangeFilter({ key: "shopId", value: shopIdLocalStorage });
+
+    const usersSelectLocalStorage =
+      localStorage.getItem("@filterAssignment.usersSelect")?.split(",") ?? [];
+    handleChangeFilter({ key: "usersSelect", value: usersSelectLocalStorage });
   }, []);
 
   const role = session?.data?.user.role;
   const sessionUserId = session?.data?.user.id;
-  const sessionUseName = session?.data?.user.name;
+  const sessionUserName = session?.data?.user.name;
   const listUsers = api.user.getAll.useQuery({});
   const { height, width } = useWindowDimensions();
   return (
@@ -98,74 +87,39 @@ export default function Assignments() {
         )}
         <ResponsiveAppBar
           openModalSummary={() => setIsOpenModalSummary(true)}
-          shopId={filterAssignment.shopId}
-          dateActivity={filterAssignment.dateActivity}
+          filterAssignment={filterAssignment}
           onChange={handleChangeFilter}
           screenAssignment
         />
 
         <div
-          style={{ maxHeight: height - 80 }}
-          className={`mt-16 flex w-full flex-1 flex-row gap-2 px-4 `}
+          style={{ maxHeight: height - 96 }}
+          className={`mt-20 flex w-full flex-1 flex-row gap-2 px-4 `}
         >
           <div className="flex flex-row gap-2">
             {role !== "TECH" && (
               <AssignmentColumn
                 dateActivity={filterAssignment.dateActivity}
                 userId={sessionUserId ?? ""}
-                userName={sessionUseName ?? ""}
+                userName={sessionUserName ?? ""}
               />
             )}
           </div>
           <div className="flex  flex-row gap-2 overflow-x-scroll">
-            {listUsers.data?.map(({ id, name }) => {
-              if (id === sessionUserId && role !== "TECH") return;
-              return (
-                <AssignmentColumn
-                  key={id}
-                  dateActivity={filterAssignment.dateActivity}
-                  shopId={filterAssignment.shopId ?? undefined}
-                  userId={id}
-                  userName={name}
-                />
-              );
-            })}
-            {listUsers.data?.map(({ id, name }) => {
-              if (id === sessionUserId && role !== "TECH") return;
-              return (
-                <AssignmentColumn
-                  key={id}
-                  dateActivity={filterAssignment.dateActivity}
-                  shopId={filterAssignment.shopId ?? undefined}
-                  userId={id}
-                  userName={name}
-                />
-              );
-            })}
-            {listUsers.data?.map(({ id, name }) => {
-              if (id === sessionUserId && role !== "TECH") return;
-              return (
-                <AssignmentColumn
-                  key={id}
-                  dateActivity={filterAssignment.dateActivity}
-                  shopId={filterAssignment.shopId ?? undefined}
-                  userId={id}
-                  userName={name}
-                />
-              );
-            })}
-            {listUsers.data?.map(({ id, name }) => {
-              if (id === sessionUserId && role !== "TECH") return;
-              return (
-                <AssignmentColumn
-                  key={id}
-                  dateActivity={filterAssignment.dateActivity}
-                  shopId={filterAssignment.shopId ?? undefined}
-                  userId={id}
-                  userName={name}
-                />
-              );
-            })}
+            {listUsers.data
+              ?.filter((user) => filterAssignment.usersSelect.includes(user.id))
+              ?.map(({ id, name }) => {
+                if (id === sessionUserId && role !== "TECH") return;
+                return (
+                  <AssignmentColumn
+                    key={id}
+                    dateActivity={filterAssignment.dateActivity}
+                    shopId={filterAssignment.shopId ?? undefined}
+                    userId={id}
+                    userName={name}
+                  />
+                );
+              })}
           </div>
         </div>
 
