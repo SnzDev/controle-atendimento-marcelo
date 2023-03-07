@@ -13,7 +13,7 @@ const ITEM_PADDING_TOP = 8;
 const MenuProps = {
   PaperProps: {
     style: {
-      maxHeight: "800px",
+      maxHeight: "500px",
       width: 250,
       background: "rgb(30 41 59)",
       color: "#FFF",

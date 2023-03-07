@@ -106,13 +106,11 @@ export default function Assignments() {
           className={`mt-20 flex w-full flex-1 flex-row gap-2 px-4 `}
         >
           <div className="flex flex-row gap-2">
-            {role !== "TECH" && (
-              <AssignmentColumn
-                dateActivity={filterAssignment.dateActivity}
-                userId={sessionUserId ?? ""}
-                userName={sessionUserName ?? ""}
-              />
-            )}
+            <AssignmentColumn
+              dateActivity={filterAssignment.dateActivity}
+              userId={sessionUserId ?? ""}
+              userName={sessionUserName ?? ""}
+            />
           </div>
           <div className="flex  flex-row gap-2 overflow-x-auto">
             {listUsers.data
