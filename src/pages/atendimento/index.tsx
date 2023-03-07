@@ -50,7 +50,15 @@ export default function Assignments() {
       return { ...old, [key]: value };
     });
 
+  const role = session?.data?.user.role;
+  const sessionUserId = session?.data?.user.id;
+  const sessionUserName = session?.data?.user.name;
+  const listUsers = api.user.getAll.useQuery({});
   React.useEffect(() => {
+    handleChangeFilter({
+      key: "usersSelect",
+      value: listUsers.data?.map((user) => user.id) ?? [],
+    });
     const shopIdLocalStorage = localStorage.getItem("@filterAssignment.shopId");
     if (shopIdLocalStorage)
       handleChangeFilter({ key: "shopId", value: shopIdLocalStorage });
@@ -63,12 +71,8 @@ export default function Assignments() {
         key: "usersSelect",
         value: usersSelectLocalStorage,
       });
-  }, []);
+  }, [listUsers.data]);
 
-  const role = session?.data?.user.role;
-  const sessionUserId = session?.data?.user.id;
-  const sessionUserName = session?.data?.user.name;
-  const listUsers = api.user.getAll.useQuery({});
   const { height } = useWindowDimensions();
 
   return (
