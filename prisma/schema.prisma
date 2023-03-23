@@ -71,6 +71,7 @@ model User {
   HistoryAssignmentDeletedBy HistoryAssignment[] @relation("HistoryAssignmentUserAction")
   AssignmentUser             Assignment[]        @relation("AssignmentUser")
   AssignmentDeletedBy        Assignment[]        @relation("AssignmentDeletedBy")
+  Region                     Region[]
 }
 
 model VerificationToken {
@@ -120,11 +121,13 @@ model Assignment {
   clientId                String
   userId                  String
   serviceId               String
+  regionId                String?
   informations            String?
   dateActivity            DateTime            @db.Date
   position                Int
   status                  AssignmentStatus
   createdAt               DateTime            @default(now())
+  createdBy               String?
   inProgressAt            DateTime?
   finalizedAt             DateTime?
   canceledAt              DateTime?
@@ -138,6 +141,7 @@ model Assignment {
   service                 Service             @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   observation             Observation[]
   HistoryAssignment       HistoryAssignment[]
+  Region                  Region?             @relation(fields: [regionId], references: [id])
 }
 
 model HistoryAssignment {
@@ -178,6 +182,17 @@ model Log {
   deletedBy     String?
   userDeletedBy User?     @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
   userAction    User      @relation("UserAction", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Region {
+  id         String       @id @default(cuid())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  deletedBy  String?
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  Assignment Assignment[]
 }
 
 enum AssignmentStatus {
