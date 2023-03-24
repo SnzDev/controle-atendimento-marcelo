@@ -119,6 +119,13 @@ function ResponsiveAppBar({
               </Link>
             )}
             {role === "ADMIN" && [
+              <Link key="region" href="/cadastro/regiao">
+                <MenuItem>
+                  <Badge variant="dot" color="error">
+                    <Typography textAlign="center">Região</Typography>
+                  </Badge>
+                </MenuItem>
+              </Link>,
               <Link key="shop" href="/cadastro/loja">
                 <MenuItem>
                   <Badge variant="dot" color="error">
@@ -297,6 +304,13 @@ function ResponsiveAppBar({
                 </Link>
               )}
               {role === "ADMIN" && [
+                <Link key="region" href="/cadastro/regiao">
+                  <MenuItem>
+                    <Badge variant="dot" color="error">
+                      <Typography textAlign="center">Região</Typography>
+                    </Badge>
+                  </MenuItem>
+                </Link>,
                 <Link key="shop" href="/cadastro/loja">
                   <MenuItem>
                     <Badge variant="dot" color="error">

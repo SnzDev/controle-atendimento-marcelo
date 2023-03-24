@@ -70,6 +70,9 @@ model User {
   HistoryAssignmentAction    HistoryAssignment[] @relation("HistoryAssignmentUserDeletedBy")
   HistoryAssignmentDeletedBy HistoryAssignment[] @relation("HistoryAssignmentUserAction")
   AssignmentUser             Assignment[]        @relation("AssignmentUser")
+  AssignmentCreatedBy        Assignment[]        @relation("AssignmentCreatedBy")
+  AssignmentFinalizedBy      Assignment[]        @relation("AssignmentFinalizedBy")
+  AssignmentCanceledBy       Assignment[]        @relation("AssignmentCanceledBy")
   AssignmentDeletedBy        Assignment[]        @relation("AssignmentDeletedBy")
   Region                     Region[]
 }
@@ -130,11 +133,16 @@ model Assignment {
   createdBy               String?
   inProgressAt            DateTime?
   finalizedAt             DateTime?
+  finalizedBy             String?
   canceledAt              DateTime?
+  canceledBy              String?
   updatedAt               DateTime            @updatedAt
   deletedAt               DateTime?
   deletedBy               String?
   userAssignment          User                @relation("AssignmentUser", fields: [userId], references: [id], onDelete: Cascade)
+  userCreatedBy           User?               @relation("AssignmentCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
+  userFinalizedBy         User?               @relation("AssignmentFinalizedBy", fields: [finalizedBy], references: [id], onDelete: Cascade)
+  userCanceledBy          User?               @relation("AssignmentCanceledBy", fields: [canceledBy], references: [id], onDelete: Cascade)
   userAssignmentDeletedBy User?               @relation("AssignmentDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
   shop                    Shop                @relation(fields: [shopId], references: [id], onDelete: Cascade)
   client                  Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)

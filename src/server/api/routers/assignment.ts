@@ -30,10 +30,15 @@ export const assignmentRouter = createTRPCRouter({
           id: z.string({ required_error: "Obrigatório" }),
           label: z.string().optional(),
         }),
+        region: z.object({
+          id: z.string({ required_error: "Obrigatório" }),
+          label: z.string().optional(),
+        }),
         dateActivity: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
       const date = moment(input.dateActivity).format("YYYY-MM-DD");
       const lastPosition = await ctx.prisma.assignment.findFirst({
         where: {
@@ -56,6 +61,8 @@ export const assignmentRouter = createTRPCRouter({
           userId: input.user.id,
           status: "PENDING",
           shopId: input.shop.id,
+          regionId: input.region.id,
+          createdBy: userId,
         },
       });
       await ctx.prisma.historyAssignment.create({
@@ -112,6 +119,7 @@ export const assignmentRouter = createTRPCRouter({
           shop: true,
           service: true,
           client: true,
+          Region: true,
           HistoryAssignment: {
             include: { userAction: true },
           },
@@ -148,6 +156,7 @@ export const assignmentRouter = createTRPCRouter({
           userAssignment: true,
           shop: true,
           service: true,
+          Region: true,
           client: true,
           HistoryAssignment: {
             include: { userAction: true },
@@ -315,6 +324,7 @@ export const assignmentRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
       const assignment = await ctx.prisma.assignment.findUnique({
         where: { id: input.id },
       });
@@ -326,14 +336,41 @@ export const assignmentRouter = createTRPCRouter({
 
       let data: Partial<Assignment> = { status: input.status };
       if (input.status === "FINALIZED")
-        data = { ...data, finalizedAt: new Date() };
+        data = { ...data, finalizedAt: new Date(), finalizedBy: userId };
+      if (input.status === "CANCELED") {
+        data = {
+          ...data,
+          canceledAt: new Date(),
+          canceledBy: userId,
+          finalizedAt: assignment.finalizedAt
+            ? assignment.finalizedAt
+            : new Date(),
+          finalizedBy: assignment.finalizedBy ? assignment.finalizedBy : userId,
+        };
+      }
       if (input.status === "IN_PROGRESS")
-        data = { ...data, inProgressAt: new Date() };
+        data = {
+          ...data,
+          inProgressAt: new Date(),
+          canceledBy: null,
+          canceledAt: null,
+          finalizedAt: null,
+          finalizedBy: null,
+        };
+      if (input.status === "PENDING")
+        data = {
+          ...data,
+          inProgressAt: null,
+          canceledBy: null,
+          canceledAt: null,
+          finalizedAt: null,
+          finalizedBy: null,
+        };
       if (input.status === "INACTIVE")
         data = {
           ...data,
           deletedAt: new Date(),
-          deletedBy: ctx.session.user.id,
+          deletedBy: userId,
         };
 
       const response = await ctx.prisma.assignment.update({
@@ -537,6 +574,7 @@ export const assignmentRouter = createTRPCRouter({
         include: {
           observation: { include: { userAction: true } },
           client: true,
+          Region: true,
           HistoryAssignment: { include: { userAction: true } },
           service: true,
           shop: true,

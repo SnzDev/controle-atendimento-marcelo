@@ -3,6 +3,7 @@ import type {
   Client,
   HistoryAssignment,
   Observation,
+  Region,
   Service,
   Shop,
   User,
@@ -35,6 +36,7 @@ interface AssignmentRows {
         observation: (Observation & {
           userAction: User;
         })[];
+        Region: Region | null;
         HistoryAssignment: (HistoryAssignment & {
           userAction: User;
         })[];
@@ -153,6 +155,7 @@ const AssignmentRows = (props: AssignmentRows) => {
                     assignmentId={assignment.id}
                     shopName={assignment.shop.name}
                   />
+
                   {!isActivityBeforeActivityDay && (
                     <div className="flex flex-row">
                       {role !== "TECH" && (
@@ -185,6 +188,9 @@ const AssignmentRows = (props: AssignmentRows) => {
                       </IconButton>
                     </div>
                   )}
+                </div>
+                <div className="flex flex-row items-center justify-between font-bold capitalize text-teal-500">
+                  {assignment.Region?.name}
                 </div>
                 <ObservationModal
                   assignmentId={assignment.id}
