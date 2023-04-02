@@ -35,7 +35,7 @@ const ChangeService = (props: ChangeServiceProps) => {
         }
         className="font-bold capitalize text-blue-500"
       >
-        {serviceName}
+        {serviceName?.toLowerCase()}
         {userSession?.role === "TECH" && ` - ${props.shopName?.toLowerCase()}`}
       </button>
       <StyledMenu

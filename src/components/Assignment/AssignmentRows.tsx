@@ -102,7 +102,7 @@ const AssignmentRows = (props: AssignmentRows) => {
                     <StatusHistoryModal
                       historyAssignment={assignment.HistoryAssignment}
                     />
-                    {assignment.client.name}
+                    {assignment.client.name?.toLowerCase()}
                   </span>
                   <div className="flex flex-row gap-1">
                     <ChangeStatus

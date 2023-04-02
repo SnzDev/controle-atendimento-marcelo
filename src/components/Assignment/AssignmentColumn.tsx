@@ -64,6 +64,8 @@ const AssignmentColumn = (props: AssignmentColumn) => {
       assignment.status === "FINALIZED" || assignment.status === "CANCELED"
   );
 
+  if (!filteredAssignment || filteredAssignment?.length < 1) return null;
+
   return (
     <>
       {!!assignments.data && assignments.data.length > 0 && (

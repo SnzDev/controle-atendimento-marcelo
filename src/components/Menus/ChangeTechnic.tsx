@@ -53,8 +53,9 @@ const ChangeTechnic = (props: ChangeTechnicProps) => {
                   });
                   setAnchor(null);
                 }}
+                sx={{ textTransform: "capitalize" }}
               >
-                {userName}
+                {userName?.toLowerCase()}
               </MenuItem>
             );
         })}

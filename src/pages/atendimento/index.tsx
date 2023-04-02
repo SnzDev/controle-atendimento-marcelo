@@ -118,6 +118,8 @@ export default function Assignments() {
               dateActivity={filterAssignment.dateActivity}
               userId={sessionUserId ?? ""}
               userName={sessionUserName ?? ""}
+              clientName={filterAssignment.clientName}
+              services={filterAssignment.servicesSelect}
             />
           </div>
           <div className="flex  flex-row gap-2 overflow-x-auto">
