@@ -11,17 +11,24 @@ import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useSession } from "next-auth/react";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import StoreIcon from "@mui/icons-material/Store";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import HomeRepairServiceIcon from "@mui/icons-material/HomeRepairService";
+import BadgeIcon from "@mui/icons-material/Badge";
+import PersonIcon from "@mui/icons-material/Person";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import * as React from "react";
 import { api } from "../utils/api";
 import { StyledMenu } from "./StyledMenu";
-import { SelectUser } from "../components/Select";
+import { SelectUser, SelectService } from "../components/Select";
 import type {
   FilterAssignment,
   HandleChangeFilterAssignment,
 } from "../pages/atendimento";
+import type { UserRole } from "@prisma/client";
 type ResponsiveAppBarProps =
   | {
       screenAssignment: true;
@@ -35,6 +42,51 @@ type ResponsiveAppBarProps =
       onChange?: undefined;
       openModalSummary?: undefined;
     };
+interface IMenu {
+  name: string;
+  href: string;
+  icon: React.ReactElement;
+  role: UserRole[];
+}
+
+const menu: IMenu[] = [
+  {
+    name: "Atendimentos",
+    href: "/atendimento",
+    icon: <AssignmentIcon fontSize="medium" />,
+    role: ["ADMIN", "TECH", "USER"],
+  },
+  {
+    name: "Clientes",
+    href: "/cadastro/cliente",
+    icon: <PersonIcon fontSize="medium" />,
+    role: ["ADMIN", "USER"],
+  },
+  {
+    name: "Regiões",
+    href: "/cadastro/regiao",
+    icon: <LocationOnIcon fontSize="medium" />,
+    role: ["ADMIN"],
+  },
+  {
+    name: "Revendas",
+    href: "/cadastro/loja",
+    icon: <StoreIcon fontSize="medium" />,
+    role: ["ADMIN"],
+  },
+  {
+    name: "Serviços",
+    href: "/cadastro/servico",
+    icon: <HomeRepairServiceIcon fontSize="medium" />,
+    role: ["ADMIN"],
+  },
+  {
+    name: "Usuários",
+    href: "/cadastro/usuario",
+    icon: <BadgeIcon fontSize="medium" />,
+    role: ["ADMIN"],
+  },
+];
 
 function ResponsiveAppBar({
   onChange,
@@ -104,52 +156,33 @@ function ResponsiveAppBar({
               display: { xs: "none", md: "flex" },
             }}
           >
-            <Link href="/atendimento">
-              <MenuItem>
-                <Typography textAlign="center">Atendimentos</Typography>
-              </MenuItem>
-            </Link>
-            {role !== "TECH" && (
-              <Link href="/cadastro/cliente">
-                <MenuItem>
-                  <Badge variant="dot" color="success">
-                    <Typography textAlign="center">Clientes</Typography>
-                  </Badge>
-                </MenuItem>
-              </Link>
-            )}
-            {role === "ADMIN" && [
-              <Link key="region" href="/cadastro/regiao">
-                <MenuItem>
-                  <Badge variant="dot" color="error">
-                    <Typography textAlign="center">Região</Typography>
-                  </Badge>
-                </MenuItem>
-              </Link>,
-              <Link key="shop" href="/cadastro/loja">
-                <MenuItem>
-                  <Badge variant="dot" color="error">
-                    <Typography textAlign="center">Revendas</Typography>
-                  </Badge>
-                </MenuItem>
-              </Link>,
-              <Link key="service" href="/cadastro/servico">
-                <MenuItem>
-                  <Badge variant="dot" color="error">
-                    <Typography textAlign="center">Serviços</Typography>
-                  </Badge>
-                </MenuItem>
-              </Link>,
-              <Link key="user" href="/cadastro/usuario">
-                <MenuItem>
-                  <Badge variant="dot" color="error">
-                    <Typography textAlign="center">Usuarios</Typography>
-                  </Badge>
-                </MenuItem>
-              </Link>,
-            ]}
+            {menu.map((menu) => {
+              if (!menu.role.includes(role as UserRole)) return null;
+              return (
+                <Link href={menu.href} key={menu.name}>
+                  <Tooltip title={menu.name}>
+                    <MenuItem>{menu.icon}</MenuItem>
+                  </Tooltip>
+                </Link>
+              );
+            })}
             {!isTechnic && screenAssignment && (
               <div className="ml-5 flex gap-5">
+                <input
+                  placeholder="Nome do cliente"
+                  value={filterAssignment?.clientName ?? ""}
+                  onChange={(e) =>
+                    onChange({ key: "clientName", value: e.target.value })
+                  }
+                  className="rounded-md border-slate-100 bg-slate-700 p-2 text-slate-100 shadow-lg"
+                />
+                <SelectService
+                  onChange={(e) => {
+                    onChange &&
+                      onChange({ key: "servicesSelect", value: e ?? [] });
+                  }}
+                  value={filterAssignment?.servicesSelect ?? []}
+                />
                 <SelectUser
                   onChange={(e) => {
                     onChange &&
@@ -291,48 +324,16 @@ function ResponsiveAppBar({
                 display: { xs: "block", md: "none" },
               }}
             >
-              <Link href="/atendimento">
-                <MenuItem>
-                  <Typography textAlign="center">Atendimentos</Typography>
-                </MenuItem>
-              </Link>
-              {role !== "TECH" && (
-                <Link href="/cadastro/cliente">
-                  <MenuItem>
-                    <Typography textAlign="center">Clientes</Typography>
-                  </MenuItem>
-                </Link>
-              )}
-              {role === "ADMIN" && [
-                <Link key="region" href="/cadastro/regiao">
-                  <MenuItem>
-                    <Badge variant="dot" color="error">
-                      <Typography textAlign="center">Região</Typography>
-                    </Badge>
-                  </MenuItem>
-                </Link>,
-                <Link key="shop" href="/cadastro/loja">
-                  <MenuItem>
-                    <Badge variant="dot" color="error">
-                      <Typography textAlign="center">Revendas</Typography>
-                    </Badge>
-                  </MenuItem>
-                </Link>,
-                <Link key="service" href="/cadastro/servico">
-                  <MenuItem>
-                    <Badge variant="dot" color="error">
-                      <Typography textAlign="center">Serviços</Typography>
-                    </Badge>
-                  </MenuItem>
-                </Link>,
-                <Link key="user" href="/cadastro/usuario">
-                  <MenuItem>
-                    <Badge variant="dot" color="error">
-                      <Typography textAlign="center">Usuarios</Typography>
-                    </Badge>
-                  </MenuItem>
-                </Link>,
-              ]}
+              {menu.map((menu) => {
+                if (!menu.role.includes(role as UserRole)) return null;
+                return (
+                  <Link href={menu.href} key={menu.name}>
+                    <MenuItem>
+                      <Typography textAlign="center">{menu.name}</Typography>
+                    </MenuItem>
+                  </Link>
+                );
+              })}
               {!isTechnic &&
                 screenAssignment && [
                   <MenuItem key="shopSelector">

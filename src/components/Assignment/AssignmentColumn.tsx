@@ -17,6 +17,8 @@ interface AssignmentColumn {
   shopId?: string;
   userName: string;
   dateActivity: string;
+  services?: string[];
+  clientName?: string | null;
 }
 const AssignmentColumn = (props: AssignmentColumn) => {
   const assignments = api.assignment.getAssignment.useQuery({
@@ -24,7 +26,20 @@ const AssignmentColumn = (props: AssignmentColumn) => {
     shopId: props.shopId,
     dateActivity: props.dateActivity,
   });
-  const runningAssignments = assignments.data?.filter((assignment) => {
+
+  console.log(props.clientName?.toLowerCase());
+
+  const filteredAssignment = assignments.data?.filter(
+    (assignment) =>
+      (!props.services ||
+        props.services?.length === 0 ||
+        props.services?.includes(assignment.serviceId)) &&
+      assignment.client.name
+        ?.toLowerCase()
+        .includes(props.clientName?.toLowerCase() ?? "")
+  );
+
+  const runningAssignments = filteredAssignment?.filter((assignment) => {
     const isToday =
       moment(assignment.dateActivity).utc().format("YYYY-MM-DD") ===
       moment(props.dateActivity).format("YYYY-MM-DD");
@@ -34,7 +49,7 @@ const AssignmentColumn = (props: AssignmentColumn) => {
       isToday
     );
   });
-  const pendingFromBefore = assignments.data?.filter((assignment) => {
+  const pendingFromBefore = filteredAssignment?.filter((assignment) => {
     const isToday =
       moment(assignment.dateActivity).utc().format("YYYY-MM-DD") !==
       moment(props.dateActivity).format("YYYY-MM-DD");
@@ -44,7 +59,7 @@ const AssignmentColumn = (props: AssignmentColumn) => {
       isToday
     );
   });
-  const finalizedAssignments = assignments.data?.filter(
+  const finalizedAssignments = filteredAssignment?.filter(
     (assignment) =>
       assignment.status === "FINALIZED" || assignment.status === "CANCELED"
   );

@@ -15,17 +15,23 @@ import { api } from "../../utils/api";
 
 export interface FilterAssignment {
   shopId: string | null;
+  clientName: string | null;
   dateActivity: string;
   usersSelect: string[];
+  servicesSelect: string[];
 }
 
 export type HandleChangeFilterAssignment =
   | {
-      key: "shopId" | "dateActivity";
+      key: "shopId" | "dateActivity" | "clientName";
       value: string;
     }
   | {
       key: "usersSelect";
+      value: string[];
+    }
+  | {
+      key: "servicesSelect";
       value: string[];
     };
 export default function Assignments() {
@@ -34,8 +40,10 @@ export default function Assignments() {
   const [isOpenModalSummary, setIsOpenModalSummary] = useState(false);
   const [filterAssignment, setFilterAssignment] = useState<FilterAssignment>({
     shopId: null,
+    clientName: null,
     dateActivity: moment().format("YYYY-MM-DD"),
     usersSelect: [],
+    servicesSelect: [],
   });
   const { shopId, dateActivity } = useDebounce(filterAssignment, 300);
 
@@ -124,6 +132,8 @@ export default function Assignments() {
                     shopId={filterAssignment.shopId ?? undefined}
                     userId={id}
                     userName={name}
+                    clientName={filterAssignment.clientName}
+                    services={filterAssignment.servicesSelect}
                   />
                 );
               })}
