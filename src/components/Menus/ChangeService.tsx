@@ -60,8 +60,9 @@ const ChangeService = (props: ChangeServiceProps) => {
                   });
                   setAnchor(null);
                 }}
+                sx={{ textTransform: "capitalize" }}
               >
-                {name}
+                {name?.toLowerCase()}
               </MenuItem>
             );
         })}
