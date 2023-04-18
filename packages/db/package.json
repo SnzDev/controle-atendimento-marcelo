@@ -11,6 +11,7 @@
     "dev": "pnpm with-env prisma studio --port 5556",
     "with-env": "dotenv -e ../../.env --"
   },
+  "prisma": {},
   "dependencies": {
     "@prisma/client": "^4.12.0"
   },

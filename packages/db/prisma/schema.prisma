@@ -2,64 +2,223 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "mysql"
+  // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
 }
 
-model Post {
-    id      String @id @default(cuid())
-    title   String
-    content String
-}
-
-// NextAuth.js Models
-// NOTE: When using postgresql, mysql or sqlserver, 
-// uncomment the @db.Text annotations below
-// @see https://next-auth.js.org/schemas/models
+// Necessary for Next auth
 model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? // @db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? // @db.Text
+  access_token      String? // @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? // @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
+  id            String    @id @default(cuid())
+  name          String
+  email         String?   @unique
+  userName      String    @unique
+  password      String?
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(USER)
+
+  accounts Account[]
+  sessions Session[]
+  Cient    Client[]
+  Service  Service[]
+  Shop     Shop[]
+
+  createdAt                  DateTime            @default(now())
+  updatedAt                  DateTime            @updatedAt
+  deletedAt                  DateTime?
+  deletedBy                  String?
+  user                       User?               @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  User                       User[]              @relation("DeletedBy")
+  HistoryAction              Log[]               @relation("UserAction")
+  LogDeletedBy               Log[]               @relation("UserDeletedBy")
+  ObservationAction          Observation[]       @relation("ObservationUserDeletedBy")
+  ObservationDeletedBy       Observation[]       @relation("ObservationUserAction")
+  HistoryAssignmentAction    HistoryAssignment[] @relation("HistoryAssignmentUserDeletedBy")
+  HistoryAssignmentDeletedBy HistoryAssignment[] @relation("HistoryAssignmentUserAction")
+  AssignmentUser             Assignment[]        @relation("AssignmentUser")
+  AssignmentCreatedBy        Assignment[]        @relation("AssignmentCreatedBy")
+  AssignmentFinalizedBy      Assignment[]        @relation("AssignmentFinalizedBy")
+  AssignmentCanceledBy       Assignment[]        @relation("AssignmentCanceledBy")
+  AssignmentDeletedBy        Assignment[]        @relation("AssignmentDeletedBy")
+  Region                     Region[]
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
+}
+
+model Service {
+  id         String       @id @default(cuid())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  deletedBy  String?
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  Assignment Assignment[]
+}
+
+model Client {
+  id         String       @id @default(cuid())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  deletedBy  String?
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  Assignment Assignment[]
+}
+
+model Shop {
+  id         String       @id @default(cuid())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  deletedBy  String?
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  Assignment Assignment[]
+}
+
+model Assignment {
+  id                      String              @id @default(cuid())
+  shopId                  String
+  clientId                String
+  userId                  String
+  serviceId               String
+  regionId                String?
+  informations            String?
+  dateActivity            DateTime            @db.Date
+  position                Int
+  status                  AssignmentStatus
+  createdAt               DateTime            @default(now())
+  createdBy               String?
+  inProgressAt            DateTime?
+  finalizedAt             DateTime?
+  finalizedBy             String?
+  canceledAt              DateTime?
+  canceledBy              String?
+  updatedAt               DateTime            @updatedAt
+  deletedAt               DateTime?
+  deletedBy               String?
+  userAssignment          User                @relation("AssignmentUser", fields: [userId], references: [id], onDelete: Cascade)
+  userCreatedBy           User?               @relation("AssignmentCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
+  userFinalizedBy         User?               @relation("AssignmentFinalizedBy", fields: [finalizedBy], references: [id], onDelete: Cascade)
+  userCanceledBy          User?               @relation("AssignmentCanceledBy", fields: [canceledBy], references: [id], onDelete: Cascade)
+  userAssignmentDeletedBy User?               @relation("AssignmentDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  shop                    Shop                @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  client                  Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service                 Service             @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  observation             Observation[]
+  HistoryAssignment       HistoryAssignment[]
+  Region                  Region?             @relation(fields: [regionId], references: [id])
+}
+
+model HistoryAssignment {
+  id            String     @id @default(cuid())
+  assignmentId  String
+  userId        String
+  description   String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+  userAction    User       @relation("HistoryAssignmentUserAction", fields: [userId], references: [id], onDelete: Cascade)
+  userDeletedBy User?      @relation("HistoryAssignmentUserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+}
+
+model Observation {
+  id            String     @id @default(cuid())
+  assignmentId  String
+  userId        String
+  observation   String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+  userDeletedBy User?      @relation("ObservationUserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  userAction    User       @relation("ObservationUserAction", fields: [userId], references: [id], onDelete: Cascade)
+  assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+}
+
+model Log {
+  id            String    @id @default(cuid())
+  userId        String
+  flag          LogFlag
+  description   String
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+  userDeletedBy User?     @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  userAction    User      @relation("UserAction", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Region {
+  id         String       @id @default(cuid())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  deletedBy  String?
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  Assignment Assignment[]
+}
+
+enum AssignmentStatus {
+  PENDING
+  IN_PROGRESS
+  FINALIZED
+  CANCELED
+  INACTIVE
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  TECH
+}
+
+enum LogFlag {
+  ACCESS_DENIED
+  ERROR
+  SUCCESS
 }

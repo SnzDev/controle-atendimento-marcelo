@@ -1,9 +1,21 @@
+import { assignmentRouter } from "./router/assignment";
 import { authRouter } from "./router/auth";
-import { postRouter } from "./router/post";
+import { clientRouter } from "./router/client";
+import { observationRouter } from "./router/observation";
+import { regionRouter } from "./router/region";
+import { serviceRouter } from "./router/service";
+import { shopRouter } from "./router/shop";
+import { userRouter } from "./router/user";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
-  post: postRouter,
+  service: serviceRouter,
+  shop: shopRouter,
+  clients: clientRouter,
+  assignment: assignmentRouter,
+  user: userRouter,
+  observation: observationRouter,
+  region: regionRouter,
   auth: authRouter,
 });
 

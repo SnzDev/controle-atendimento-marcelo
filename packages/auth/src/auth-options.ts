@@ -1,6 +1,8 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import type { User } from "@prisma/client";
+import * as bcrypt from "bcrypt";
 import { type DefaultSession, type NextAuthOptions } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 import { prisma } from "@acme/db";
 
@@ -12,11 +14,7 @@ import { prisma } from "@acme/db";
  **/
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: {
-      id: string;
-      // ...other properties
-      // role: UserRole;
-    } & DefaultSession["user"];
+    user: Omit<User, "password"> & DefaultSession["user"];
   }
 
   // interface User {
@@ -32,20 +30,68 @@ declare module "next-auth" {
  **/
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session({ session, user }) {
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
+        const data = await prisma.user.findUnique({
+          where: { id: token.sub },
+        });
+
+        if (!data) return session;
+        const { password, ...user } = data;
+        session.user = user;
         // session.user.role = user.role; <-- put other properties on the session here
       }
       return session;
     },
   },
+
+  session: {
+    strategy: "jwt",
+    // Seconds - How long until an idle session expires and is no longer valid.
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   adapter: PrismaAdapter(prisma),
   providers: [
-    DiscordProvider({
-      clientId: process.env.DISCORD_CLIENT_ID as string,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        userName: {
+          label: "Usuário",
+          type: "text",
+          placeholder: "nome.sobrenome",
+        },
+        password: { label: "Senha", type: "password" },
+      },
+      async authorize(credentials) {
+        const data = await prisma.user.findUnique({
+          where: {
+            userName: credentials?.userName,
+          },
+        });
+        if (data && data.password && credentials?.password) {
+          const { password, ...user } = data;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+          const passwordMatch = bcrypt.compareSync(
+            credentials.password,
+            password,
+          );
+          if (passwordMatch) {
+            //SALVAR NO HISTÒRICO
+            await prisma.log.create({
+              data: {
+                description: "Usuário logado com sucesso!",
+                flag: "SUCCESS",
+                userId: user.id,
+              },
+            });
+            return user;
+          }
+          return null;
+        }
+        return null;
+      },
     }),
+
     /**
      * ...add more providers here
      *
@@ -56,4 +102,8 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      **/
   ],
+  pages: {
+    signIn: "/",
+    signOut: "/auth/desconectar",
+  },
 };
