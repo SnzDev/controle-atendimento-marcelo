@@ -34,14 +34,15 @@
   "globalEnv": [
     "CI",
     "DATABASE_URL",
-    "DISCORD_CLIENT_ID",
-    "DISCORD_CLIENT_SECRET",
     "EXPO_ROUTER_APP_ROOT",
     "NEXTAUTH_SECRET",
     "NEXTAUTH_URL",
     "NODE_ENV",
     "SKIP_ENV_VALIDATION",
     "VERCEL",
-    "VERCEL_URL"
+    "VERCEL_URL",
+    "MK_API_URL",
+    "MK_API_KEY",
+    "MK_API_SECRET"
   ]
 }

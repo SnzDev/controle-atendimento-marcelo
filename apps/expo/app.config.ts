@@ -26,6 +26,7 @@ const defineConfig = (): ExpoConfig => ({
       foregroundImage: "./assets/icon.png",
       backgroundColor: "#1F104A",
     },
+    package: "br.com.morpheus.acessenet",
   },
   extra: {
     eas: {

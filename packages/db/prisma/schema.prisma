@@ -77,6 +77,14 @@ model User {
   Region                     Region[]
 }
 
+model SessionMk{
+  id          String   @id @default(cuid())
+  personName  String
+  personCode  Int
+  expires     DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique
