@@ -4,7 +4,7 @@ export const mk = axios.create({
   baseURL: process.env.MK_API_URL,
 });
 
-mk.interceptors.request.use(async (config) => {
+mk.interceptors.request.use((config) => {
   //let credentials = config.params?.token;
   //if (!credentials) {
   //  credentials = (await auth()).data;

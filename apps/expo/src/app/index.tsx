@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { zodResolver } from "@hookform/resolvers/zod";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { type TRPCError } from "@trpc/server";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
@@ -32,12 +33,7 @@ function Index() {
   const onSubmit: SubmitHandler<FieldValues> = (data) =>
     loginSac
       .mutateAsync(data)
-      .then((response) =>
-        Alert.alert(
-          "Sucesso",
-          `Login realizado com sucesso. ${response?.personCode}`,
-        ),
-      )
+      .then((response) => AsyncStorage.setItem("_jid", response.id))
       .catch((error: TRPCError) =>
         Alert.alert("Erro", `Erro ao realizar login. ${error.message}`),
       );
