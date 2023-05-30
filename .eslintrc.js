@@ -12,6 +12,10 @@ const config = {
       "./packages/*/tsconfig.json",
     ],
   },
+  rules:{
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-misused-promises": "off",
+  },
   settings: {
     next: {
       rootDir: ["apps/nextjs"],
