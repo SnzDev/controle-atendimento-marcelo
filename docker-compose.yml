@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  mariadb:
+    image: mariadb:10.4
+    container_name: morpheus-mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: morpheus
+      MARIADB_DATABASE: morpheus
+      MARIADB_USER: morpheus
+      MARIADB_PASSWORD: morpheus
+    volumes:
+      - stdoctor-mariadb-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+volumes:
+  stdoctor-mariadb-data:

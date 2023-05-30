@@ -117,13 +117,13 @@ export const assignmentRouter = createTRPCRouter({
           userId: isTechnic || input.userId ? userId : undefined,
           OR: isTechnic
             ? [
-                {
-                  status: "IN_PROGRESS",
-                },
-                {
-                  status: "PENDING",
-                },
-              ]
+              {
+                status: "IN_PROGRESS",
+              },
+              {
+                status: "PENDING",
+              },
+            ]
             : undefined,
           deletedAt: {
             equals: null,
@@ -317,9 +317,8 @@ export const assignmentRouter = createTRPCRouter({
         data: {
           assignmentId: data.id,
           userId: ctx.session.user.id,
-          description: `Moveu para cima da posição ${
-            assignment.position
-          } para a posição ${assignmentDown.position + 1}`,
+          description: `Moveu para cima da posição ${assignment.position
+            } para a posição ${assignmentDown.position + 1}`,
         },
       });
 
@@ -550,6 +549,45 @@ export const assignmentRouter = createTRPCRouter({
       });
       return data;
     }),
+  changeRegion: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        regionId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input: { regionId, id } }) => {
+      const assignment = await ctx.prisma.assignment.findUnique({
+        where: { id },
+        include: { Region: true },
+      });
+      if (!assignment)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Ná existe esse atendimento",
+        });
+      const region = await ctx.prisma.region.findUnique({
+        where: { id: regionId },
+      });
+      if (!region)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Ná existe esse tipo de serviço",
+        });
+
+      const data = await ctx.prisma.assignment.update({
+        where: { id },
+        data: { regionId },
+      });
+      await ctx.prisma.historyAssignment.create({
+        data: {
+          assignmentId: assignment.id,
+          userId: ctx.session.user.id,
+          description: `Trocou a região ${assignment.Region?.name} para a região ${region.name}`,
+        },
+      });
+      return data;
+    }),
 
   getAssignment: protectedProcedure
     .input(
@@ -569,22 +607,22 @@ export const assignmentRouter = createTRPCRouter({
           OR:
             role === "TECH"
               ? [
-                  {
-                    status: "IN_PROGRESS",
-                  },
-                  {
-                    status: "PENDING",
-                  },
-                ]
+                {
+                  status: "IN_PROGRESS",
+                },
+                {
+                  status: "PENDING",
+                },
+              ]
               : [
-                  {
-                    dateActivity: { lt: new Date(dateActivity) },
-                    status: "PENDING",
-                  },
-                  {
-                    dateActivity: new Date(dateActivity),
-                  },
-                ],
+                {
+                  dateActivity: { lt: new Date(dateActivity) },
+                  status: "PENDING",
+                },
+                {
+                  dateActivity: new Date(dateActivity),
+                },
+              ],
         },
         include: {
           observation: { include: { userAction: true } },

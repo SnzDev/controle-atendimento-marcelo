@@ -4,21 +4,21 @@ import React from "react";
 import { api } from "../../utils/api";
 import { StyledMenu } from "../StyledMenu";
 
-interface ChangeServiceProps {
-  serviceId: string;
+interface ChangeRegion {
+  regionId: null | string;
   assignmentId: string;
   shopName: string;
 }
-const ChangeService = (props: ChangeServiceProps) => {
+const ChangeRegion = (props: ChangeRegion) => {
   const [anchor, setAnchor] = React.useState<HTMLElement | null>(null);
 
   const queryClient = api.useContext();
-  const listService = api.service.getAll.useQuery({});
-  const serviceName = listService.data?.find(
-    (service) => service.id === props.serviceId
+  const listRegion = api.region.getAll.useQuery({});
+  const Region = listRegion.data?.find(
+    (service) => service.id === props.regionId
   )?.name;
 
-  const changeService = api.assignment.changeService.useMutation({
+  const changeService = api.assignment.changeRegion.useMutation({
     onSuccess: async () => {
       await queryClient.assignment.getAssignments.invalidate();
       await queryClient.assignment.getAssignment.invalidate();
@@ -33,9 +33,9 @@ const ChangeService = (props: ChangeServiceProps) => {
         onClick={(event) =>
           userSession?.role !== "TECH" && setAnchor(event.currentTarget)
         }
-        className="font-bold capitalize text-teal-500"
+        className="font-bold capitalize text-blue-500"
       >
-        {serviceName}
+        {Region}
         {userSession?.role === "TECH" && ` - ${props.shopName?.toLowerCase()}`}
       </button>
       <StyledMenu
@@ -48,15 +48,15 @@ const ChangeService = (props: ChangeServiceProps) => {
         onClose={() => setAnchor(null)}
         TransitionComponent={Fade}
       >
-        {listService.data?.map(({ id: serviceId, name }) => {
-          if (serviceId !== props.serviceId)
+        {listRegion.data?.map(({ id: regionId, name }) => {
+          if (regionId !== props.regionId)
             return (
               <MenuItem
-                key={serviceId}
+                key={regionId}
                 onClick={() => {
                   changeService.mutate({
                     id: props.assignmentId,
-                    serviceId,
+                    regionId,
                   });
                   setAnchor(null);
                 }}
@@ -70,4 +70,4 @@ const ChangeService = (props: ChangeServiceProps) => {
   );
 };
 
-export default React.memo(ChangeService);
+export default React.memo(ChangeRegion);

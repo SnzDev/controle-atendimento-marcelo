@@ -26,22 +26,23 @@ import moment from "moment";
 import { IconButton, TableCell, TableRow } from "@mui/material";
 import { useSession } from "next-auth/react";
 import React from "react";
+import ChangeRegion from "../Menus/ChangeRegion";
 interface AssignmentRows {
   dateActivity: string;
   assignments:
-    | (Assignment & {
-        service: Service;
-        client: Client;
-        shop: Shop;
-        observation: (Observation & {
-          userAction: User;
-        })[];
-        Region: Region | null;
-        HistoryAssignment: (HistoryAssignment & {
-          userAction: User;
-        })[];
-      })[]
-    | undefined;
+  | (Assignment & {
+    service: Service;
+    client: Client;
+    shop: Shop;
+    observation: (Observation & {
+      userAction: User;
+    })[];
+    Region: Region | null;
+    HistoryAssignment: (HistoryAssignment & {
+      userAction: User;
+    })[];
+  })[]
+  | undefined;
 }
 const AssignmentRows = (props: AssignmentRows) => {
   const session = useSession();
@@ -128,8 +129,8 @@ const AssignmentRows = (props: AssignmentRows) => {
                         ? `${diffFinalizedHour} H`
                         : `${diffFinalizedMinutes} M`
                       : diffHour
-                      ? `${diffHour} H`
-                      : `${diffMinutes} M`}
+                        ? `${diffHour} H`
+                        : `${diffMinutes} M`}
                   </div>
                   <div className="flex">
                     {isActivityBeforeActivityDay ? (
@@ -190,7 +191,11 @@ const AssignmentRows = (props: AssignmentRows) => {
                   )}
                 </div>
                 <div className="flex flex-row items-center justify-between font-bold capitalize text-teal-500">
-                  {assignment.Region?.name}
+                  <ChangeRegion
+                    assignmentId={assignment.id}
+                    regionId={assignment?.regionId}
+                    shopName={assignment.shop.name}
+                  />
                 </div>
                 <ObservationModal
                   assignmentId={assignment.id}
