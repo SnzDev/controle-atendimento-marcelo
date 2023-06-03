@@ -1,5 +1,5 @@
-
-
+import StyledTextInput from "./StyledTextInput";
+import StyledView from "./StyledView";
 
 interface InputProps {
   placeholder: string;
@@ -12,25 +12,22 @@ interface InputProps {
 }
 const Input = (props: InputProps) => {
   return (
-    <div>
-      <input
+    <StyledView>
+      <StyledTextInput
         placeholder={props.placeholder}
-        onChange={(e) => props.onChangeText(e.target.value)}
+        onChange={(e) => props.onChangeText(e.nativeEvent.text)}
         value={props.value}
-        type={props.secureTextEntry ? "password" : "text"}
+        secureTextEntry={props.secureTextEntry}
         className="h-14 w-full rounded-md border-[2px] border-slate-500"
       />
       {/* //put adornment here */}
 
       {props.adornment && (
-        <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+        <StyledView className="absolute inset-y-0 right-0 flex items-center pr-2">
           {props.adornment}
-        </div>
+        </StyledView>
       )}
-
-
-
-    </div>
+    </StyledView>
   )
 }
 

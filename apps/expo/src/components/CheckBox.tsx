@@ -1,24 +1,26 @@
-import { type ChangeEventHandler } from "react";
+import ExpoCheckbox from "expo-checkbox/build/ExpoCheckbox";
+import { styled } from 'nativewind';
+import View from "./StyledView";
+
+const StyledCheckBox = styled(ExpoCheckbox);
 
 interface CheckBoxProps {
     isChecked: boolean;
-    handleCheck?: ChangeEventHandler<HTMLInputElement>;
+    onChange?: (value: boolean) => void;
     label?: React.ReactNode;
-
 }
 const CheckBox = (props: CheckBoxProps) => {
 
     return (
-        <label className="flex items-center">
-            <input
-                type="checkbox"
+        <View className="flex items-center">
+            <StyledCheckBox
                 className="form-checkbox h-5 w-5 text-blue-500"
-                checked={props.isChecked}
-                onChange={props.handleCheck}
+                value={props.isChecked}
+                onValueChange={props.onChange}
             />
             {/* <span className="ml-2 text-gray-700">Label text</span> */}
-            {props.label && <span className="ml-2 text-gray-700">{props.label}</span>}
-        </label>
+            {props.label && <View className="ml-2 text-gray-700">{props.label}</View>}
+        </View>
     );
 };
 

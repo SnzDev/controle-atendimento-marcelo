@@ -1,9 +1,12 @@
 import { FaSpinner } from 'react-icons/fa';
+import StyledText from './StyledText';
+import StyledTouchableOpacity from './StyledTouchableOpacity';
+
 
 interface ButtonProps {
-  children: React.ReactNode;
-  onClick: () => void;
-  variant: "contained" | "outlined";
+  children?: React.ReactNode;
+  onPress?: () => void;
+  variant?: "contained" | "outlined";
   isLoading?: boolean;
   isDisabled?: boolean;
 }
@@ -11,17 +14,19 @@ interface ButtonProps {
 const Button = (props: ButtonProps) => {
 
   return (
-    <button
-      onClick={props.onClick}
-      className={`py-7 w-full ${props.variant === "contained" ? "bg-blue-500 hover:bg-blue-700 text-white" : "bg-transparent hover:bg-blue-500 text-blue-500 hover:text-white"} shadow-lg rounded-sm `}
+    <StyledTouchableOpacity
+      onPress={props.onPress}
+      className={`py-6 w-full ${props.variant === "contained" ? "bg-blue-800" : "bg-transparent border border-blue-800 hover:bg-blue-800 "} shadow-lg rounded-xl `}
       disabled={props.isLoading || props.isDisabled}
     >
 
       {props.isLoading && <FaSpinner className="animate-spin mr-2" />}
 
-      {props.isLoading ? 'Carregando...' : props.children}
+      {props.isLoading && <StyledText>Carregando...</StyledText>}
 
-    </button>
+      {!props.isLoading && <StyledText className={`text-center font-bold ${props.variant === "contained" ? "text-white" : "text-blue-800 hover:text-white"}`}>{props.children}</StyledText>}
+
+    </StyledTouchableOpacity>
   )
 }
 
