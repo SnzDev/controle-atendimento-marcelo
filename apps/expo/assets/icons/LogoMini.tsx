@@ -1,5 +1,5 @@
 import type { StyledProps } from 'nativewind';
-import { Image, type ImageProps, type ImageSourcePropType } from 'react-native';
+import { type ImageProps, type ImageSourcePropType } from 'react-native';
 import StyledImage from '~/components/StyledImage';
 
 const LogoMini = (props: Omit<StyledProps<ImageProps>, 'alt' | 'source'>) => {

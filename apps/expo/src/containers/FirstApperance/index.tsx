@@ -5,15 +5,17 @@ import StyledText from '~/components/StyledText';
 import StyledView from '~/components/StyledView';
 import assets from '../../../assets/';
 import Link from '~/components/Link';
+import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 
 const UndrawOnlineConnection = assets.icons.undrawOnlineConnection;
 const LogoMini = assets.icons.logoMini;
 const FirstApperance = () => {
 
     const insets = useSafeAreaInsets();
+    const router = useRouter();
 
-    console.log(insets);
     return (
         <StyledView
             style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
@@ -27,12 +29,14 @@ const FirstApperance = () => {
             </StyledView>
             <StyledView>
                 <StyledView>
-                    <Button variant='contained'>
-                        Já sou Cliente
-                    </Button>
+                    <Link href="/">
+                        <Button onPress={() => router.push("/Login")} variant='contained'>
+                            Já sou Cliente
+                        </Button>
+                    </Link>
                     <Divisor label="OU" className='h-1' />
                     <Button
-                        onPress={() => WebBrowser.openBrowserAsync("https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MTAyMzc2NzMyMjUxMjQ4?igshid=MmJiY2I4NDBkZg==")}
+                        onPress={() => Linking.openURL("https://wa.me/86999135090?text=Olá+tudo+bem?")}
                         variant='outlined'>
                         Ainda não sou cliente
                     </Button>

@@ -16,7 +16,7 @@ const Button = (props: ButtonProps) => {
   return (
     <StyledTouchableOpacity
       onPress={props.onPress}
-      className={`py-6 w-full ${props.variant === "contained" ? "bg-blue-800" : "bg-transparent border border-blue-800 hover:bg-blue-800 "} shadow-lg rounded-xl `}
+      className={`py-5 w-full ${props.variant === "contained" ? "bg-blue-800 shadow-lg" : "bg-transparent border border-blue-800 hover:bg-blue-800 "}  rounded-xl `}
       disabled={props.isLoading || props.isDisabled}
     >
 
