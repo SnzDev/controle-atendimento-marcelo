@@ -1,9 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
-import { type FieldValues, schemaValidation } from "./schema";
+import StyledView from "~/components/StyledView";
+import KeepConnected from "./KeepConnected";
 import Password from "./Password";
-import Username from "./Username";
 import Submit from "./Submit";
+import Username from "./Username";
+import { schemaValidation, type FieldValues } from "./schema";
+import Link from "~/components/Link";
 
 const Form = () => {
     const hookform = useForm<FieldValues>({
@@ -12,9 +15,16 @@ const Form = () => {
 
     return (
         <FormProvider {...hookform}>
-            <Username />
-            <Password />
-            <Submit />
+            <StyledView className="flex h-64 justify-around">
+                <Username />
+                <Password />
+                <StyledView className="flex flex-row justify-between">
+                    <KeepConnected />
+                    <Link href="http://www.google.com.br" >Esqueci minha senha</Link>
+                </StyledView>
+                <Submit />
+            </StyledView>
+
         </FormProvider>
     )
 }

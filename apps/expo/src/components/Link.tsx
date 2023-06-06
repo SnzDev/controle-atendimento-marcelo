@@ -21,7 +21,7 @@ const Link = (props: LinkProps) => {
                 : WebBrowser.openBrowserAsync(props.href)}>
             {
                 typeof props.children === 'string' ? (
-                    <StyledText className="text-blue-800 text-center">
+                    <StyledText className="text-blue-800 font-bold text-center">
                         {props.children}
                     </StyledText>
                 )

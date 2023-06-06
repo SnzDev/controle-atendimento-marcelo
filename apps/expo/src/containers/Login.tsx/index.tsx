@@ -5,6 +5,8 @@ import Input from "~/components/Input";
 import StyledText from "~/components/StyledText";
 import StyledView from "~/components/StyledView"
 import Form from "./Form";
+import Divisor from "~/components/Divisor";
+import Button from "~/components/Button";
 
 
 const LogoMedium = assets.icons.logoMedium;
@@ -16,13 +18,15 @@ const Login = () => {
             style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
             className={`flex-1 flex items-center justify-between bg-white px-2`}
         >
-            <StyledView>
+            <StyledView >
                 <LogoMedium />
             </StyledView>
-            <StyledView className="flex-1 w-full flex justify-center px-4">
-                <StyledText className="text-center text-gray-400 font-bold text-4xl">Fazer Login</StyledText>
+            <StyledView className="flex-1 w-full flex justify-start px-4">
+                <StyledText className="text-center text-gray-400 font-bold text-4xl my-5">Fazer Login</StyledText>
                 <Form />
-
+                <Divisor label="OU" />
+                <StyledText className="text-center text-gray-400 font-bold text-md mb-5">Precisando de internet?</StyledText>
+                <Button>Assine Já</Button>
             </StyledView>
 
             <StyledView>
