@@ -1,7 +1,7 @@
-import Login from "~/containers/Login.tsx"
+import LoginPage from "~/containers/Login"
 
-const LoginPage = () => {
+const Login = () => {
 
-    return <Login />
+    return <LoginPage />
 }
-export default LoginPage;
+export default Login;

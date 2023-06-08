@@ -7,6 +7,9 @@ import StyledView from "~/components/StyledView"
 import Form from "./Form";
 import Divisor from "~/components/Divisor";
 import Button from "~/components/Button";
+import { useEffect } from "react";
+import { useContextHook } from "~/hook/Auth";
+import { useRouter } from "expo-router";
 
 
 const LogoMedium = assets.icons.logoMedium;

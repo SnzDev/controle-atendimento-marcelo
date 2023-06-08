@@ -67,6 +67,9 @@ importers:
       expo-checkbox:
         specifier: ~2.3.1
         version: 2.3.1
+      expo-clipboard:
+        specifier: ~4.1.2
+        version: 4.1.2(expo@48.0.11)
       expo-constants:
         specifier: ~14.2.1
         version: 14.2.1(expo@48.0.11)
@@ -5658,6 +5661,14 @@ packages:
 
   /expo-checkbox@2.3.1:
     resolution: {integrity: sha512-CTIabriK5xbtDnI9U5Hve82/WG85XLI4GLYSRTT1XST21HjQ7mDaeiYm7DnKzcgM+qeBwmbg3crJYnp7WW/8Ew==}
+    dev: false
+
+  /expo-clipboard@4.1.2(expo@48.0.11):
+    resolution: {integrity: sha512-YSuIs4CV+3gypl7X74sp2ruwAVuhnOngsWs7EGkcvRdX0BBrZZMk3GXGw9a59sU6SW4wGWAfwrhyCT41GUaN+A==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 48.0.11(@babel/core@7.21.4)
     dev: false
 
   /expo-constants@14.2.1(expo@48.0.11):

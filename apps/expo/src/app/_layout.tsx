@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { TRPCProvider } from "~/utils/api";
+import { ContextProvider } from "~/hook/Auth";
 
 // This is the main layout of the app
 // It wraps your pages with the providers they need
@@ -15,12 +16,14 @@ const RootLayout = () => {
           The Stack component displays the current page.
           It also allows you to configure your screens 
         */}
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        />
-        <StatusBar />
+        <ContextProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          />
+          <StatusBar />
+        </ContextProvider>
       </SafeAreaProvider>
     </TRPCProvider>
   );

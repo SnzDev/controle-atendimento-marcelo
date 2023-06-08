@@ -11,6 +11,11 @@ import Link from "~/components/Link";
 const Form = () => {
     const hookform = useForm<FieldValues>({
         resolver: zodResolver(schemaValidation),
+        defaultValues: {
+            username: "",
+            password: "",
+            keepConnected: false
+        }
     });
 
     return (
