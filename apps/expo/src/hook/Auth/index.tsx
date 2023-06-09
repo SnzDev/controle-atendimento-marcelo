@@ -19,6 +19,7 @@ interface ContextProviderProps {
 
 function ContextProvider(props: ContextProviderProps) {
   const [session, setSession] = React.useState<string>('');
+  const router = useRouter();
 
   const clientInfo = api.mk.getClientInfo.useQuery({ session: session }, {
     enabled: !!session,
@@ -31,11 +32,12 @@ function ContextProvider(props: ContextProviderProps) {
     void AsyncStorage.getItem("_jid").then((response) => {
       if (response) {
         handleSetSessionId(response);
+        router.replace("/Home");
       }
     })
   }, []);
 
-  // useProtectedRoute(clientInfo);
+
   return (
     <Context.Provider
       value={{
@@ -48,17 +50,6 @@ function ContextProvider(props: ContextProviderProps) {
     </Context.Provider>
   );
 }
-
-// // This hook will protect the route access based on user authentication.
-// function useProtectedRoute(clientInfo: UseQueryResult<ClientInfoResponse, unknown>) {
-//   const router = useRouter();
-
-//   React.useEffect(() => {
-//     if (clientInfo) {
-//       router.replace("/Home");
-//     }
-//   }, [clientInfo]);
-// }
 
 
 //hook

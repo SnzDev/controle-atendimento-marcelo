@@ -46,7 +46,6 @@ export interface ProvedorEmpresa {
 export const getClientInfo = async (params: ClientInfoRequest) => {
     const data = await mk.get<ClientInfoResponse>(
         `/core-api/pessoas/id?id=${params.id}`,
-    );
-    console.log(data.data);
+    )
     return data.data;
 };

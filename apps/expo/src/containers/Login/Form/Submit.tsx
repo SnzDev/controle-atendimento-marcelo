@@ -12,7 +12,7 @@ const Submit = () => {
     const hookForm = useFormContext<FieldValues>();
     const loginMk = api.mk.loginSac.useMutation();
     const authContext = useContextHook();
-    const router = useRouter();
+    const navigation = useRouter(); // Get the navigation object
 
     const onSubmit: SubmitHandler<FieldValues> = (data) => {
         loginMk.mutateAsync({ pass_sac: data.password, user_sac: data.username })
@@ -20,7 +20,7 @@ const Submit = () => {
                 await AsyncStorage.setItem("_jid", response.id);
                 await AsyncStorage.setItem("@keepConnected", data.keepConnected.toString());
                 authContext.handleSetSessionId(response.id);
-                router.push("/Home");
+                navigation.push('Home') // Navigate to the "Home" screen
             })
             .catch((error: TRPCError) =>
                 Alert.alert("Erro", `Erro ao realizar login. ${error.message}`),

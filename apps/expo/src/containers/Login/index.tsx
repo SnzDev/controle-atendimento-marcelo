@@ -1,15 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
-import assets from "../../../assets";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Input from "~/components/Input";
-import StyledText from "~/components/StyledText";
-import StyledView from "~/components/StyledView"
-import Form from "./Form";
-import Divisor from "~/components/Divisor";
 import Button from "~/components/Button";
-import { useEffect } from "react";
-import { useContextHook } from "~/hook/Auth";
-import { useRouter } from "expo-router";
+import Divisor from "~/components/Divisor";
+import StyledText from "~/components/StyledText";
+import StyledView from "~/components/StyledView";
+import assets from "../../../assets";
+import Form from "./Form";
+import { Stack } from "expo-router";
 
 
 const LogoMedium = assets.icons.logoMedium;
@@ -21,6 +17,10 @@ const Login = () => {
             style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
             className={`flex-1 flex items-center justify-between bg-white px-2`}
         >
+            <Stack.Screen
+                options={{
+                    headerShown: false,
+                }} />
             <StyledView >
                 <LogoMedium />
             </StyledView>

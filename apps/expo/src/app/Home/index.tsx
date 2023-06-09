@@ -1,5 +1,3 @@
-
-
 import HomePage from "~/containers/Home"
 
 const Home = () => {

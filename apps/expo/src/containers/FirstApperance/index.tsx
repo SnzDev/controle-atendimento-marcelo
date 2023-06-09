@@ -5,8 +5,7 @@ import StyledText from '~/components/StyledText';
 import StyledView from '~/components/StyledView';
 import assets from '../../../assets/';
 import Link from '~/components/Link';
-import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
+import { Stack, useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 
 const UndrawOnlineConnection = assets.icons.undrawOnlineConnection;
@@ -21,6 +20,11 @@ const FirstApperance = () => {
             style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
             className={`flex-1 flex items-center justify-between bg-white px-2`}
         >
+            <Stack.Screen
+                options={{
+                    headerShown: false,
+                }} />
+
             <StyledView>
                 <LogoMini className='w-[97px] h-[62px]' />
             </StyledView>
