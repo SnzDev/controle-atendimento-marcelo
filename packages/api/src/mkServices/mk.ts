@@ -11,7 +11,7 @@ mk.interceptors.request.use((config) => {
   //}
 
   config.params = {
-    token: "380d481a960ad54cea6916d2e3dd7364.983055" ?? process.env.MK_API_KEY,
+    token: process.env.MK_API_KEY,
   };
   return config;
 });
