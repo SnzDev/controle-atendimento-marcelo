@@ -1,5 +1,12 @@
 import { useState } from "react";
 
+
+export interface Disclose {
+  isVisible: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  toggle: () => void;
+}
 function useDisclose(initialIsVisible?: boolean) {
   const [isVisible, setIsVisible] = useState(initialIsVisible ?? false);
 

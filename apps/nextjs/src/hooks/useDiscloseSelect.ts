@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 
+export interface DiscloseSelect {
+  ref: React.RefObject<HTMLDivElement>;
+  isVisible: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  toggle: () => void;
+}
+
 function useDiscloseSelect(initialIsVisible?: boolean) {
   const [isVisible, setIsVisible] = useState(initialIsVisible ?? false);
   const ref = useRef<HTMLDivElement>(null);
