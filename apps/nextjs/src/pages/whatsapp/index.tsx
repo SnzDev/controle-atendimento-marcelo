@@ -1,8 +1,7 @@
-import { RotateCcw } from "lucide-react";
 import Image from "next/image";
-import { ButtonLogout } from "~/components/whatsapp/qr-code/ButtonLogout";
-import { ButtonQrCode } from "~/components/whatsapp/qr-code/ButtonQrCode";
-import { ButtonRestart } from "~/components/whatsapp/qr-code/ButtonRestart";
+import { ButtonQrCode } from "~/components/whatsapp/ButtonQrCode";
+import { ButtonRestart } from "~/components/whatsapp/ButtonRestart";
+import { ButtonLogout } from "~/components/whatsapp/ButtonLogout";
 import { api } from "~/utils/api";
 
 

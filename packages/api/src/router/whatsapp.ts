@@ -90,4 +90,21 @@ export const whatsappRouter = createTRPCRouter({
       const contacts = await ctx.prisma.whatsappContact.findMany();
       return contacts;
     }),
+  messagesFromContact: publicProcedure
+    .input(z.object({ contactId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const messages = await ctx.prisma.whatsappMessages.findMany({
+        where: {
+          OR: [
+            {
+              from: input.contactId
+            },
+            {
+              to: input.contactId
+            }
+          ]
+        }
+      });
+      return messages;
+    }),
 });

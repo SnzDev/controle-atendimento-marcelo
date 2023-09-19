@@ -6,12 +6,13 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider     = "mysql"
   // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
   // Further reading:
   // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
   // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+  url          = env("DATABASE_URL")
 }
 
 // Necessary for Next auth
@@ -28,9 +29,10 @@ model Account {
   scope             String?
   id_token          String? // @db.Text
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -38,7 +40,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId])
 }
 
 model User {
@@ -60,7 +64,7 @@ model User {
   Cient                      Client[]
   Service                    Service[]
   Shop                       Shop[]
-  user                       User?               @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
+  user                       User?               @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User                       User[]              @relation("DeletedBy")
   HistoryAction              Log[]               @relation("UserAction")
   LogDeletedBy               Log[]               @relation("UserDeletedBy")
@@ -75,6 +79,8 @@ model User {
   AssignmentDeletedBy        Assignment[]        @relation("AssignmentDeletedBy")
   Region                     Region[]
   WhatsappInstance           WhatsappInstance[]
+
+  @@index([deletedBy])
 }
 
 model SessionMk {
@@ -100,8 +106,10 @@ model Service {
   updatedAt  DateTime     @updatedAt
   deletedAt  DateTime?
   deletedBy  String?
-  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Assignment Assignment[]
+
+  @@index([deletedBy])
 }
 
 model Client {
@@ -112,8 +120,10 @@ model Client {
   updatedAt  DateTime     @updatedAt
   deletedAt  DateTime?
   deletedBy  String?
-  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Assignment Assignment[]
+
+  @@index([deletedBy])
 }
 
 model Shop {
@@ -123,8 +133,10 @@ model Shop {
   updatedAt  DateTime     @updatedAt
   deletedAt  DateTime?
   deletedBy  String?
-  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Assignment Assignment[]
+
+  @@index([deletedBy])
 }
 
 model Assignment {
@@ -148,17 +160,27 @@ model Assignment {
   updatedAt               DateTime            @updatedAt
   deletedAt               DateTime?
   deletedBy               String?
-  userAssignment          User                @relation("AssignmentUser", fields: [userId], references: [id], onDelete: Cascade)
-  userCreatedBy           User?               @relation("AssignmentCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
-  userFinalizedBy         User?               @relation("AssignmentFinalizedBy", fields: [finalizedBy], references: [id], onDelete: Cascade)
-  userCanceledBy          User?               @relation("AssignmentCanceledBy", fields: [canceledBy], references: [id], onDelete: Cascade)
-  userAssignmentDeletedBy User?               @relation("AssignmentDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  shop                    Shop                @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  client                  Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  service                 Service             @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  userAssignment          User                @relation("AssignmentUser", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userCreatedBy           User?               @relation("AssignmentCreatedBy", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userFinalizedBy         User?               @relation("AssignmentFinalizedBy", fields: [finalizedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userCanceledBy          User?               @relation("AssignmentCanceledBy", fields: [canceledBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userAssignmentDeletedBy User?               @relation("AssignmentDeletedBy", fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shop                    Shop                @relation(fields: [shopId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  client                  Client              @relation(fields: [clientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  service                 Service             @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   observation             Observation[]
   HistoryAssignment       HistoryAssignment[]
   Region                  Region?             @relation(fields: [regionId], references: [id])
+
+  @@index([regionId])
+  @@index([serviceId])
+  @@index([clientId])
+  @@index([shopId])
+  @@index([deletedBy])
+  @@index([canceledBy])
+  @@index([finalizedBy])
+  @@index([createdBy])
+  @@index([userId])
 }
 
 model HistoryAssignment {
@@ -170,9 +192,13 @@ model HistoryAssignment {
   updatedAt     DateTime   @updatedAt
   deletedAt     DateTime?
   deletedBy     String?
-  userAction    User       @relation("HistoryAssignmentUserAction", fields: [userId], references: [id], onDelete: Cascade)
-  userDeletedBy User?      @relation("HistoryAssignmentUserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  userAction    User       @relation("HistoryAssignmentUserAction", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userDeletedBy User?      @relation("HistoryAssignmentUserDeletedBy", fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([assignmentId])
+  @@index([deletedBy])
+  @@index([userId])
 }
 
 model Observation {
@@ -184,9 +210,13 @@ model Observation {
   updatedAt     DateTime   @updatedAt
   deletedAt     DateTime?
   deletedBy     String?
-  userDeletedBy User?      @relation("ObservationUserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  userAction    User       @relation("ObservationUserAction", fields: [userId], references: [id], onDelete: Cascade)
-  assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  userDeletedBy User?      @relation("ObservationUserDeletedBy", fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userAction    User       @relation("ObservationUserAction", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([deletedBy])
+  @@index([userId])
+  @@index([assignmentId])
 }
 
 model Log {
@@ -197,8 +227,11 @@ model Log {
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
   deletedBy     String?
-  userDeletedBy User?     @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: Cascade)
-  userAction    User      @relation("UserAction", fields: [userId], references: [id], onDelete: Cascade)
+  userDeletedBy User?     @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userAction    User      @relation("UserAction", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([deletedBy])
+  @@index([userId])
 }
 
 model WhatsappInstance {
@@ -216,8 +249,10 @@ model WhatsappInstance {
   deletedAt     DateTime?
   deletedBy     String?
 
-  userDeletedBy    User?              @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  userDeletedBy    User?              @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   whatsappMessages WhatsappMessages[]
+
+  @@index([deletedBy])
 }
 
 model WhatsappContact {
@@ -245,9 +280,13 @@ model WhatsappMessages {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  instance    WhatsappInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  instance    WhatsappInstance @relation(fields: [instanceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   fromContact WhatsappContact  @relation("fromContact", fields: [from], references: [id])
   toContact   WhatsappContact  @relation("toContact", fields: [to], references: [id])
+
+  @@index([instanceId])
+  @@index([from])
+  @@index([to])
 }
 
 model Region {
@@ -257,8 +296,10 @@ model Region {
   updatedAt  DateTime     @updatedAt
   deletedAt  DateTime?
   deletedBy  String?
-  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: Cascade)
+  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Assignment Assignment[]
+
+  @@index([deletedBy])
 }
 
 enum AssignmentStatus {

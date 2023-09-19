@@ -1,10 +1,7 @@
-import { RotateCcw } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import Image from "next/image";
-import { ButtonLogout } from "~/components/whatsapp/qr-code/ButtonLogout";
-import { ButtonQrCode } from "~/components/whatsapp/qr-code/ButtonQrCode";
-import { ButtonRestart } from "~/components/whatsapp/qr-code/ButtonRestart";
+import { ButtonChat } from "~/components/whatsapp/ButtonChat";
 import { api } from "~/utils/api";
-
 
 export default function WhatsappContacts() {
   const getAllContacts = api.whatsapp.getAllContacts.useQuery();
@@ -26,6 +23,9 @@ export default function WhatsappContacts() {
               <th scope="col" align="left" className="px-6 py-4">
                 Criado
               </th>
+              <th scope="col" align="left" className="px-6 py-4">
+                Ações
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -37,7 +37,7 @@ export default function WhatsappContacts() {
                     <div className="text-base font-semibold">{contact.name}</div>
                   </div>
                 </th>
-                <td align="left" className="px-6 py-4">
+                <td align="left" className="px-6 py-4 font-mono">
                   {contact.phone}
                 </td>
                 <td align="left" className="px-6 py-4">
@@ -45,6 +45,9 @@ export default function WhatsappContacts() {
                 </td>
                 <td align="left" className="px-6 py-4">
                   {new Date(contact.createdAt).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+                </td>
+                <td align="left" className="px-6 py-4" >
+                  <ButtonChat contactId={contact.id} />
                 </td>
               </tr>
             ))

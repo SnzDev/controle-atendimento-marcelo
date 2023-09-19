@@ -54,10 +54,7 @@ export default async function handler(
   }
   const input = schema.safeParse(req.body);
 
-
   if (!input.success) {
-    console.log(input);
-
     return res.status(400).json(input.error);
   }
 
@@ -162,6 +159,16 @@ async function messageReceived(data: IBody) {
         platform: data.fromInfo.platform
       }
     });
+  } else {
+    await prisma.whatsappContact.update({
+      where: { id: fromInfo.id },
+      data: {
+        phone: data.fromInfo.phone,
+        profilePicUrl: data.fromInfo.profilePicUrl,
+        name: data.fromInfo.pushname,
+        platform: data.fromInfo.platform
+      }
+    });
   }
 
   let toInfo = await prisma.whatsappContact.findFirst({
@@ -171,6 +178,16 @@ async function messageReceived(data: IBody) {
   });
   if (!toInfo) {
     toInfo = await prisma.whatsappContact.create({
+      data: {
+        phone: data.toInfo.phone,
+        profilePicUrl: data.toInfo.profilePicUrl,
+        name: data.toInfo.pushname,
+        platform: data.toInfo.platform
+      }
+    });
+  } else {
+    await prisma.whatsappContact.update({
+      where: { id: toInfo.id },
       data: {
         phone: data.toInfo.phone,
         profilePicUrl: data.toInfo.profilePicUrl,
@@ -231,6 +248,8 @@ async function messageAck(data: IBody) {
       protocol: data.message.id.id
     }
   })
+
+  console.log('messageAcked', data.message.id.id, data.message.ack)
   if (!messageAcked) return;
 
   await prisma.whatsappMessages.update({
