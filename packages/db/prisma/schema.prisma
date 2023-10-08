@@ -86,7 +86,7 @@ model User {
 model SessionMk {
   id         String   @id @default(cuid())
   personName String
-  personCode Int
+  personCode String
   expires    DateTime @default(now())
   createdAt  DateTime @default(now())
 }

@@ -2,6 +2,7 @@ import { mk, type MkCustomError } from "./mk";
 
 export interface PendingInvoicesRequest {
   cd_cliente: number;
+  token: string;
 }
 export type PendingInvoicesResponse =
   | {
@@ -24,7 +25,7 @@ export type PendingInvoicesResponse =
 
 export const getPendingInvoices = async (params: PendingInvoicesRequest) => {
   const data = await mk.get<PendingInvoicesResponse | MkCustomError>(
-    `/mk/WSMKFaturasPendentes.rule?sys=MK0&cd_cliente=${params.cd_cliente}`,
+    `/mk/WSMKFaturasPendentes.rule?sys=MK0&cd_cliente=${params.cd_cliente}&token=${params.token}`,
   );
   return data.data;
 };

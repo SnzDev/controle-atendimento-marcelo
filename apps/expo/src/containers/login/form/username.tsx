@@ -10,11 +10,11 @@ const Username = () => {
         <Controller
             name="username"
             control={hookform.control}
-            render={({ field, fieldState }) => (
+            render={({ field: { onChange, ...field }, fieldState }) => (
                 <Input
                     {...field}
                     onChangeText={text => {
-                        field.onChange(text.toLowerCase());
+                        onChange(text.toLowerCase());
                     }}
                     placeholder="Usuário"
                     error={fieldState.error?.message}

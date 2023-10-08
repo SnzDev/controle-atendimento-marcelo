@@ -3,20 +3,17 @@ import { ActivityIndicator, Text, TouchableOpacity, type TouchableOpacityProps }
 
 
 type ButtonProps = {
-  children?: React.ReactNode;
-  onPress?: () => void;
   variant?: "contained" | "outlined";
   isLoading?: boolean;
-  isDisabled?: boolean;
-} & Pick<StyledProps<TouchableOpacityProps>, 'className'>;
+} & TouchableOpacityProps;
 
 const Button = (props: ButtonProps) => {
 
   return (
     <TouchableOpacity
       onPress={props.onPress}
-      className={`py-5 w-full ${props.variant === "contained" ? "bg-blue-800 shadow-lg" : "bg-transparent border border-blue-800 hover:bg-blue-800 "}  rounded-xl`}
-      disabled={props.isLoading || props.isDisabled}
+      className={`py-4 w-full ${props.variant === "contained" ? "bg-blue-800 shadow-lg" : "bg-transparent border border-blue-800 hover:bg-blue-800 "}  rounded-xl`}
+      disabled={props.isLoading || props.disabled}
     >
 
       {props.isLoading && <ActivityIndicator />}

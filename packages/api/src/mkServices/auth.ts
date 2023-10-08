@@ -4,12 +4,12 @@ import { type MkCustomError } from "./mk";
 
 export type AuthResponse =
   | {
-      Expire: string;
-      LimiteUso: number;
-      ServicosAtorizados: number[];
-      Token: string;
-      status: "OK";
-    }
+    Expire: string;
+    LimiteUso: number;
+    ServicosAtorizados: number[];
+    Token: string;
+    status: "OK";
+  }
   | MkCustomError;
 
 export const auth = async () =>
@@ -23,4 +23,4 @@ export const auth = async () =>
         sys: "MK0",
       },
     },
-  );
+  ).then(res => res.data)

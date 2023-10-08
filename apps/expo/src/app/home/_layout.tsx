@@ -1,9 +1,9 @@
-import { Tabs } from "expo-router";
+import { Stack, Tabs } from "expo-router";
 import React from "react";
 
 export default function TabsLayout() {
     return (
-        <Tabs
+        <Stack
             screenOptions={{
                 headerStyle: {
                     backgroundColor: "#1e40af",

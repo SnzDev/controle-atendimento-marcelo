@@ -13,17 +13,17 @@ const Password = () => {
         <Controller
             name="password"
             control={hookform.control}
-            render={({ field, fieldState }) => (
+            render={({ field: { onChange, ...field }, fieldState }) => (
                 <Input
                     {...field}
                     onChangeText={text => {
-                        field.onChange(text.toLowerCase());
+                        onChange(text.toLowerCase());
                     }}
                     placeholder="Senha"
                     secureTextEntry={!showPassword}
                     rightDecoration={
                         <TouchableOpacity onPress={() => setShowPassword(old => !old)}>
-                            <Ionicons style={{ color: '#6b7280' }} name={showPassword ? "md-eye-off" : "md-eye"} size={24} color="black" />
+                            <Ionicons style={{ color: '#6b7280' }} name={showPassword ? "md-eye-off" : "md-eye"} size={22} color="black" />
                         </TouchableOpacity>
                     }
                     error={fieldState.error?.message}

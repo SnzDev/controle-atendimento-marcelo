@@ -21,7 +21,7 @@ const Submit = () => {
                 await AsyncStorage.setItem("_jid", response.id);
                 await AsyncStorage.setItem("@keepConnected", data.keepConnected.toString());
                 authContext.handleSetSessionId(response.id);
-                navigation.push('home') // Navigate to the "Home" screen
+                navigation.replace('select-plan')
             })
             .catch((error: TRPCError) =>
                 Alert.alert("Erro", `Erro ao realizar login. ${error.message}`),
@@ -29,7 +29,7 @@ const Submit = () => {
     };
     const onError: SubmitErrorHandler<FieldValues> = (data) => console.log(data);
     return (
-        <Button onPress={hookForm.handleSubmit(onSubmit, onError)} variant="contained">
+        <Button isLoading={loginMk.isLoading} onPress={hookForm.handleSubmit(onSubmit, onError)} variant="contained">
             Entrar
         </Button>
     );

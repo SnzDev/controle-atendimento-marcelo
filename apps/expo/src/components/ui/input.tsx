@@ -62,27 +62,25 @@ function Input({
       {label && <Text className="flex py-2">{label}</Text>}
 
       <View
-        className={`flex flex-row items-center px-5 py-4 w-full rounded-xl border border-slate-400 bg-white ${Platform.OS === "ios"
+        className={`flex flex-row items-center px-5 h-14 w-full rounded-xl border border-slate-400 bg-white ${Platform.OS === "ios"
           ? "shadow-xl shadow-['#00000099']"
           : "shadow-lg shadow-dark "
-          }`}
+          }
+          `}
         style={{ elevation: 20 }}
       >
-        {leftDecoration && <View className="ml-[-20px]">
+        {leftDecoration && <View className="h-full ml-[-20px]">
           {leftDecoration}
         </View>}
         <TextInput
           placeholderTextColor={"#575656"}
           cursorColor={"#EAA448"}
-          className={`text-base h-8 ${leftDecoration ? "w-[90%]" : "w-full"}`}
+          className={`text-base w-full h-full flex items-center justify-center ${leftDecoration ? "pl-9" : ""} ${rightDecoration ? "pr-9" : ""}`}
           {...props}
-          style={Platform.OS === "ios" && { marginBottom: 4 }}
           ref={ref}
-          onChangeText={(text) => onChange && onChange(text)}
-
         />
 
-        {rightDecoration && <View className="ml-[-20px]">
+        {rightDecoration && <View className="ml-[-20px] h-full flex items-center justify-center">
           {rightDecoration}
         </View>}
 

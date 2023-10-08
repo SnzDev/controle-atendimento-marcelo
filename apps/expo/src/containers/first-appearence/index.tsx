@@ -6,6 +6,7 @@ import Link from '~/components/ui/link';
 import { Stack, useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { View, Text } from 'react-native';
+import { openWhatsApp } from '~/utils/deep-link-whatsapp';
 
 const UndrawOnlineConnection = assets.icons.undrawOnlineConnection;
 const LogoMini = assets.icons.logoMini;
@@ -33,13 +34,13 @@ const FirstApperance = () => {
             <View>
                 <View>
                     <Link href="/">
-                        <Button onPress={() => router.push("/login")} variant='contained'>
+                        <Button onPress={() => router.replace("/login")} variant='contained'>
                             Já sou Cliente
                         </Button>
                     </Link>
                     <Divisor label="OU" className='h-1' />
                     <Button
-                        onPress={() => Linking.openURL("https://wa.me/86999135090?text=Olá+tudo+bem?")}
+                        onPress={() => openWhatsApp("86999135090", "Teste 123")}
                         variant='outlined'>
                         Ainda não sou cliente
                     </Button>

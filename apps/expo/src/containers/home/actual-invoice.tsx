@@ -1,19 +1,19 @@
+import { MaterialIcons } from "@expo/vector-icons";
+import * as Clipboard from 'expo-clipboard';
+import * as WebBrowser from 'expo-web-browser';
+import { Pressable, Text, View } from "react-native";
+import Toast from "react-native-root-toast";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Button from "~/components/ui/button";
 import { useContextHook } from "~/hook/auth";
 import { api } from "~/utils/api";
-import * as WebBrowser from 'expo-web-browser';
-import * as Clipboard from 'expo-clipboard';
-import { MaterialIcons } from "@expo/vector-icons";
-import Toast from "react-native-root-toast";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Pressable, Text, View } from "react-native";
 
 const ActualInvoice = () => {
     const authContext = useContextHook();
     const safeArea = useSafeAreaInsets();
 
     const pendingInvoices = api.mk.getPendingInvoices.useQuery({ session: authContext.session });
-    const lastInvoice = pendingInvoices.data?.FaturasPendentes?.[0];
+    const lastInvoice = pendingInvoices.data?.FaturasPendentes?.filter((invoice) => invoice.contratos.includes(`Contrato: ${authContext.selectedConnection?.contract?.codcontrato}`))?.[0];
     const invoicePdf = api.mk.getInvoicePdf.useQuery({ session: authContext.session, cd_fatura: Number(lastInvoice?.codfatura ?? '') }, {
         enabled: false,
         refetchOnWindowFocus: false,
@@ -38,9 +38,12 @@ const ActualInvoice = () => {
         });
     };
 
+    if (!lastInvoice) return <Text className="flex text-center text-blue-800">
+        Nenhuma fatura pendente
+    </Text>
 
     return (
-        <View className="border border-gray-400 mx-2 p-4 rounded-lg" >
+        <View className="border border-blue-500 mx-2 p-4 rounded-lg" >
             <View className="flex mb-2 flex-row justify-between">
                 <Text className="text-sm">Última Conta</Text>
                 <View className="flex flex-row ">
@@ -70,8 +73,8 @@ const ActualInvoice = () => {
                     barNumber?.replace(/(\d{5})(\d{5})(\d{5})(\d{6})(\d{5})(\d{6})(\d{1})(\d{14})/, '$1.$2 $3.$4 $5.$6 $7 $8')
                 }</Text>
                 <Pressable onPress={copyToClipboard} className="flex flex-row w-36 items-center">
-                    <MaterialIcons name="content-copy" style={{ color: "rgb(30 64 175) / 1" }} size={24} color="black" />
-                    <Text className="text-blue-800 text-xs ml-2 font-bold">
+                    <MaterialIcons name="content-copy" style={{ color: "rgb(30 64 175) / 1" }} size={22} color="black" />
+                    <Text className="text-blue-800 text-xs ml-2 w-24 font-bold">
                         Copiar código de barras
                     </Text>
                 </Pressable>

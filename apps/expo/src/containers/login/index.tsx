@@ -6,6 +6,7 @@ import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import Divisor from "~/components/ui/divisor";
 import Button from "~/components/ui/button";
+import { openWhatsApp } from "~/utils/deep-link-whatsapp";
 
 
 const LogoMedium = assets.icons.logoMedium;
@@ -29,10 +30,9 @@ const Login = () => {
                 <Form />
                 <Divisor label="OU" />
                 <Text className="text-center text-gray-400 font-bold text-md mb-5">Precisando de internet?</Text>
-                <Button>Assine Já</Button>
+                <Button onPress={() => openWhatsApp("5586999135090", "Quero assinar")}>Assine Já</Button>
             </View>
 
         </View>);
 }
-
 export default Login;
