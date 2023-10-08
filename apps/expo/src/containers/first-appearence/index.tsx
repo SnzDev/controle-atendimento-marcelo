@@ -1,12 +1,11 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Button from '~/components/Button';
-import Divisor from '~/components/Divisor';
-import StyledText from '~/components/StyledText';
-import StyledView from '~/components/StyledView';
-import assets from '../../../assets/';
-import Link from '~/components/Link';
+import Button from '~/components/ui/button';
+import Divisor from '~/components/ui/divisor';
+import assets from '../../../assets';
+import Link from '~/components/ui/link';
 import { Stack, useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
+import { View, Text } from 'react-native';
 
 const UndrawOnlineConnection = assets.icons.undrawOnlineConnection;
 const LogoMini = assets.icons.logoMini;
@@ -16,7 +15,7 @@ const FirstApperance = () => {
     const router = useRouter();
 
     return (
-        <StyledView
+        <View
             style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
             className={`flex-1 flex items-center justify-between bg-white px-2`}
         >
@@ -25,16 +24,16 @@ const FirstApperance = () => {
                     headerShown: false,
                 }} />
 
-            <StyledView>
+            <View>
                 <LogoMini className='w-[97px] h-[62px]' />
-            </StyledView>
-            <StyledView className="flex justify-center">
+            </View>
+            <View className="flex justify-center">
                 <UndrawOnlineConnection className="w-20 h-20" />
-            </StyledView>
-            <StyledView>
-                <StyledView>
+            </View>
+            <View>
+                <View>
                     <Link href="/">
-                        <Button onPress={() => router.push("/Login")} variant='contained'>
+                        <Button onPress={() => router.push("/login")} variant='contained'>
                             Já sou Cliente
                         </Button>
                     </Link>
@@ -44,15 +43,15 @@ const FirstApperance = () => {
                         variant='outlined'>
                         Ainda não sou cliente
                     </Button>
-                </StyledView>
-                <StyledView className='mt-5 flex justify-center'>
-                    <StyledText className='text-md px-10 text-center'>
+                </View>
+                <View className='mt-5 flex justify-center'>
+                    <Text className='text-md px-10 text-center'>
                         Ao continuar você concorda com nossos
-                    </StyledText>
+                    </Text>
                     <Link href="https://d2evkimvhatqav.cloudfront.net/documents/terms_and_conditions/testing_and_evaluation_services/testing-and-evaluation-terms-and-conditions-pt-v02.pdf?v=1666968453">Termos e condições</Link>
-                </StyledView>
-            </StyledView>
-        </StyledView >
+                </View>
+            </View>
+        </View >
     );
 
 }

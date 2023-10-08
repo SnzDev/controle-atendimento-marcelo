@@ -1,9 +1,7 @@
-import { TouchableOpacity } from "react-native";
-import StyledText from "./StyledText";
-import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
+import { Text, TouchableOpacity } from "react-native";
 
-import StyledTouchableOpacity from "./StyledTouchableOpacity";
 
 
 interface LinkProps {
@@ -15,19 +13,19 @@ interface LinkProps {
 
 const Link = (props: LinkProps) => {
     return (
-        <StyledTouchableOpacity onPress={
+        <TouchableOpacity onPress={
             () => props.isExternal
                 ? Linking.openURL(props.href)
                 : WebBrowser.openBrowserAsync(props.href)}>
             {
                 typeof props.children === 'string' ? (
-                    <StyledText className="text-blue-800 font-bold text-center">
+                    <Text className="text-blue-800 font-bold text-center">
                         {props.children}
-                    </StyledText>
+                    </Text>
                 )
                     : props.children
             }
-        </StyledTouchableOpacity >
+        </TouchableOpacity >
     );
 }
 

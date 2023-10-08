@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import Input from "~/components/Input";
-import StyledTouchableOpacity from "~/components/StyledTouchableOpacity";
+import Input from "~/components/ui/input";
 import type { FieldValues } from "./schema";
+import { TouchableOpacity } from "react-native";
 
 const Password = () => {
     const hookform = useFormContext<FieldValues>();
@@ -13,16 +13,20 @@ const Password = () => {
         <Controller
             name="password"
             control={hookform.control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
                 <Input
                     {...field}
+                    onChangeText={text => {
+                        field.onChange(text.toLowerCase());
+                    }}
                     placeholder="Senha"
                     secureTextEntry={!showPassword}
-                    adornment={
-                        <StyledTouchableOpacity onPress={() => setShowPassword(old => !old)}>
+                    rightDecoration={
+                        <TouchableOpacity onPress={() => setShowPassword(old => !old)}>
                             <Ionicons style={{ color: '#6b7280' }} name={showPassword ? "md-eye-off" : "md-eye"} size={24} color="black" />
-                        </StyledTouchableOpacity>
+                        </TouchableOpacity>
                     }
+                    error={fieldState.error?.message}
                 />
             )}
 

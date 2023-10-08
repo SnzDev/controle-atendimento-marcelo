@@ -1,10 +1,7 @@
-import FirstApperance from "~/containers/FirstApperance";
+import FirstApperance from "~/containers/first-appearence";
 
 
 
-const Index = () => {
+export default function Index() {
     return <FirstApperance />
 }
-
-
-export default Index;

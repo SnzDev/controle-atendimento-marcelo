@@ -1,7 +1,7 @@
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import Input from "~/components/Input";
 import type { FieldValues } from "./schema";
+import Input from "~/components/ui/input";
 
 const Username = () => {
     const hookform = useFormContext<FieldValues>();
@@ -10,10 +10,15 @@ const Username = () => {
         <Controller
             name="username"
             control={hookform.control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
                 <Input
                     {...field}
+                    onChangeText={text => {
+                        field.onChange(text.toLowerCase());
+                    }}
                     placeholder="Usuário"
+                    error={fieldState.error?.message}
+
                 />
             )}
         />

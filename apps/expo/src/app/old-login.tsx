@@ -16,7 +16,7 @@ import { z } from "zod";
 
 import { api } from "~/utils/api";
 
-function Index() {
+export default function Index() {
   const schemaValidation = z.object({
     user_sac: z.string().min(3).max(20),
     pass_sac: z.string().min(3).max(20),
@@ -93,4 +93,3 @@ function Index() {
   );
 }
 
-export default Index;

@@ -1,12 +1,13 @@
-import Button from "~/components/Button"
-import type { FieldValues } from "./schema";
-import { type SubmitErrorHandler, type SubmitHandler, useFormContext } from "react-hook-form";
-import { api } from "~/utils/api";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { type TRPCError } from "@trpc/server";
-import { Alert } from "react-native";
-import { useContextHook } from "~/hook/Auth";
 import { useRouter } from "expo-router";
+import { useFormContext, type SubmitErrorHandler, type SubmitHandler } from "react-hook-form";
+import { Alert } from "react-native";
+import Button from "~/components/ui/button";
+import { useContextHook } from "~/hook/auth";
+import { api } from "~/utils/api";
+import type { FieldValues } from "./schema";
 
 const Submit = () => {
     const hookForm = useFormContext<FieldValues>();
@@ -20,7 +21,7 @@ const Submit = () => {
                 await AsyncStorage.setItem("_jid", response.id);
                 await AsyncStorage.setItem("@keepConnected", data.keepConnected.toString());
                 authContext.handleSetSessionId(response.id);
-                navigation.push('Home') // Navigate to the "Home" screen
+                navigation.push('home') // Navigate to the "Home" screen
             })
             .catch((error: TRPCError) =>
                 Alert.alert("Erro", `Erro ao realizar login. ${error.message}`),

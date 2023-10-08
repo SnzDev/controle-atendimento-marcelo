@@ -1,7 +1,6 @@
 import React from "react";
-import StyledView from "./StyledView";
 import ExpoCheckbox from "expo-checkbox";
-import StyledText from "./StyledText";
+import { Text, View } from "react-native";
 
 
 interface CheckBoxProps {
@@ -12,7 +11,7 @@ interface CheckBoxProps {
 const CheckBox = (props: CheckBoxProps, ref?: React.LegacyRef<ExpoCheckbox>) => {
 
     return (
-        <StyledView onTouchEnd={() => props.onChange && props.onChange(!props.value)} className="flex items-center flex-row pl-1">
+        <View onTouchEnd={() => props.onChange && props.onChange(!props.value)} className="flex items-center flex-row pl-1">
             <ExpoCheckbox
                 value={props.value}
                 ref={ref}
@@ -20,9 +19,9 @@ const CheckBox = (props: CheckBoxProps, ref?: React.LegacyRef<ExpoCheckbox>) => 
             />
             {/* <span className="ml-2 text-gray-700">Label text</span> */}
             {props.label && typeof props.label === 'string' ?
-                <StyledView className="ml-2"><StyledText className="text-gray-500">{props.label}</StyledText></StyledView>
-                : <StyledView className="ml-2">{props.label}</StyledView>}
-        </StyledView>
+                <View className="ml-2"><Text className="text-gray-500">{props.label}</Text></View>
+                : <View className="ml-2">{props.label}</View>}
+        </View>
     );
 };
 

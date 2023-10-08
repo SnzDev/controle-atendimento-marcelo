@@ -1,6 +1,5 @@
 import type { StyledProps } from 'nativewind';
 import { Image, useWindowDimensions, type ImageProps, type ImageSourcePropType } from 'react-native';
-import StyledImage from '~/components/StyledImage';
 
 const UndrawOnlineConnection = (props: Omit<StyledProps<ImageProps>, 'alt' | 'source'>) => {
     const UndrawOnlineConnectionImage = require('../images/undraw-online-connection.png') as ImageSourcePropType;
@@ -12,7 +11,7 @@ const UndrawOnlineConnection = (props: Omit<StyledProps<ImageProps>, 'alt' | 'so
     const componentHeight = componentWidth / aspectRatio; // Calcula a altura do componente com base na proporção de aspecto
 
     return (
-        <StyledImage {...props} style={{ height: componentHeight, width: componentWidth }} alt='conexão' source={UndrawOnlineConnectionImage} />
+        <Image {...props} style={{ height: componentHeight, width: componentWidth }} alt='conexão' source={UndrawOnlineConnectionImage} />
     );
 }
 

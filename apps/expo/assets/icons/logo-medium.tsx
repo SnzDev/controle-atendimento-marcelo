@@ -1,6 +1,5 @@
 import type { StyledProps } from 'nativewind';
-import { useWindowDimensions, type ImageProps, type ImageSourcePropType } from 'react-native';
-import StyledImage from '~/components/StyledImage';
+import { Image, useWindowDimensions, type ImageProps, type ImageSourcePropType } from 'react-native';
 
 const LogoMini = (props: Omit<StyledProps<ImageProps>, 'alt' | 'source'>) => {
     const logoMediumImage = require('../images/logo-medium.png') as ImageSourcePropType;
@@ -11,7 +10,7 @@ const LogoMini = (props: Omit<StyledProps<ImageProps>, 'alt' | 'source'>) => {
     const componentWidth = width * 0.8; // Define a largura do componente como 80% da largura da tela
     const componentHeight = componentWidth / aspectRatio; // Calcula a altura do componente com base na proporção de aspecto
     return (
-        <StyledImage {...props} style={{ height: componentHeight, width: componentWidth }} alt='logo-medium' source={logoMediumImage} />
+        <Image {...props} style={{ height: componentHeight, width: componentWidth }} alt='logo-medium' source={logoMediumImage} />
     );
 }
 

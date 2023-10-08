@@ -1,7 +1,7 @@
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import CheckBox from "~/components/CheckBox";
 import type { FieldValues } from "./schema";
+import Checkbox from "~/components/ui/checkbox";
 
 const KeepConnected = () => {
     const hookform = useFormContext<FieldValues>();
@@ -11,7 +11,7 @@ const KeepConnected = () => {
             name="keepConnected"
             control={hookform.control}
             render={({ field }) => (
-                <CheckBox
+                <Checkbox
                     {...field}
                     label="Manter conectado"
                 />
