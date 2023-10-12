@@ -2,6 +2,7 @@ import { mk, type MkCustomError } from "./mk";
 
 export interface InvoicePdfRequest {
   cd_fatura: number;
+  token: string;
 }
 export type InvoicePdfResponse =
   | {
@@ -17,7 +18,7 @@ export type InvoicePdfResponse =
 
 export const getInvoicePdf = async (params: InvoicePdfRequest) => {
   const data = await mk.get<InvoicePdfResponse | MkCustomError>(
-    `/mk/WSMKSegundaViaCobranca.rule?sys=MK0&cd_fatura=${params.cd_fatura}`,
+    `/mk/WSMKSegundaViaCobranca.rule?sys=MK0&cd_fatura=${params.cd_fatura}&token=${params.token}`,
   );
   return data.data;
 };

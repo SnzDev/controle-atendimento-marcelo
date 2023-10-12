@@ -7,12 +7,41 @@ import { getInvoiceBarNumber } from "../mkServices/getInvoiceBarNumber";
 import { getPendingInvoices } from "../mkServices/getPendingInvoices";
 import { getInvoicePdf } from "../mkServices/getInvoicePdf";
 import { getClientInfo } from "../mkServices/getClientInfo";
+import { getConnections } from "../mkServices/getConnections";
+import { getContracts } from "../mkServices/getContracts";
+import { auth } from "../mkServices/auth";
+import moment from "moment";
+import { type PrismaClient } from "@acme/db";
 
+const mkGetToken = async (prisma: PrismaClient) => {
+  const token = await prisma.sessionMk.findFirst({
+    where: { personName: 'mk', expires: { gte: new Date() } },
+  });
+  if (!token) {
+    const login = await auth();
+    if (login.status !== "OK")
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: login.Mensagem ?? "Algo deu errado",
+      });
+    return await prisma.sessionMk.create({
+      data: {
+        personCode: login.Token,
+        personName: 'mk',
+        expires: moment(login.Expire, 'DD/MM/YYYY HH:mm:ss').toDate(),
+      },
+    });
+  }
+
+  return token;
+}
 export const mkRouter = createTRPCRouter({
   loginSac: publicProcedure
     .input(z.object({ user_sac: z.string(), pass_sac: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const data = await loginSac(input);
+
+      const token = await mkGetToken(ctx.prisma);
+      const data = await loginSac({ ...input, token: token.personCode });
       if (data.status !== "OK")
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -21,7 +50,7 @@ export const mkRouter = createTRPCRouter({
 
       const info = await ctx.prisma.sessionMk.findFirst({
         where: {
-          personCode: data.CodigoPessoa,
+          personCode: data.CodigoPessoa.toString(),
           expires: { gte: new Date() },
         },
       });
@@ -32,7 +61,7 @@ export const mkRouter = createTRPCRouter({
 
       const session = await ctx.prisma.sessionMk.create({
         data: {
-          personCode: data.CodigoPessoa,
+          personCode: data.CodigoPessoa.toString(),
           personName: data.Nome,
           expires,
         },
@@ -46,6 +75,8 @@ export const mkRouter = createTRPCRouter({
       const session = await ctx.prisma.sessionMk.findFirst({
         where: { id: input.session, expires: { gte: new Date() } },
       });
+      const token = await mkGetToken(ctx.prisma);
+
       if (!session)
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -54,6 +85,7 @@ export const mkRouter = createTRPCRouter({
 
       const data = await getInvoiceBarNumber({
         cd_fatura: input.cd_fatura,
+        token: token.personCode,
       });
 
       if (data.status !== "OK")
@@ -62,7 +94,7 @@ export const mkRouter = createTRPCRouter({
           message: data.Mensagem ?? "Algo deu errado",
         });
 
-      if (session.personCode !== data.DadosFatura[0].codigopessoa)
+      if (session.personCode !== data.DadosFatura[0].codigopessoa.toString())
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Fatura não encontrada!",
@@ -81,9 +113,11 @@ export const mkRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message: "Sessão inválida",
         });
+      const token = await mkGetToken(ctx.prisma);
 
       const data = await getPendingInvoices({
-        cd_cliente: session.personCode,
+        cd_cliente: Number(session.personCode),
+        token: token.personCode,
       });
 
       if (data.status !== "OK")
@@ -106,8 +140,11 @@ export const mkRouter = createTRPCRouter({
           message: "Sessão inválida",
         });
 
+      const token = await mkGetToken(ctx.prisma);
+
       const data = await getInvoicePdf({
         cd_fatura: input.cd_fatura,
+        token: token.personCode,
       });
 
       if (data.status !== "OK")
@@ -130,8 +167,11 @@ export const mkRouter = createTRPCRouter({
           message: "Sessão inválida",
         });
 
+      const token = await mkGetToken(ctx.prisma);
+
       const data = await getClientInfo({
-        id: session.personCode,
+        id: Number(session.personCode),
+        token: token.personCode,
       })
 
       if (!data)
@@ -142,4 +182,60 @@ export const mkRouter = createTRPCRouter({
 
       return data;
     }),
+  getConnections: publicProcedure
+    .input(z.object({ session: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const session = await ctx.prisma.sessionMk.findFirst({
+        where: { id: input.session, expires: { gte: new Date() } },
+      });
+      if (!session)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Sessão inválida",
+        });
+
+      const token = await mkGetToken(ctx.prisma);
+
+      const data = await getConnections({
+        personCode: Number(session.personCode),
+        token: token.personCode,
+      })
+
+      if (data.status !== "OK")
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cliente não encontrado!",
+        });
+
+      return data;
+    }),
+
+  getContracts: publicProcedure
+    .input(z.object({ session: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const session = await ctx.prisma.sessionMk.findFirst({
+        where: { id: input.session, expires: { gte: new Date() } },
+      });
+      if (!session)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Sessão inválida",
+        });
+
+      const token = await mkGetToken(ctx.prisma);
+
+      const data = await getContracts({
+        personCode: Number(session.personCode),
+        token: token.personCode,
+      })
+
+      if (data.status !== "OK")
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cliente não encontrado!",
+        });
+
+      return data;
+    }),
+
 });

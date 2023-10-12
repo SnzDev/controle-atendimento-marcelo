@@ -5,7 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { RootSiblingParent } from 'react-native-root-siblings';
 
 import { TRPCProvider } from "~/utils/api";
-import { ContextProvider } from "~/hook/Auth";
+import { ContextProvider } from "~/hook/auth";
 
 // This is the main layout of the app
 // It wraps your pages with the providers they need
