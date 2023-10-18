@@ -15,6 +15,8 @@ const defineConfig = (): ExpoConfig => ({
   },
   updates: {
     fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/a61923ab-e576-4f2a-aab5-6595ba533622"
+
   },
   assetBundlePatterns: ["**/*"],
   ios: {
@@ -37,6 +39,10 @@ const defineConfig = (): ExpoConfig => ({
   plugins: [
     "./expo-plugins/with-modify-gradle.js",
   ],
+  runtimeVersion: {
+    policy: "appVersion"
+  }
+
 });
 
 export default defineConfig;
