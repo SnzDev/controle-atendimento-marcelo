@@ -38,6 +38,13 @@ const defineConfig = (): ExpoConfig => ({
   },
   plugins: [
     "./expo-plugins/with-modify-gradle.js",
+    [
+      'expo-build-properties',
+      {
+        android: {
+          "usesCleartextTraffic": true
+        }
+      }],
   ],
   runtimeVersion: {
     policy: "appVersion"
