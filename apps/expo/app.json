@@ -1,5 +1,10 @@
 {
   "expo": {
+    "name": "Minha Acessenet",
+    "slug": "acessenet-telecom",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "acessenet",
     "extra": {
       "eas": {
         "projectId": "a61923ab-e576-4f2a-aab5-6595ba533622"
@@ -7,7 +12,11 @@
     },
     "android": {
       "package": "br.com.morpheus.acessenet",
-      "versionCode": 2
+      "versionCode": 3,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#fff"
+      }
     }
   }
 }
