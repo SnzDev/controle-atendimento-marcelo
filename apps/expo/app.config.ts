@@ -4,7 +4,7 @@ const defineConfig = (): ExpoConfig => ({
   name: "Minha Acessenet",
   slug: "acessenet-telecom",
   scheme: "acessenet",
-  version: "0.2.0",
+  version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
