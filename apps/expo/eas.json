@@ -23,7 +23,7 @@
         "resourceClass": "m-medium"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://177.10.118.1:3001"
+        "EXPO_PUBLIC_API_URL": "https://www.controle-atendimento-marcelo-nextjs.vercel.app"
       }
     }
   },

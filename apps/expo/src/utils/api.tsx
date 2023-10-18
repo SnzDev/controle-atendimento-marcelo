@@ -40,8 +40,6 @@ export const getBaseUrl = () => {
 
     return apiUrl;
   }
-
-  return process.env.EXPO_PUBLIC_API_URL;
   return `http://${localhost}:3000`;
 };
 
