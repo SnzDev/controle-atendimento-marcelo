@@ -50,7 +50,7 @@ const Home = () => {
                     Selecionar Ponto
                 </Button>}
 
-                <Button onPress={() => openWhatsApp('5586999135090', 'Preciso de suporte!')}>
+                <Button onPress={() => openWhatsApp('Preciso de suporte!')}>
                     <MaterialCommunityIcons name="whatsapp" size={20} /><Text>Suporte</Text>
                 </Button>
             </View>
