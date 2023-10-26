@@ -30,7 +30,7 @@ const Login = () => {
                 <Form />
                 <Divisor label="OU" />
                 <Text className="text-center text-gray-400 font-bold text-md mb-5">Precisando de internet?</Text>
-                <Button onPress={() => openWhatsApp("5586999135090", "Quero assinar")}>Assine Já</Button>
+                <Button onPress={() => openWhatsApp("Quero assinar")}>Assine Já</Button>
             </View>
 
         </View>);

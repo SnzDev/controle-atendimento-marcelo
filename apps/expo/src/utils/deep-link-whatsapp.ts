@@ -1,13 +1,7 @@
 import { Linking } from 'react-native';
 
-export const openWhatsApp = async (number: string, message: string) => {
+export const openWhatsApp = async (message: string) => {
+  const number = "+558631421710";
   const url = `https://wa.me/${number}?text=${message}`;
-
-  await Linking.canOpenURL(url).then(async (supported) => {
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      console.log(`Unable to open URL: ${url}`);
-    }
-  });
+  await Linking.openURL(url);
 };

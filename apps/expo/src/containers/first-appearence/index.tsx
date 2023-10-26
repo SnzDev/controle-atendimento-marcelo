@@ -4,7 +4,6 @@ import Divisor from '~/components/ui/divisor';
 import assets from '../../../assets';
 import Link from '~/components/ui/link';
 import { Stack, useRouter } from 'expo-router';
-import * as Linking from 'expo-linking';
 import { View, Text } from 'react-native';
 import { openWhatsApp } from '~/utils/deep-link-whatsapp';
 
@@ -40,9 +39,9 @@ const FirstApperance = () => {
                     </Link>
                     <Divisor label="OU" className='h-1' />
                     <Button
-                        onPress={() => openWhatsApp("86999135090", "Teste 123")}
+                        onPress={() => openWhatsApp("Quero assinar")}
                         variant='outlined'>
-                        Ainda não sou cliente
+                        Quero Assinar
                     </Button>
                 </View>
                 <View className='mt-5 flex justify-center'>

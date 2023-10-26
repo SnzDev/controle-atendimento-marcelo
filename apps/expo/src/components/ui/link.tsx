@@ -15,8 +15,9 @@ const Link = (props: LinkProps) => {
     return (
         <TouchableOpacity onPress={
             () => props.isExternal
-                ? Linking.openURL(props.href)
-                : WebBrowser.openBrowserAsync(props.href)}>
+                ? WebBrowser.openBrowserAsync(props.href)
+                : Linking.openURL(props.href)}
+        >
             {
                 typeof props.children === 'string' ? (
                     <Text className="text-blue-800 font-bold text-center">
