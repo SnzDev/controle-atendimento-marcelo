@@ -32,13 +32,13 @@ const schema = z.object({
   toInfo: z.object({
     pushname: z.string(),
     platform: z.string().optional(),
-    profilePicUrl: z.string(),
+    profilePicUrl: z.string().optional(),
     phone: string()
   }).optional(),
   fromInfo: z.object({
     pushname: z.string(),
     platform: z.string().optional(),
-    profilePicUrl: z.string(),
+    profilePicUrl: z.string().optional(),
     phone: string()
   }).optional(),
 })

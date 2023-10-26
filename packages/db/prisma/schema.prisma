@@ -240,7 +240,7 @@ model WhatsappInstance {
   phone         String?
   instanceName  String?
   platform      String?
-  profilePicUrl String?
+  profilePicUrl String?        @db.VarChar(255)
   url           String
   qrCode        String?        @db.VarChar(255)
   status        StatusInstance @default(DISCONNECTED)
@@ -259,7 +259,7 @@ model WhatsappContact {
   id                   String             @id @default(cuid())
   name                 String
   phone                String
-  profilePicUrl        String?
+  profilePicUrl        String?            @db.VarChar(255)
   platform             String?
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
