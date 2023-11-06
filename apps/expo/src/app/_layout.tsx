@@ -1,11 +1,11 @@
-import React from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import React from "react";
 import { RootSiblingParent } from 'react-native-root-siblings';
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { TRPCProvider } from "~/utils/api";
 import { ContextProvider } from "~/hook/auth";
+import { TRPCProvider } from "~/utils/api";
 
 // This is the main layout of the app
 // It wraps your pages with the providers they need
@@ -14,7 +14,7 @@ const RootLayout = () => {
 
     <TRPCProvider>
       <ContextProvider>
-        <RootSiblingParent>
+        <RootSiblingParent >
           <SafeAreaProvider>
             {/*
           The Stack component displays the current page.

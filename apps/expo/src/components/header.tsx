@@ -12,11 +12,11 @@ export const Header = ({ title }: HeaderProps) => {
 
   return (
     <View className="w-full flex-row justify-between p-2 items-center">
-      <TouchableOpacity onPress={() => canGoback && router.back()} className="flex-row space-x-2">
-        <ArrowCircleLeft2 size="32" color="#1552A7" variant="Bold" />
-        <Text className="font-semibold text-xl text-[#1552A7]">Voltar</Text>
+      <TouchableOpacity onPress={() => canGoback && router.back()} className="flex-row space-x-2 items-center">
+        <ArrowCircleLeft2 size="30" color="#1552A7" variant="Bold" />
+        <Text className="font-semibold text-lg text-[#1552A7]">Voltar</Text>
       </TouchableOpacity>
-      <Text className="font-semibold text-xl text-[#1552A7]">{title}</Text>
+      <Text className="font-semibold text-lg text-[#1552A7]">{title}</Text>
     </View>
   );
 }

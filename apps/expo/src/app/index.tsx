@@ -1,9 +1,7 @@
-import { Invoice } from "~/containers/Invoices";
+import FirstApperance from "~/containers/first-appearence";
 
 
 
-export default function App() {
-
-
-  return <Invoice />
+export default function Index() {
+    return <FirstApperance />
 }
