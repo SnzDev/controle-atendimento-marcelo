@@ -3,9 +3,6 @@ import { Pressable, Text, View } from "react-native"
 import { Section } from "../../components/section"
 import moment from "moment"
 import { useRouter } from "expo-router"
-moment.locale('pt-br');
-
-
 
 type CardPaymentProps = {
   invoice?: {

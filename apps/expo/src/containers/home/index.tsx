@@ -9,8 +9,6 @@ import { YourPlan } from "~/containers/home/your-plan";
 import { useContextHook } from "~/hook/auth";
 import { api } from "~/utils/api";
 
-
-
 export default function Home() {
     const isDay = Number(moment().format("HH")) < 12;
     const isAfternoon = Number(moment().format("HH")) >= 12 && Number(moment().format("HH")) < 18;
@@ -18,7 +16,6 @@ export default function Home() {
     const authContext = useContextHook();
     const pendingInvoices = api.mk.getPendingInvoices.useQuery({ session: authContext.session });
     const lastInvoice = pendingInvoices.data?.FaturasPendentes?.filter((invoice) => invoice.contratos.includes(`Contrato: ${authContext.selectedConnection?.contract?.codcontrato}`))?.[0];
-    const dateFormat = moment(lastInvoice?.data_vencimento, 'DD/MM/YYYY');
     return (
         <Page className="flex-1">
             <StatusBar backgroundColor="#1552A7" />

@@ -1,11 +1,8 @@
 
 
 import { Clock } from "iconsax-react-native"
-import { Pressable, Text, View } from "react-native"
-import { Section } from "../../components/section"
 import moment from "moment"
-moment.locale('pt-br');
-
+import { Text, View } from "react-native"
 
 type ActualInvoice = {
   invoice?: {

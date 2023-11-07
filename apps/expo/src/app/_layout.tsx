@@ -6,6 +6,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ContextProvider } from "~/hook/auth";
 import { TRPCProvider } from "~/utils/api";
+import 'moment/locale/pt-br';
+import moment from "moment";
+moment.locale('pt-br');
 
 // This is the main layout of the app
 // It wraps your pages with the providers they need
