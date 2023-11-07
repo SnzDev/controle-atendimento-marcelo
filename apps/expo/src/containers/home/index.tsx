@@ -13,7 +13,7 @@ import { api } from "~/utils/api";
 
 export default function Home() {
     const isDay = Number(moment().format("HH")) < 12;
-    const isAfternoon = Number(moment().format("HH")) >= 12;
+    const isAfternoon = Number(moment().format("HH")) >= 12 && Number(moment().format("HH")) < 18;
     const isNight = Number(moment().format("HH")) >= 18;
     const authContext = useContextHook();
     const pendingInvoices = api.mk.getPendingInvoices.useQuery({ session: authContext.session });

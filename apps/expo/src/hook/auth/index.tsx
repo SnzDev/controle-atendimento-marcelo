@@ -23,16 +23,14 @@ interface ContextProviderProps {
   children: React.ReactNode;
 }
 
-
 type ISelectedConnection = {
   connection: Connections;
   contract?: Contracts;
 }
 function ContextProvider(props: ContextProviderProps) {
+  const router = useRouter();
   const [session, setSession] = React.useState<string>('');
   const [selectedConnection, setSelectedConnection] = React.useState<ISelectedConnection>();
-  const router = useRouter();
-
   const clientInfo = api.mk.getClientInfo.useQuery({ session: session }, {
     enabled: !!session,
     refetchOnWindowFocus: false,

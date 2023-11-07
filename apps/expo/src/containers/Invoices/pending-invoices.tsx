@@ -13,8 +13,9 @@ type PendingInvoicesProps = {
     descricao: string;
     valor_total: number;
   }
+  onSelect: () => void;
 }
-export const PendingInvoices = ({ invoice }: PendingInvoicesProps) => {
+export const PendingInvoices = ({ invoice, onSelect }: PendingInvoicesProps) => {
   const validDate = moment(invoice?.data_vencimento, 'DD/MM/YYYY');
   const formattedDate = validDate.format('MM/YYYY');
   const price = Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(invoice?.valor_total ?? 0);
@@ -33,7 +34,10 @@ export const PendingInvoices = ({ invoice }: PendingInvoicesProps) => {
         <Text className="text-gray-500 font-bold text-xs">ref: {formattedDate}</Text>
       </View>
 
-      <TouchableOpacity onPress={() => push({ params: { invoiceId: invoice?.codfatura }, pathname: '/invoice' })}>
+      <TouchableOpacity onPress={() => {
+        push({ params: { invoiceId: invoice?.codfatura }, pathname: '/invoice' });
+        onSelect();
+      }}>
         <Text className="text-[#1552A7] font-bold text-md">Ver Fatura</Text>
       </TouchableOpacity>
     </View>

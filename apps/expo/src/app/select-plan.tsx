@@ -8,7 +8,6 @@ import { useContextHook } from "~/hook/auth";
 export default function SelectPlan() {
   const router = useRouter();
   const authContext = useContextHook();
-  console.log(authContext);
 
   return (
     <View className="flex flex-1 justify-center items-center p-5 gap-4">
