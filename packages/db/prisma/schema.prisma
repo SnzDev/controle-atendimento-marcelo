@@ -121,9 +121,12 @@ model Client {
   deletedAt  DateTime?
   deletedBy  String?
   user       User?        @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  externalId String?
+  phone      String?
   Assignment Assignment[]
 
   @@index([deletedBy])
+  @@index([externalId])
 }
 
 model Shop {
@@ -146,6 +149,7 @@ model Assignment {
   userId                  String
   serviceId               String
   regionId                String?
+  chatId                  String?
   informations            String?
   dateActivity            DateTime            @db.Date
   position                Int
@@ -171,6 +175,7 @@ model Assignment {
   observation             Observation[]
   HistoryAssignment       HistoryAssignment[]
   Region                  Region?             @relation(fields: [regionId], references: [id])
+  Chat                    WhatsappChat?       @relation(fields: [chatId], references: [id])
 
   @@index([regionId])
   @@index([serviceId])
@@ -181,6 +186,7 @@ model Assignment {
   @@index([finalizedBy])
   @@index([createdBy])
   @@index([userId])
+  @@index([chatId])
 }
 
 model HistoryAssignment {
@@ -249,8 +255,8 @@ model WhatsappInstance {
   deletedAt     DateTime?
   deletedBy     String?
 
-  userDeletedBy    User?              @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  whatsappMessages WhatsappMessages[]
+  userDeletedBy User?          @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  WhatsappChat  WhatsappChat[]
 
   @@index([deletedBy])
 }
@@ -265,28 +271,46 @@ model WhatsappContact {
   updatedAt            DateTime           @updatedAt
   WhatsappMessagesFrom WhatsappMessages[] @relation("fromContact")
   WhatsappMessagesTo   WhatsappMessages[] @relation("toContact")
+  WhatsappChat         WhatsappChat[]
 }
 
 model WhatsappMessages {
-  id         String   @id @default(cuid())
-  instanceId String
-  from       String
-  to         String
-  ack        Int
-  fromMe     Boolean
-  body       String
-  protocol   String
-  timestamp  Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  chatId    String
+  from      String
+  to        String
+  ack       Int
+  fromMe    Boolean
+  body      String
+  protocol  String
+  timestamp Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  instance    WhatsappInstance @relation(fields: [instanceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  fromContact WhatsappContact  @relation("fromContact", fields: [from], references: [id])
-  toContact   WhatsappContact  @relation("toContact", fields: [to], references: [id])
+  fromContact WhatsappContact @relation("fromContact", fields: [from], references: [id])
+  toContact   WhatsappContact @relation("toContact", fields: [to], references: [id])
+  chat        WhatsappChat    @relation(fields: [chatId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@index([instanceId])
+  @@index([chatId])
   @@index([from])
   @@index([to])
+}
+
+model WhatsappChat {
+  id         String    @id @default(cuid())
+  instanceId String
+  contactId  String
+  step       ChatSteps @default(START)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  instance         WhatsappInstance   @relation(fields: [instanceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  contact          WhatsappContact    @relation(fields: [contactId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  WhatsappMessages WhatsappMessages[]
+  Assignment       Assignment[]
+
+  @@index([instanceId])
+  @@index([contactId])
 }
 
 model Region {
@@ -300,6 +324,13 @@ model Region {
   Assignment Assignment[]
 
   @@index([deletedBy])
+}
+
+enum ChatSteps {
+  START
+  LOGIN
+  ATENDANT
+  FINISHED
 }
 
 enum AssignmentStatus {

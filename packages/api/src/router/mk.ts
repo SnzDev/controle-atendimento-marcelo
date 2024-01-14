@@ -13,7 +13,7 @@ import { auth } from "../mkServices/auth";
 import moment from "moment";
 import { type PrismaClient } from "@acme/db";
 
-const mkGetToken = async (prisma: PrismaClient) => {
+export const mkGetToken = async (prisma: PrismaClient) => {
   const token = await prisma.sessionMk.findFirst({
     where: { personName: 'mk', expires: { gte: new Date() } },
   });

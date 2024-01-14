@@ -4,6 +4,8 @@ import { type AppRouter } from "./src/root";
 
 export { appRouter, type AppRouter } from "./src/root";
 export { createTRPCContext } from "./src/trpc";
+export * as whatsappServices from "./src/whatsappServices/";
+export * as mkServices from "./src/mkServices/";
 
 /**
  * Inference helpers for input types
