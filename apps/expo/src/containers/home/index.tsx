@@ -1,46 +1,41 @@
-
-import { Stack, Tabs, router } from "expo-router";
-import React from "react";
-import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import moment from "moment";
+import { Image, Text, View } from "react-native";
 import { LogoutButton } from "~/components/logout-button";
+import { Page } from "~/components/ui/page";
+import { CardPayment } from "~/containers/home/card-payment";
+import { MainMenu } from "~/containers/home/main-menu";
+import { YourPlan } from "~/containers/home/your-plan";
 import { useContextHook } from "~/hook/auth";
-import LogoMini from "../../../assets/icons/logo-mini";
-import ActualInvoice from "./actual-invoice";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import Button from "~/components/ui/button";
-import { openWhatsApp } from "~/utils/deep-link-whatsapp";
+import { api } from "~/utils/api";
 
-const Home = () => {
-    const safeArea = useSafeAreaInsets();
+export default function Home() {
+    const isDay = Number(moment().format("HH")) < 12;
+    const isAfternoon = Number(moment().format("HH")) >= 12 && Number(moment().format("HH")) < 18;
+    const isNight = Number(moment().format("HH")) >= 18;
     const authContext = useContextHook();
-    const name = authContext.clientInfo.data?.nome.split(" ")?.[0]?.toLocaleLowerCase();
-
+    const pendingInvoices = api.mk.getPendingInvoices.useQuery({ session: authContext.session });
+    const lastInvoice = pendingInvoices.data?.FaturasPendentes?.filter((invoice) => invoice.contratos.includes(`Contrato: ${authContext.selectedConnection?.contract?.codcontrato}`))?.[0];
     return (
-        <View className="flex-1" style={{ paddingBottom: safeArea.bottom }}>
-            <Stack.Screen
-                options={{
-                    title: "Início",
-                    headerRight: LogoutButton,
-                    headerStyle: { backgroundColor: "#1e40af" },
-                    headerTintColor: "#fff",
-                    headerTitleStyle: {
-                        fontWeight: "bold",
-                    },
-                    // href: '/home',
-                    // tabBarIcon: ({ color, size }) => (
-                    //     <MaterialIcons name="home" size={size} color={color} />
-                    // ),
+        <Page className="flex-1">
+            <StatusBar backgroundColor="#1552A7" />
+            <View className="bg-[#1552A7] p-4">
+                <View className="flex-row items-center justify-between">
+                    <View>
+                        <Text className="text-md text-white">
+                            {isDay && "Bom dia"}
+                            {isAfternoon && "Boa tarde"}
+                            {isNight && "Boa noite"}
+                        </Text>
+                        <Text className="text-lg font-bold text-white">{authContext.clientInfo.data?.nome}</Text>
+                    </View>
+                    <LogoutButton />
 
-                }}
-            />
-            <View className="flex flex-row items-center p-2">
-                <LogoMini className="w-[140px] h-[90px]" />
-                <View className="ml-2">
-                    <Text className="text-xl text-blue-800 capitalize">Olá, {name}!</Text>
-                    <Text className="text-sm text-gray-500">Como podemos ajudar?</Text>
                 </View>
             </View>
+
+            <CardPayment invoice={lastInvoice} />
+            <MainMenu />
 
             <ActualInvoice />
 
@@ -55,8 +50,7 @@ const Home = () => {
                 </Button>
             </View>
 
-        </View>
-    );
-}
+            <YourPlan />
 
-export default Home;
+        </Page>);
+}

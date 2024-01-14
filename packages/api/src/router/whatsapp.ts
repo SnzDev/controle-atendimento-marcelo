@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { sendMessageSync } from "../whatsappServices/api/sendMessage";
 
 
 export const whatsappRouter = createTRPCRouter({
@@ -67,22 +68,38 @@ export const whatsappRouter = createTRPCRouter({
       });
     }
     ),
-
   sendMessage: publicProcedure
-    .input(z.object({ id: z.string(), message: z.string() }))
+    .input(z.object({ instanceId: z.string().cuid(), contactId: z.string().cuid(), message: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const instance = await ctx.prisma.whatsappInstance.findUnique({
+      const contact = await ctx.prisma.whatsappContact.findUnique({
         where: {
-          id: input.id
+          id: input.contactId
         }
       });
-      if (!instance)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Instance not found" })
 
-      await fetch(`${instance.url}/${instance.id}/sendMessage`, {
-        method: "POST",
-        body: JSON.stringify({ message: input.message })
+      if (!contact)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Contato não encontrado" })
+
+      const instance = await ctx.prisma.whatsappInstance.findUnique({
+        where: {
+          id: input.instanceId
+        }
       });
+
+
+      if (!instance)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Instância não encontrada" })
+
+      let userContact = instance.name;
+      if (ctx.session?.user?.role !== "ADMIN") userContact = ctx.session?.user.name ?? instance.name;
+
+      const data = await sendMessageSync({
+        message: `*${userContact}:*\n${input.message}`,
+        phone: contact.phone,
+        url: instance.url
+      });
+
+      return data.json();
     }),
 
   getAllContacts: publicProcedure

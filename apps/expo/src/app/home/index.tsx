@@ -1,4 +1,4 @@
-import HomePage from "~/containers/home"
+import HomePage from "~/containers/home/index"
 
 export default function Home() {
 

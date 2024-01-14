@@ -35,7 +35,6 @@ export const getBaseUrl = () => {
     const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
     console.log(`Using API URL: ${apiUrl}`);
-
     if (!apiUrl) {
       throw new Error("No API URL found. Please check env config.");
     }

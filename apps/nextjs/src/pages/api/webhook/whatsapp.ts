@@ -1,6 +1,11 @@
 import { prisma } from '@acme/db';
 import { type NextApiRequest, type NextApiResponse } from 'next';
 import { string, z } from 'zod';
+import { whatsappServices } from '@acme/api';
+import { sendStepLogin, sendStepStart } from '@acme/api/src/whatsappServices/chat';
+import { mkGetToken } from '@acme/api/src/router/mk';
+import { getClientInfoCpf } from '@acme/api/src/mkServices';
+import { sendMessageQueue } from '@acme/api/src/whatsappServices/api/sendMessage';
 
 export enum Events {
   READY = 'ready',
@@ -91,6 +96,7 @@ async function qrCodeReceived(data: IBody) {
     }
   });
 
+  console.log('qrCodeReceived', data.qr);
   if (!instance) return;
 
   await prisma.whatsappInstance.update({
@@ -145,91 +151,58 @@ async function messageReceived(data: IBody) {
 
   if (!instance || !data.message || !data.toInfo || !data.fromInfo) return;
 
-  let fromInfo = await prisma.whatsappContact.findFirst({
-    where: {
-      phone: data.fromInfo.phone
-    }
-  });
-  if (!fromInfo) {
-    fromInfo = await prisma.whatsappContact.create({
-      data: {
-        phone: data.fromInfo.phone,
-        profilePicUrl: data.fromInfo.profilePicUrl,
-        name: data.fromInfo.pushname,
-        platform: data.fromInfo.platform
-      }
-    });
-  } else {
-    await prisma.whatsappContact.update({
-      where: { id: fromInfo.id },
-      data: {
-        phone: data.fromInfo.phone,
-        profilePicUrl: data.fromInfo.profilePicUrl,
-        name: data.fromInfo.pushname,
-        platform: data.fromInfo.platform
-      }
-    });
-  }
 
-  let toInfo = await prisma.whatsappContact.findFirst({
-    where: {
-      phone: data.toInfo.phone
-    }
-  });
-  if (!toInfo) {
-    toInfo = await prisma.whatsappContact.create({
-      data: {
-        phone: data.toInfo.phone,
-        profilePicUrl: data.toInfo.profilePicUrl,
-        name: data.toInfo.pushname,
-        platform: data.toInfo.platform
-      }
+  const fromInfo = await whatsappServices.createOrUpdateContact(data.fromInfo);
+  const toInfo = await whatsappServices.createOrUpdateContact(data.toInfo);
+
+  const hasChat = await whatsappServices.getHasChat({ contactId: data.message.fromMe ? fromInfo.id : toInfo.id, instanceId: instance.id })
+
+  if (hasChat.step === 'START' && !data.message.fromMe)
+    await sendStepStart({
+      chatId: hasChat.id,
+      phone: toInfo.phone,
+      url: instance.url,
+    })
+
+  if (hasChat.step === 'LOGIN' && !data.message.fromMe) {
+    const token = await mkGetToken(prisma);
+    const client = await getClientInfoCpf({
+      cpfCnpj: data.message.body?.replace(/\D/g, ''),
+      token: token.personCode
     });
-  } else {
-    await prisma.whatsappContact.update({
-      where: { id: toInfo.id },
-      data: {
-        phone: data.toInfo.phone,
-        profilePicUrl: data.toInfo.profilePicUrl,
-        name: data.toInfo.pushname,
-        platform: data.toInfo.platform
-      }
+
+    if (!client?.Nome) return await sendMessageQueue({
+      message: `CPF não encontrado. Por favor, digite novamente.`,
+      phone: toInfo.phone,
+      url: instance.url
     });
+
+    await sendStepLogin({
+      chatId: hasChat.id,
+      phone: toInfo.phone,
+      url: instance.url,
+      mk: {
+        externalId: client?.CodigoPessoa.toString(),
+        clientName: client?.Nome,
+        phone: client?.Fone
+      },
+      cpf: data.message.body?.replace(/\D/g, ''),
+    })
   }
 
   if (!data.message.id.id) return;
 
-  const message = await prisma.whatsappMessages.findFirst({
-    where: {
-      protocol: data.message.id.id
-    }
-  });
-
-  if (message) await prisma.whatsappMessages.update({
-    where: { id: message.id },
-    data: {
-      protocol: data.message.id.id,
-      ack: data.message.ack,
-      body: data.message.body,
-      from: fromInfo.id,
-      to: toInfo.id,
-      fromMe: data.message.fromMe,
-      instanceId: data.api_token,
-      timestamp: data.message.timestamp
-    }
-  });
-
-  await prisma.whatsappMessages.create({
-    data: {
-      protocol: data.message.id.id,
-      ack: data.message.ack,
-      body: data.message.body,
-      from: fromInfo.id,
-      to: toInfo.id,
-      fromMe: data.message.fromMe,
-      instanceId: data.api_token,
-      timestamp: data.message.timestamp
-    }
+  await whatsappServices.createOrUpdateMessage({
+    id: {
+      id: data.message.id.id
+    },
+    ack: data.message.ack,
+    body: data.message.body,
+    fromMe: data.message.fromMe,
+    timestamp: data.message.timestamp,
+    fromContactId: fromInfo.id,
+    toContactId: toInfo.id,
+    chatId: hasChat.id
   });
 
 }
@@ -249,20 +222,12 @@ async function messageAck(data: IBody) {
     }
   })
 
-  console.log('messageAcked', data.message.id.id, data.message.ack)
   if (!messageAcked) return;
 
   await prisma.whatsappMessages.update({
     where: { id: messageAcked.id },
     data: {
-      protocol: data.message.id.id,
       ack: data.message.ack,
-      body: data.message.body,
-      from: data.message.from,
-      to: data.message.to,
-      fromMe: data.message.fromMe,
-      instanceId: data.api_token,
-      timestamp: data.message.timestamp
     }
   })
 }
