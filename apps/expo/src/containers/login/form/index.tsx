@@ -23,8 +23,7 @@ const Form = () => {
                 <Username />
                 <Password />
                 <View className="flex flex-row justify-end">
-                    <TouchableOpacity onPress={() => openWhatsApp("Teste 123")}>
-
+                    <TouchableOpacity onPress={() => openWhatsApp("Esqueci minha senha SAC!")}>
                         <Text className="text-blue-500">
                             Esqueci minha senha
                         </Text></TouchableOpacity>

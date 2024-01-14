@@ -37,6 +37,19 @@ export default function Home() {
             <CardPayment invoice={lastInvoice} />
             <MainMenu />
 
+            <ActualInvoice />
+
+
+            <View className="flex flex-col items-center p-2 mt-10">
+                {(authContext.connections.data?.Conexoes.length ?? 1) > 1 && <Button onPress={() => router.replace('select-plan')}>
+                    Selecionar Ponto
+                </Button>}
+
+                <Button onPress={() => openWhatsApp('Preciso de suporte!')}>
+                    <MaterialCommunityIcons name="whatsapp" size={20} /><Text>Suporte</Text>
+                </Button>
+            </View>
+
             <YourPlan />
 
         </Page>);
