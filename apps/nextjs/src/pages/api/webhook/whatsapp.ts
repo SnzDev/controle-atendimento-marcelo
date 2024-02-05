@@ -12,27 +12,40 @@ export enum Events {
   MESSAGE_RECEIVED = 'message',
   MESSAGE_ACK = 'message_ack',
   QR_RECEIVED = 'qr',
-  DISCONNECTED = 'disconnected'
+  DISCONNECTED = 'disconnected',
+  MESSAGE_REVOKED_EVERYONE = 'message_revoke_everyone',
 }
+
+const typeMessageSchema = z.enum(['chat', 'revoked', 'image', 'video', 'audio', 'ptt', 'document', 'sticker', 'location', 'vcard', 'liveLocation', 'call']);
 
 const schema = z.object({
   api_token: z.string(),
-  event_type: z.enum([Events.READY, Events.QR_RECEIVED, Events.MESSAGE_RECEIVED, Events.MESSAGE_ACK, Events.DISCONNECTED]),
+  event_type: z.enum([Events.READY, Events.QR_RECEIVED, Events.MESSAGE_RECEIVED, Events.MESSAGE_ACK, Events.DISCONNECTED, Events.MESSAGE_REVOKED_EVERYONE]),
   qr: z.string().optional(),
   phone: z.string().optional(),
   pushname: z.string().optional(),
   platform: z.string().optional(),
   profilePicUrl: z.string().optional(),
+  fileKey: z.string().optional(),
+  mimeType: z.string().optional(),
   message: z.object({
     id: z.object({
       id: z.string()
     }),
+    isGif: z.boolean().optional(),
+    type: typeMessageSchema,
+    vCards: z.array(z.string()).optional(),
+    location: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+      description: z.string().optional()
+    }).optional(),
     ack: z.number(),
     body: z.string(),
     from: z.string(),
     to: z.string(),
     timestamp: z.number(),
-    fromMe: z.boolean()
+    fromMe: z.boolean(),
   }).optional(),
   toInfo: z.object({
     pushname: z.string(),
@@ -54,14 +67,19 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+
+
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
   const input = schema.safeParse(req.body);
 
   if (!input.success) {
+    console.log({ error: input.error })
+
     return res.status(400).json(input.error);
   }
+
 
   try {
     const body = req.body as IBody;
@@ -77,6 +95,9 @@ export default async function handler(
         break;
       case Events.MESSAGE_ACK:
         await messageAck(body);
+        break;
+      case Events.MESSAGE_REVOKED_EVERYONE:
+        await messageRevokeEveryone(body);
         break;
       case Events.DISCONNECTED:
         await disconnected(body);
@@ -157,6 +178,26 @@ async function messageReceived(data: IBody) {
 
   const hasChat = await whatsappServices.getHasChat({ contactId: data.message.fromMe ? fromInfo.id : toInfo.id, instanceId: instance.id })
 
+  await whatsappServices.createOrUpdateMessage({
+    id: {
+      id: data.message.id.id
+    },
+    ack: data.message.ack,
+    body: data.message.body,
+    fromMe: data.message.fromMe,
+    timestamp: data.message.timestamp,
+    vCards: data.message.vCards,
+    location: data.message.location,
+    fileKey: data.fileKey,
+    type: data.message.type,
+    fromContactId: fromInfo.id,
+    toContactId: toInfo.id,
+    chatId: hasChat.id,
+    mimeType: data.mimeType,
+    isGif: data.message.isGif
+  });
+
+
   if (hasChat.step === 'START' && !data.message.fromMe)
     await sendStepStart({
       chatId: hasChat.id,
@@ -184,27 +225,12 @@ async function messageReceived(data: IBody) {
       mk: {
         externalId: client?.CodigoPessoa.toString(),
         clientName: client?.Nome,
-        phone: client?.Fone
       },
       cpf: data.message.body?.replace(/\D/g, ''),
     })
   }
 
   if (!data.message.id.id) return;
-
-  await whatsappServices.createOrUpdateMessage({
-    id: {
-      id: data.message.id.id
-    },
-    ack: data.message.ack,
-    body: data.message.body,
-    fromMe: data.message.fromMe,
-    timestamp: data.message.timestamp,
-    fromContactId: fromInfo.id,
-    toContactId: toInfo.id,
-    chatId: hasChat.id
-  });
-
 }
 
 async function messageAck(data: IBody) {
@@ -252,4 +278,26 @@ async function disconnected(data: IBody) {
   });
 }
 
+async function messageRevokeEveryone(data: IBody) {
+
+  console.log("MESSAGE REVOKED");
+
+  if (!data.message) return;
+
+  const message = await prisma.whatsappMessages.findFirst({
+    where: {
+      timestamp: data.message.timestamp
+    }
+  });
+
+  if (!message) return;
+
+  await prisma.whatsappMessages.update({
+    where: { id: message.id },
+    data: {
+      isRevoked: true
+    }
+  })
+
+}
 

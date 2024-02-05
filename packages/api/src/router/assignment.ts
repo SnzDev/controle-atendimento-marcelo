@@ -631,6 +631,12 @@ export const assignmentRouter = createTRPCRouter({
           HistoryAssignment: { include: { userAction: true } },
           service: true,
           shop: true,
+          Chat:{
+            select:{
+              id:true,
+              contactId:true,
+            },
+          }
         },
         orderBy: {
           position: "asc",

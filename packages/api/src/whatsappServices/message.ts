@@ -1,6 +1,11 @@
 import { prisma } from "@acme/db";
+import { z } from "zod";
 
 
+const typeMessageSchema = z.enum(['chat', 'revoked', 'image', 'video', 'audio', 'ptt', 'document', 'sticker', 'location', 'vcard', 'liveLocation', 'call']);
+
+
+type TypeMessage = z.infer<typeof typeMessageSchema>;
 interface CreateOrUpdateMessage {
   id: {
     id: string;
@@ -12,6 +17,16 @@ interface CreateOrUpdateMessage {
   toContactId: string;
   fromContactId: string;
   chatId: string;
+  vCards?: string | string[];
+  location?: {
+    latitude: number;
+    longitude: number;
+    description?: string;
+  };
+  type: TypeMessage;
+  fileKey?: string;
+  mimeType?: string;
+  isGif?: boolean;
 }
 
 export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
@@ -26,12 +41,16 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
     data: {
       protocol: props.id.id,
       ack: props.ack,
-      body: props.body,
+      body: ['chat', 'document'].includes(props.type) ? props.body : '',
       from: props.fromContactId,
       to: props.toContactId,
       fromMe: props.fromMe,
       timestamp: props.timestamp,
       chatId: props.chatId,
+      fileKey: props.fileKey,
+      mimetype: props.mimeType,
+      isGif: props.isGif,
+      location: props.location,
     }
   });
 
@@ -39,12 +58,18 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
     data: {
       protocol: props.id.id,
       ack: props.ack,
-      body: props.body,
+      body: ['chat', 'document'].includes(props.type) ? props.body : '',
+      type: props.type,
+      vcard: props.vCards,
+      location: props.location,
       from: props.fromContactId,
       to: props.toContactId,
       fromMe: props.fromMe,
       timestamp: props.timestamp,
       chatId: props.chatId,
+      fileKey: props.fileKey,
+      mimetype: props.mimeType,
+      isGif: props.isGif,
     }
   });
 }

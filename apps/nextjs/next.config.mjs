@@ -13,7 +13,9 @@ const config = {
   eslint: { ignoreDuringBuilds: !!process.env.CI },
   typescript: { ignoreBuildErrors: !!process.env.CI },
   images :{
-    domains: ['pps.whatsapp.net'],
+    domains: ['pps.whatsapp.net',
+    'localhost',
+  ],
   }
 };
 

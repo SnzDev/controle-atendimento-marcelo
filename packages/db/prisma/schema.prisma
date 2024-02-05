@@ -276,6 +276,7 @@ model WhatsappContact {
 
 model WhatsappMessages {
   id        String   @id @default(cuid())
+  type      String   @default("chat")
   chatId    String
   from      String
   to        String
@@ -284,6 +285,12 @@ model WhatsappMessages {
   body      String
   protocol  String
   timestamp Int
+  fileKey   String?
+  isGif     Boolean  @default(false)
+  mimetype  String?
+  vcard     Json?
+  location  Json?
+  isRevoked Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

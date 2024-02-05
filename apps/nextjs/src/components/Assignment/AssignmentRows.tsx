@@ -27,22 +27,14 @@ import { IconButton, TableCell, TableRow } from "@mui/material";
 import { useSession } from "next-auth/react";
 import React from "react";
 import ChangeRegion from "../Menus/ChangeRegion";
+import { ButtonChat } from "../whatsapp/ButtonChat";
+import type { inferRouterOutputs } from '@trpc/server';
+import type { AppRouter } from "@acme/api";
+
+type Assignments = inferRouterOutputs<AppRouter>['assignment']['getAssignment']
 interface AssignmentRows {
   dateActivity: string;
-  assignments:
-  | (Assignment & {
-    service: Service;
-    client: Client;
-    shop: Shop;
-    observation: (Observation & {
-      userAction: User;
-    })[];
-    Region: Region | null;
-    HistoryAssignment: (HistoryAssignment & {
-      userAction: User;
-    })[];
-  })[]
-  | undefined;
+  assignments: Assignments;
 }
 const AssignmentRows = (props: AssignmentRows) => {
   const session = useSession();
@@ -187,6 +179,13 @@ const AssignmentRows = (props: AssignmentRows) => {
                       >
                         <ArrowDownward />
                       </IconButton>
+
+                      {assignment.Chat?.contactId && (
+                        <ButtonChat 
+                          chatId={assignment.Chat.id} 
+                          contactId={assignment.Chat.contactId} 
+                        />
+                      )}
                     </div>
                   )}
                 </div>

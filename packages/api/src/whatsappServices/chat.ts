@@ -68,10 +68,9 @@ type SendStepLoginProps = {
   mk: {
     externalId: string;
     clientName: string;
-    phone: string;
   }
 }
-export const sendStepLogin = async ({ chatId, url, cpf, mk: { clientName, phone, externalId } }: SendStepLoginProps) => {
+export const sendStepLogin = async ({ chatId, url, phone, cpf, mk: { clientName, externalId } }: SendStepLoginProps) => {
   const phrase = `Tudo certo *Sr(a). ${clientName}*, Estamos iniciando seu atendimento aguarde e em instantes um de nossos atendentes irá lhe atender.`;
 
   await sendMessageQueue({

@@ -1,15 +1,14 @@
-import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { sendMessageSync } from "../whatsappServices/api/sendMessage";
 
-
 export const whatsappRouter = createTRPCRouter({
-  getAll: publicProcedure
+  getAll: protectedProcedure
     .query(({ ctx, input }) => {
       return ctx.prisma.whatsappInstance.findMany();
     }),
-  getStatus: publicProcedure
+  getStatus: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const instance = await ctx.prisma.whatsappInstance.findUnique({
@@ -27,7 +26,7 @@ export const whatsappRouter = createTRPCRouter({
 
       return status.json();
     }),
-  logout: publicProcedure
+  logout: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const instance = await ctx.prisma.whatsappInstance.findUnique({
@@ -43,7 +42,7 @@ export const whatsappRouter = createTRPCRouter({
       });
     }
     ),
-  restart: publicProcedure
+  restart: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const instance = await ctx.prisma.whatsappInstance.findUnique({
@@ -68,7 +67,7 @@ export const whatsappRouter = createTRPCRouter({
       });
     }
     ),
-  sendMessage: publicProcedure
+  sendMessage: protectedProcedure
     .input(z.object({ instanceId: z.string().cuid(), contactId: z.string().cuid(), message: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const contact = await ctx.prisma.whatsappContact.findUnique({
@@ -102,16 +101,17 @@ export const whatsappRouter = createTRPCRouter({
       return data.json();
     }),
 
-  getAllContacts: publicProcedure
+  getAllContacts: protectedProcedure
     .query(async ({ ctx }) => {
       const contacts = await ctx.prisma.whatsappContact.findMany();
       return contacts;
     }),
-  messagesFromContact: publicProcedure
-    .input(z.object({ contactId: z.string() }))
+  messagesFromContact: protectedProcedure
+    .input(z.object({ contactId: z.string(), chatId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       const messages = await ctx.prisma.whatsappMessages.findMany({
         where: {
+          chatId: input.chatId,
           OR: [
             {
               from: input.contactId
@@ -122,6 +122,21 @@ export const whatsappRouter = createTRPCRouter({
           ]
         }
       });
-      return messages;
+
+      return messages.map(message => ({
+        ...message,
+        fileUrl: message.fileKey ? `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}/${message.fileKey}` : null
+      }));
+
     }),
+  getContactById: protectedProcedure.input(z.object({ id: z.string().cuid() })).query(async ({ ctx, input }) => {
+
+    const contact = await ctx.prisma.whatsappContact.findUnique({
+      where: {
+        id: input.id
+      }
+    });
+
+    return contact;
+  }),
 });
