@@ -11,6 +11,8 @@ import Image from "next/image";
 import React from "react";
 import { api } from "../../utils/api";
 import AssignmentRows from "./AssignmentRows";
+import { type inferRouterOutputs } from "@trpc/server";
+import { type AppRouter } from "@acme/api";
 
 interface AssignmentColumn {
   userId: string;
@@ -20,6 +22,9 @@ interface AssignmentColumn {
   services?: string[];
   clientName?: string | null;
 }
+
+type Assignments = inferRouterOutputs<AppRouter>['assignment']['getAssignment']
+
 const AssignmentColumn = (props: AssignmentColumn) => {
   const assignments = api.assignment.getAssignment.useQuery({
     userId: props.userId,
@@ -37,7 +42,7 @@ const AssignmentColumn = (props: AssignmentColumn) => {
       assignment.client.name
         ?.toLowerCase()
         .includes(props.clientName?.toLowerCase() ?? "")
-  );
+  ) as Assignments;
 
   const runningAssignments = filteredAssignment?.filter((assignment) => {
     const isToday =
