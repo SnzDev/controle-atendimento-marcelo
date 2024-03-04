@@ -1,9 +1,14 @@
 import { z } from "zod";
 
-
 const schemaValidation = z.object({
-  username: z.string().min(3, { message: "Obrigatório" }),
-  password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
+  username: z
+    .string()
+    .min(3, { message: "Obrigatório" })
+    .transform((field) => field.replace(/\D/g, "")),
+  password: z
+    .string()
+    .min(6, { message: "Mínimo 6 caracteres" })
+    .transform((field) => field.replace(/\D/g, "")),
   keepConnected: z.boolean(),
 });
 

@@ -1,21 +1,23 @@
 import { TRPCError } from "@trpc/server";
+import moment from "moment";
 import { z } from "zod";
 
-import { loginSac } from "../mkServices/loginSac";
-import { createTRPCRouter, publicProcedure } from "../trpc";
-import { getInvoiceBarNumber } from "../mkServices/getInvoiceBarNumber";
-import { getPendingInvoices } from "../mkServices/getPendingInvoices";
-import { getInvoicePdf } from "../mkServices/getInvoicePdf";
+import { type PrismaClient } from "@acme/db";
+
+import { auth } from "../mkServices/auth";
 import { getClientInfo } from "../mkServices/getClientInfo";
 import { getConnections } from "../mkServices/getConnections";
 import { getContracts } from "../mkServices/getContracts";
-import { auth } from "../mkServices/auth";
-import moment from "moment";
-import { type PrismaClient } from "@acme/db";
+import { getInvoiceBarNumber } from "../mkServices/getInvoiceBarNumber";
+import { getInvoicePdf } from "../mkServices/getInvoicePdf";
+import { getPendingInvoices } from "../mkServices/getPendingInvoices";
+import { loginSac } from "../mkServices/loginSac";
+import { selfUnblock } from "../mkServices/selfUnblock";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const mkGetToken = async (prisma: PrismaClient) => {
   const token = await prisma.sessionMk.findFirst({
-    where: { personName: 'mk', expires: { gte: new Date() } },
+    where: { personName: "mk", expires: { gte: new Date() } },
   });
   if (!token) {
     const login = await auth();
@@ -27,19 +29,18 @@ export const mkGetToken = async (prisma: PrismaClient) => {
     return await prisma.sessionMk.create({
       data: {
         personCode: login.Token,
-        personName: 'mk',
-        expires: moment(login.Expire, 'DD/MM/YYYY HH:mm:ss').toDate(),
+        personName: "mk",
+        expires: moment(login.Expire, "DD/MM/YYYY HH:mm:ss").toDate(),
       },
     });
   }
 
   return token;
-}
+};
 export const mkRouter = createTRPCRouter({
   loginSac: publicProcedure
     .input(z.object({ user_sac: z.string(), pass_sac: z.string() }))
     .mutation(async ({ input, ctx }) => {
-
       const token = await mkGetToken(ctx.prisma);
       const data = await loginSac({ ...input, token: token.personCode });
       if (data.status !== "OK")
@@ -172,7 +173,7 @@ export const mkRouter = createTRPCRouter({
       const data = await getClientInfo({
         id: Number(session.personCode),
         token: token.personCode,
-      })
+      });
 
       if (!data)
         throw new TRPCError({
@@ -199,7 +200,7 @@ export const mkRouter = createTRPCRouter({
       const data = await getConnections({
         personCode: Number(session.personCode),
         token: token.personCode,
-      })
+      });
 
       if (data.status !== "OK")
         throw new TRPCError({
@@ -227,7 +228,7 @@ export const mkRouter = createTRPCRouter({
       const data = await getContracts({
         personCode: Number(session.personCode),
         token: token.personCode,
-      })
+      });
 
       if (data.status !== "OK")
         throw new TRPCError({
@@ -237,5 +238,30 @@ export const mkRouter = createTRPCRouter({
 
       return data;
     }),
+  selfUnblock: publicProcedure
+    .input(z.object({ session: z.string(), selectedConnection: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const session = await ctx.prisma.sessionMk.findFirst({
+        where: { id: input.session, expires: { gte: new Date() } },
+      });
+      if (!session)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Sessão inválida",
+        });
 
+      const token = await mkGetToken(ctx.prisma);
+
+      const data = await selfUnblock({
+        token: token.personCode,
+        cod_conexao: input.selectedConnection,
+      });
+      if (data.status !== "OK")
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: data.Mensagem ?? "Conexão não encontrada!",
+        });
+
+      return data;
+    }),
 });
