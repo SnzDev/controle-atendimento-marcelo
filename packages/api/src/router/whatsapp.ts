@@ -4,6 +4,20 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { sendMessageSync } from "../whatsappServices/api/sendMessage";
 
 export const whatsappRouter = createTRPCRouter({
+  getQrCode: protectedProcedure
+    .query(async ({ ctx }) => {
+      const instance = await ctx.prisma.whatsappInstance.findMany({
+        select: {
+          qrCode: true
+        }
+      });
+
+      if (!instance[0])
+        throw new TRPCError({ code: "NOT_FOUND", message: "Instance not found" })
+
+      return instance[0].qrCode;
+    }),
+
   getAll: protectedProcedure
     .query(({ ctx, input }) => {
       return ctx.prisma.whatsappInstance.findMany();
@@ -100,7 +114,6 @@ export const whatsappRouter = createTRPCRouter({
 
       return data.json();
     }),
-
   getAllContacts: protectedProcedure
     .query(async ({ ctx }) => {
       const contacts = await ctx.prisma.whatsappContact.findMany();

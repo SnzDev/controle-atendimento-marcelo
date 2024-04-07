@@ -61,7 +61,7 @@ const schema = z.object({
   }).optional(),
 })
 
-type IBody = z.infer<typeof schema>;
+export type IBody = z.infer<typeof schema>;
 
 export default async function handler(
   req: NextApiRequest,

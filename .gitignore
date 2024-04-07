@@ -46,3 +46,9 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+#auth bot
+.wwebjs_auth
+
+#minio
+minio-data

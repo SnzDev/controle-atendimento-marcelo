@@ -3,12 +3,22 @@ import { ButtonQrCode } from "~/components/whatsapp/ButtonQrCode";
 import { ButtonRestart } from "~/components/whatsapp/ButtonRestart";
 import { ButtonLogout } from "~/components/whatsapp/ButtonLogout";
 import { api } from "~/utils/api";
+import { useEffect } from "react";
+import { disconnected, off } from "~/utils/socket/sub/disconnected";
+import { socket } from "~/utils/socket";
 
 
 export default function Whatsapp() {
-  const getAllInstances = api.whatsapp.getAll.useQuery(undefined, {
-    refetchInterval: 10000
-  });
+  const getAllInstances = api.whatsapp.getAll.useQuery();
+
+
+  useEffect(() => {
+    disconnected(() => getAllInstances.refetch());
+
+    return () => {
+      off()
+    }
+  }, []);
   return (
     <div>
       <h1>Whatsapp</h1>
@@ -72,7 +82,7 @@ export default function Whatsapp() {
                 <td align="center" className="px-6 py-4 text-center">
                   <div className=" flex gap-2 justify-center ">
                     {instance.status !== "OFFLINE" && (<ButtonRestart instanceId={instance.id} />)}
-                    {instance.status === "DISCONNECTED" && <ButtonQrCode qrCode={instance.qrCode} />}
+                    {instance.status === "DISCONNECTED" && <ButtonQrCode />}
                     {instance.status === "CONNECTED" && (<ButtonLogout instanceId={instance.id} />)}
                   </div>
                 </td>

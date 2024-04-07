@@ -4,12 +4,12 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "license": "MIT",
+  "type":"module",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "db:generate": "pnpm with-env prisma generate",
     "db:seed": "pnpm with-env prisma db seed",
     "db:push": "pnpm with-env prisma db push --skip-generate",
-    "dev": "pnpm with-env prisma studio --port 5556",
     "with-env": "dotenv -e ../../.env --"
   },
   "prisma": {

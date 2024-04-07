@@ -14,6 +14,19 @@ services:
       - stdoctor-mariadb-data:/var/lib/mysql
     ports:
       - 3306:3306
-
+  storage:
+    image: minio/minio
+    container_name: morpheus-minio
+    ports:
+      - 9000:9000
+      - 41277:41277
+    environment:
+      MINIO_ACCESS_KEY: 4ce753c0b96c69c08e6dac5e02d20989 # generated using node's crypto.randomBytes
+      MINIO_SECRET_KEY: 6bf480e68cddeabcc7f00c4566ddd076 # generated using node's crypto.randomBytes
+      MINIO_REGION: us-east-2
+      MINIO_HTTP_PORT: 9000
+    command: minio server /data --console-address 0.0.0.0:41277
+    volumes:
+      - ./minio-data:/data
 volumes:
   stdoctor-mariadb-data:

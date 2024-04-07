@@ -12,6 +12,7 @@ import SummaryModal from "../../components/SummaryModal";
 import useDebounce from "../../hooks/useDebounce";
 import { useWindowDimensions } from "../../hooks";
 import { api } from "../../utils/api";
+import { MessageAudio } from "~/components/socket-test/MessageAudio";
 
 export interface FilterAssignment {
   shopId: string | null;
@@ -23,17 +24,17 @@ export interface FilterAssignment {
 
 export type HandleChangeFilterAssignment =
   | {
-      key: "shopId" | "dateActivity" | "clientName";
-      value: string;
-    }
+    key: "shopId" | "dateActivity" | "clientName";
+    value: string;
+  }
   | {
-      key: "usersSelect";
-      value: string[];
-    }
+    key: "usersSelect";
+    value: string[];
+  }
   | {
-      key: "servicesSelect";
-      value: string[];
-    };
+    key: "servicesSelect";
+    value: string[];
+  };
 export default function Assignments() {
   const session = useSession();
   const [isVisibleModalCreate, setIsVisibleModalCreate] = useState(false);
@@ -61,6 +62,7 @@ export default function Assignments() {
   const role = session?.data?.user.role;
   const sessionUserId = session?.data?.user.id;
   const sessionUserName = session?.data?.user.name;
+
   const listUsers = api.user.getAll.useQuery({});
   React.useEffect(() => {
     handleChangeFilter({
@@ -151,6 +153,7 @@ export default function Assignments() {
           onClose={() => setIsOpenModalSummary(false)}
         />
       </main>
+      <MessageAudio />
     </>
   );
 }

@@ -1,16 +1,17 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import moment from "moment";
 import type {
   GetServerSidePropsContext,
   InferGetServerSidePropsType,
 } from "next";
+import { getServerSession } from "next-auth";
+import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { zodResolver } from "@hookform/resolvers/zod";
-import moment from "moment";
-import { getServerSession } from "next-auth";
-import { getProviders, signIn } from "next-auth/react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
+
 
 import { authOptions } from "@acme/auth";
 
@@ -69,6 +70,8 @@ const Login = ({
   //     void push("/atendimento");
   //   }
   // }, [session]);
+  // client-side
+
   return (
     <>
       <Head>

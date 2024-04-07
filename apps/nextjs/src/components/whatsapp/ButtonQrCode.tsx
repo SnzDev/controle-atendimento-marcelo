@@ -4,29 +4,29 @@ import { type DiscloseSelect } from "~/hooks/useDiscloseSelect";
 import { QRCodeSVG } from "qrcode.react";
 import { Loading } from "~/components/Loading";
 import Swal from "sweetalert2";
-import { type StatusInstance } from "@acme/db";
+import { useEffect, useState } from "react";
+import { socket } from "~/utils/socket";
+import { api } from "~/utils/api";
 
-interface ButtonQrCodeProps {
-  qrCode?: string | null;
-}
-const ButtonQrCode = ({ qrCode }: ButtonQrCodeProps) => {
+
+const ButtonQrCode = () => {
+
   const disclose = useDiscloseSelect();
+  const [qrCode, setQrCode] = useState<string | null>(null);
+
+
   return (<>
     <button
-      onClick={async () => {
-        if (qrCode) return disclose.onOpen();
+      onClick={
+        disclose.onOpen
 
-        await Swal.fire({
-          title: 'Ops!',
-          text: 'Ainda estamos capturando o QrCode!',
-          icon: 'warning',
-        })
-      }}
+
+      }
       className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors ">
       <QrCode />
     </button>
 
-    <ModalQrCode qrCode={qrCode} disclose={disclose} />
+    {disclose.isVisible && <ModalQrCode disclose={disclose} />}
   </>)
 }
 
@@ -35,9 +35,31 @@ const ButtonQrCode = ({ qrCode }: ButtonQrCodeProps) => {
 
 interface ModalQrCodeProps {
   disclose: DiscloseSelect;
-  qrCode?: string | null;
 }
-const ModalQrCode = ({ disclose, qrCode }: ModalQrCodeProps) => {
+const ModalQrCode = ({ disclose }: ModalQrCodeProps) => {
+  const { data: defaultQrCode, isLoading } = api.whatsapp.getQrCode.useQuery();
+
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    function handleQrCode(data: string) {
+      setQrCode(data);
+      console.log(data);
+    }
+    function handleConnected() {
+      setIsConnected(true);
+    }
+    socket.on("qr", handleQrCode);
+    socket.on("ready", handleConnected);
+
+    return () => {
+      socket.off("qr", handleQrCode);
+      socket.off("ready", handleConnected);
+    };
+  }, []);
+
+
   if (!disclose.isVisible) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-gray-900 bg-opacity-50">
@@ -56,9 +78,9 @@ const ModalQrCode = ({ disclose, qrCode }: ModalQrCodeProps) => {
             <div id="content">
 
               <div className="flex items-center justify-center p-6 h-full">
-
-                {qrCode && <div className="p-2 rounded-lg bg-white"><QRCodeSVG className="w-[20rem] h-[20rem]" value={qrCode} /></div>}
-                {!qrCode && <p className="text-lg text-white">WhatsApp Conectado!</p>}
+                {isLoading && <Loading />}
+                {!isConnected && <div className="p-2 rounded-lg bg-white"><QRCodeSVG className="w-[20rem] h-[20rem]" value={qrCode ?? defaultQrCode ?? ""} /></div>}
+                {isConnected && <p className="text-lg text-white">WhatsApp Conectado!</p>}
               </div>
 
             </div>

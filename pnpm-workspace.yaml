@@ -1,7 +1,9 @@
 packages:
   - apps/expo
   - apps/nextjs
+  - apps/bot
   - packages/api
   - packages/auth
   - packages/db
   - packages/config/*
+  - packages/socket.io
