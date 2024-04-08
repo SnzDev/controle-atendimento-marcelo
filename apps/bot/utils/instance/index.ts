@@ -4,7 +4,7 @@ import {
   type Message,
   type MessageAck,
 } from "whatsapp-web.js";
-import { SaveIfHaveFileS3 } from "../utils/saveFile";
+import { SaveIfHaveFileS3 } from "../saveFile";
 import { socket } from "~/socket";
 import { qr } from "~/socket/pub/qr";
 import { authenticated } from "~/socket/pub/authenticated";
@@ -19,6 +19,9 @@ import { changeState } from "~/socket/pub/change_state";
 import { changeProfilePic } from "~/socket/pub/change-profile-pic";
 import { changeStatus } from "~/socket/pub/change-status";
 import { messageAck } from "~/socket/pub/message-ack";
+import { getWid } from "./getWid";
+import { messageSend } from "~/socket/sub/message-send";
+import { logout } from "~/socket/sub/logout";
 
 
 export interface InstanceInfo {
@@ -61,9 +64,9 @@ class Instance {
       },
     });
 
-    this.addListeners();
-
     this.addSocketListeners();
+
+    this.addListeners();
   }
 
   start = async () => {
@@ -108,13 +111,8 @@ class Instance {
     this.client.removeAllListeners("change_status");
   };
 
-  sendMessage = async (number: string, message: string) => {
-    const data = await this.client.sendMessage(number, message, {});
-    return data;
-  };
-
   getContact = async (number: string) => {
-    const contact = await this.client.getNumberId(this.getWid(number));
+    const contact = await this.client.getNumberId(getWid(number));
     return contact;
   };
 
@@ -147,7 +145,7 @@ class Instance {
         data.from.includes("@g.us") ||
         data.id.remote.includes("@broadcast")) return;
       const contact = await this.client.getContactById(
-        data.fromMe ? data.to : data.from
+        data.from
       );
       const contactInfo: InstanceInfo = {
         phone: contact.number,
@@ -159,22 +157,24 @@ class Instance {
       const s3Uploaded = await SaveIfHaveFileS3(data);
 
       const response = {
-        ...data,
-        toInfo: data.fromMe ? this.info : contactInfo,
-        fromInfo: data.fromMe ? contactInfo : this.info,
+        message: data,
+        toInfo: this.info,
+        fromInfo: contactInfo,
         mimeType: s3Uploaded?.mimeType,
         fileKey: s3Uploaded?.fileKey,
       };
+
       message(response);
     });
 
     this.client.on("message_create", async (message) => {
       if (message.to.includes("@g.us") ||
         message.from.includes("@g.us") ||
-        message.id.remote.includes("@broadcast")) return;
+        message.id.remote.includes("@broadcast") ||
+        !message.fromMe) return;
 
       const contact = await this.client.getContactById(
-        message.fromMe ? message.to : message.from
+        message.to
       );
       const contactInfo: InstanceInfo = {
         phone: contact.number,
@@ -186,9 +186,9 @@ class Instance {
       const s3Uploaded = await SaveIfHaveFileS3(message);
 
       const data = {
-        ...message,
-        toInfo: message.fromMe ? this.info : contactInfo,
-        fromInfo: message.fromMe ? contactInfo : this.info,
+        message,
+        toInfo: contactInfo,
+        fromInfo: this.info,
         mimeType: s3Uploaded?.mimeType,
         fileKey: s3Uploaded?.fileKey,
       };
@@ -217,30 +217,10 @@ class Instance {
     this.client.on("message_ack", messageAck);
   };
   addSocketListeners = () => {
-    socket.on("sendMessage", (data) => {
-      const { number, message } = data;
-      this.sendMessage(number, message);
-
-    });
-    socket.on("getContact", async (number) => {
-      const contact = await this.getContact(number);
-      socket.emit("getContact", contact);
-    });
-    socket.on("logout", async () => {
-      await this.logout();
-    });
+    logout(this.logout);
+    messageSend(this.client);
   }
 
-  getWid = (number: string) => {
-    number = number.replace(/\D/g, "");
-    return `${number.includes("@c.us")
-      ? number
-      : `${number.includes("55")
-        ? number
-        : `${number.includes("55") ? number : `55${number}`}`
-      }@c.us`
-      }`;
-  };
 }
 
 export { Instance };

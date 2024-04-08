@@ -1,47 +1,17 @@
 import { TRPCError } from "@trpc/server";
-import moment from "moment";
 import { z } from "zod";
 
-import { type PrismaClient } from "@acme/db";
 
-import { auth } from "../mkServices/auth";
-import { getClientInfo } from "../mkServices/getClientInfo";
-import { getConnections } from "../mkServices/getConnections";
-import { getContracts } from "../mkServices/getContracts";
-import { getInvoiceBarNumber } from "../mkServices/getInvoiceBarNumber";
-import { getInvoicePdf } from "../mkServices/getInvoicePdf";
-import { getPendingInvoices } from "../mkServices/getPendingInvoices";
-import { loginSac } from "../mkServices/loginSac";
-import { selfUnblock } from "../mkServices/selfUnblock";
+
+import { getClientInfo, getConnections, getContracts, getInvoiceBarNumber, getInvoicePdf, getPendingInvoices, loginSac, mkGetToken, selfUnblock } from "@acme/mk";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
-export const mkGetToken = async (prisma: PrismaClient) => {
-  const token = await prisma.sessionMk.findFirst({
-    where: { personName: "mk", expires: { gte: new Date() } },
-  });
-  if (!token) {
-    const login = await auth();
-    if (login.status !== "OK")
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: login.Mensagem ?? "Algo deu errado",
-      });
-    return await prisma.sessionMk.create({
-      data: {
-        personCode: login.Token,
-        personName: "mk",
-        expires: moment(login.Expire, "DD/MM/YYYY HH:mm:ss").toDate(),
-      },
-    });
-  }
 
-  return token;
-};
 export const mkRouter = createTRPCRouter({
   loginSac: publicProcedure
     .input(z.object({ user_sac: z.string(), pass_sac: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const token = await mkGetToken(ctx.prisma);
+      const token = await mkGetToken();
       const data = await loginSac({ ...input, token: token.personCode });
       if (data.status !== "OK")
         throw new TRPCError({
@@ -76,7 +46,7 @@ export const mkRouter = createTRPCRouter({
       const session = await ctx.prisma.sessionMk.findFirst({
         where: { id: input.session, expires: { gte: new Date() } },
       });
-      const token = await mkGetToken(ctx.prisma);
+      const token = await mkGetToken();
 
       if (!session)
         throw new TRPCError({
@@ -114,7 +84,7 @@ export const mkRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message: "Sessão inválida",
         });
-      const token = await mkGetToken(ctx.prisma);
+      const token = await mkGetToken();
 
       const data = await getPendingInvoices({
         cd_cliente: Number(session.personCode),
@@ -141,7 +111,7 @@ export const mkRouter = createTRPCRouter({
           message: "Sessão inválida",
         });
 
-      const token = await mkGetToken(ctx.prisma);
+      const token = await mkGetToken();
 
       const data = await getInvoicePdf({
         cd_fatura: input.cd_fatura,
@@ -168,7 +138,7 @@ export const mkRouter = createTRPCRouter({
           message: "Sessão inválida",
         });
 
-      const token = await mkGetToken(ctx.prisma);
+      const token = await mkGetToken();
 
       const data = await getClientInfo({
         id: Number(session.personCode),
@@ -195,7 +165,7 @@ export const mkRouter = createTRPCRouter({
           message: "Sessão inválida",
         });
 
-      const token = await mkGetToken(ctx.prisma);
+      const token = await mkGetToken();
 
       const data = await getConnections({
         personCode: Number(session.personCode),
@@ -223,7 +193,7 @@ export const mkRouter = createTRPCRouter({
           message: "Sessão inválida",
         });
 
-      const token = await mkGetToken(ctx.prisma);
+      const token = await mkGetToken();
 
       const data = await getContracts({
         personCode: Number(session.personCode),
@@ -250,7 +220,7 @@ export const mkRouter = createTRPCRouter({
           message: "Sessão inválida",
         });
 
-      const token = await mkGetToken(ctx.prisma);
+      const token = await mkGetToken();
 
       const data = await selfUnblock({
         token: token.personCode,

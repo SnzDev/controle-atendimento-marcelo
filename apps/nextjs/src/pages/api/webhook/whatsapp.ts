@@ -4,7 +4,7 @@ import { string, z } from 'zod';
 import { whatsappServices } from '@acme/api';
 import { sendStepLogin, sendStepStart } from '@acme/api/src/whatsappServices/chat';
 import { mkGetToken } from '@acme/api/src/router/mk';
-import { getClientInfoCpf } from '@acme/api/src/mkServices';
+import { getClientInfoCpf } from '../../../../../../packages/mk';
 import { sendMessageQueue } from '@acme/api/src/whatsappServices/api/sendMessage';
 
 export enum Events {

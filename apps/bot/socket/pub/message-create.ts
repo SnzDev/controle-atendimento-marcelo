@@ -1,8 +1,9 @@
 import { type Message } from "whatsapp-web.js"
-import { type InstanceInfo } from "~/utils/instance";
 import { socket } from "..";
+import { type InstanceInfo } from "~/utils/instance";
 
-type MessageCreateProps = Message & {
+type MessageCreateProps = {
+  message: Message;
   toInfo: InstanceInfo;
   fromInfo: InstanceInfo;
   mimeType: string | undefined;

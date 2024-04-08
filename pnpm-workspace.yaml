@@ -5,5 +5,6 @@ packages:
   - packages/api
   - packages/auth
   - packages/db
+  - packages/mk
   - packages/config/*
   - packages/socket.io

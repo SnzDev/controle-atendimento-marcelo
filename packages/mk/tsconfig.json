@@ -4,7 +4,6 @@
     "src",
     "index.ts",
     "transformer.ts",
-    "../mk/src",
-    "../mk/index.ts"
+    "../mk/src"
   ]
 }

@@ -1,81 +1,45 @@
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useRef, type FormEvent, type KeyboardEvent } from "react";
 import { Spinner } from "~/components/Spinner";
-import { api } from "~/utils/api";
+import { messageSend } from "~/utils/socket/pub/message-send";
 
 type SendMessageProps = {
-  contactId: string;
-  onSend: () => void;
+  phone: string;
 }
 
-
-export const SendMessage = ({ contactId, onSend }: SendMessageProps) => {
-  const sendMessage = api.whatsapp.sendMessage.useMutation();
+export const SendMessage = ({ phone }: SendMessageProps) => {
   const session = useSession();
+  const ref = useRef<HTMLDivElement>(null);
 
-  const [message, setMessage] = useState('');
-  const ctx = api.useContext();
+  if (!session.data) return (<Spinner />);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!message || sendMessage.isLoading) return;
+  const handleSubmit = (e: KeyboardEvent<HTMLDivElement> | FormEvent<HTMLFormElement> | undefined) => {
+    e?.preventDefault();
+    if (!ref.current) return;
 
-    await sendMessage.mutateAsync({ contactId, instanceId: 'clo3gfcla0000i03nwemri43p', message },
-      {
-        onSuccess: async () => {
-          setMessage('');
-          await ctx.whatsapp.messagesFromContact.cancel();
-          const previousTodo = ctx.whatsapp.messagesFromContact.getData({ contactId });
-          const temporaryData = {
-            id: "clq1kqig5000fi10nfdtja5ome",
-            instanceId: "clo3gfc1la0000i03nwemri43p",
-            from: "clq1jexhk00011i0nf3wov5pdg",
-            to: "clq1jexh90000i01nfqeofsm07",
-            ack: 0,
-            fromMe: true,
-            body: `${session.data?.user.name ?? ''}: message`,
-            protocol: "3EB045EEAAFB5D0AE80230",
-            chatId: "clq1jexh90000i01nfqeofsm07",
-            fileKey: null,
-            fileUrl: null,
-            location: null,
-            mimetype: null,
-            type: "chat",
-            vcard: null,
-            isGif: false,
-            isRevoked: false,
-            timestamp: 1702339080,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
-          ctx.whatsapp.messagesFromContact.setData({ contactId }, (old) => old ? [...old,
-            temporaryData] :
-            [
-              temporaryData
-            ]);
-
-          // Return a context object with the snapshotted value
-          onSend();
-          return { previousTodo }
-
-        }
-
-      });
+    messageSend({ phone, message: `*${session.data.user.name}*: ${ref.current.textContent}` });
+    ref.current.textContent = "";
   }
 
   return (<form onSubmit={handleSubmit} className="flex gap-3 w-full p-4 items-end ease-in">
-    <textarea
-      className="rounded-md w-full border-slate-100 bg-slate-500 p-2 text-slate-100 shadow-lg h-fit"
-      value={message}
-      onChange={e => setMessage(e.target.value)}
-    />
+    <div
+      ref={ref}
+      contentEditable
+      role="textbox"
+      content="Digite uma mensagem123"
+      onKeyDown={e => e.key === 'Enter' && handleSubmit(e)}
+      spellCheck
+      aria-autocomplete="list"
+      title="Digite uma mensagem"
+      className="outline-none rounded max-h-[7.35em] min-h-[1.47em] user-select-text whitespace-pre-wrap break-words w-full bg-slate-500 p-2 text-slate-100 "
+    >
+    </div>
     <button
-      disabled={sendMessage.isLoading}
+
       type="submit"
       className="rounded-md h-fit border-slate-100 bg-slate-500 p-2 text-slate-100 shadow-lg hover:opacity-80 transition-opacity font-bold"
     >
-      {sendMessage.isLoading && <Spinner />}
-      {!sendMessage.isLoading && "Enviar"}
+      Enviar
     </button>
   </form>)
 }

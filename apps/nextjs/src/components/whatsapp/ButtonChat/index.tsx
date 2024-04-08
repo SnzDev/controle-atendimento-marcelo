@@ -8,8 +8,8 @@ import { Balloon } from "./Balloon";
 import { SendMessage } from "./SendMessage";
 import Image from "next/image";
 import { ImageExpand } from "~/components/ImageExpand";
-import { useEffect } from "react";
-
+import { useEffect, useState } from "react";
+import { type MessageData, messageRoom, messageRoomOff } from "~/utils/socket/sub/message-room";
 
 interface ButtonQrCodeProps {
   contactId: string;
@@ -35,11 +35,52 @@ interface ModalChatProps {
 }
 const ModalChat = ({ disclose, contactId, chatId }: ModalChatProps) => {
   const scrollToEnd = useScrollToEnd();
-  const messages = api.whatsapp.messagesFromContact.useQuery({ contactId, chatId }, {
-    refetchInterval: 5000,
-  });
+  const queryClient = api.useContext();
+
+  const dbMessages = api.whatsapp.messagesFromContact.useQuery({ contactId, chatId });
   const { data: contact } = api.whatsapp.getContactById.useQuery({ id: contactId });
 
+
+
+  useEffect(() => {
+    console.log(contact?.phone);
+
+    if (!contact?.phone) return;
+
+    messageRoom(contact?.phone, (data) => {
+      console.log("message received");
+      const info = {
+        ack: data.message.ack,
+        body: data.message.body,
+        fileKey: data.fileKey ?? null,
+        from: data.message.from,
+        fromMe: data.message.fromMe,
+        id: data.message.id.id,
+        isGif: data.message.isGif ?? false,
+        isRevoked: false,
+        location: data.message.location ?? {},
+        timestamp: data.message.timestamp,
+        to: data.message.to,
+        type: data.message.type,
+        vcard: data.message.vCards ?? [],
+        protocol: data.message.id.id ?? 0,
+        chatId: "",
+        mimetype: data.mimeType ?? null,
+        fileUrl: data.fileKey ?? null,
+        createdAt: new Date(data.message.timestamp * 1000),
+        updatedAt: new Date(data.message.timestamp * 1000),
+
+      };
+      queryClient.whatsapp.messagesFromContact.setData({ contactId, chatId }, (prev) =>
+        prev ? [...prev, info] : [info]
+      );
+
+    });
+
+    return () => {
+      messageRoomOff(contact?.phone)
+    }
+  }, [contact?.phone])
 
   return (
     <Portal>
@@ -70,14 +111,12 @@ const ModalChat = ({ disclose, contactId, chatId }: ModalChatProps) => {
 
 
           <div ref={scrollToEnd.ref} className="flex flex-col gap-2 overflow-auto mt-2 p-10">
-            {messages.data?.map(message => <Balloon key={message.id} message={message} />)}
+            {dbMessages.data?.map(message => <Balloon key={message.id} message={message} />)}
+
           </div>
 
 
-          <SendMessage onSend={() => {
-            scrollToEnd.ref.current?.scrollIntoView({ behavior: 'smooth' });
-          }}
-            contactId={contactId} />
+          {contact?.phone && <SendMessage phone={contact?.phone} />}
         </div>
 
       </div>
