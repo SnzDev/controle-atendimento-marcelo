@@ -138,7 +138,9 @@ class Instance {
       this.status = "CONNECTED";
     });
 
-    this.client.on("message_revoke_everyone", messageRevokeEveryone);
+    this.client.on("message_revoke_everyone", (e) => {
+      messageRevokeEveryone({ timestamp: e.timestamp });
+    });
 
     this.client.on("message", async (data) => {
       if (data.to.includes("@g.us") ||
@@ -214,7 +216,9 @@ class Instance {
 
     this.client.on("change_status", changeStatus);
 
-    this.client.on("message_ack", messageAck);
+    this.client.on("message_ack", (msg, ack) => {
+      messageAck({ protocol: msg.id.id, ack });
+    });
   };
   addSocketListeners = () => {
     logout(this.logout);

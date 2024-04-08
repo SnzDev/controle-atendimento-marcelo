@@ -10,6 +10,8 @@ import Image from "next/image";
 import { ImageExpand } from "~/components/ImageExpand";
 import { useEffect, useState } from "react";
 import { type MessageData, messageRoom, messageRoomOff } from "~/utils/socket/sub/message-room";
+import { messageRevokeEveryone, messageRevokeEveryoneOff } from "~/utils/socket/sub/message-revoke-everyone";
+import { messageAck, messageAckOff } from "~/utils/socket/sub/message-ack";
 
 interface ButtonQrCodeProps {
   contactId: string;
@@ -74,11 +76,52 @@ const ModalChat = ({ disclose, contactId, chatId }: ModalChatProps) => {
       queryClient.whatsapp.messagesFromContact.setData({ contactId, chatId }, (prev) =>
         prev ? [...prev, info] : [info]
       );
+      void dbMessages.refetch();
+
+    });
+
+    messageRevokeEveryone((data) => {
+      console.log("message revoked");
+
+      queryClient.whatsapp.messagesFromContact.setData({ contactId, chatId }, (prev) => {
+        const index = prev?.findIndex(message => message.timestamp === data.timestamp);
+        if (!index || index === -1 || !prev?.[index]) return prev;
+        prev[index].isRevoked = true
+        return [...prev];
+      }
+
+      );
+      void dbMessages.refetch();
+
+    }
+
+    );
+
+    messageAck((data) => {
+      console.log("message ack", data);
+      queryClient.whatsapp.messagesFromContact.setData({ contactId, chatId }, (prev) => {
+
+        const index = prev?.findIndex(message => message.protocol === data.protocol || message.id === data.protocol);
+        console.log(index, prev?.[index]);
+
+        if (!index || index === -1 || !prev?.[index]) return prev;
+        console.log(prev[index].ack);
+
+        prev[index].ack = data.ack;
+        console.log(prev[index].ack);
+
+        return [...prev];
+      }
+
+      );
+      void dbMessages.refetch();
 
     });
 
     return () => {
-      messageRoomOff(contact?.phone)
+      messageRoomOff(contact.phone);
+      messageRevokeEveryoneOff();
+      messageAckOff();
     }
   }, [contact?.phone])
 

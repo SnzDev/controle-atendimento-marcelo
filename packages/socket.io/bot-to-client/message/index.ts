@@ -55,7 +55,7 @@ export const message = (socket: Socket) => {
     const fromInfo = await createOrUpdateContact(parse.data.fromInfo);
     const toInfo = await createOrUpdateContact(parse.data.toInfo);
 
-    const hasChat = await getHasChat({ contactId: parse.data.message.fromMe ? fromInfo.id : toInfo.id, instanceId: instance[0].id })
+    const hasChat = await getHasChat({ contactId: fromInfo.id, instanceId: instance[0].id })
 
     await createOrUpdateMessage({
       id: {
@@ -80,15 +80,14 @@ export const message = (socket: Socket) => {
       await sendStepStart({
         socket,
         chatId: hasChat.id,
-        phone: toInfo.phone,
+        phone: fromInfo.phone,
       })
 
     if (hasChat.step === 'LOGIN') {
       await sendStepLogin({
         socket,
-
         chatId: hasChat.id,
-        phone: toInfo.phone,
+        phone: fromInfo.phone,
         cpf: parse.data.message.body?.replace(/\D/g, ''),
       })
     }

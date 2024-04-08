@@ -7,6 +7,8 @@ import { disconnected } from "./bot-to-client/disconnected";
 import { messageSend } from "./client-to-bot/message-send";
 import { message } from "./bot-to-client/message";
 import { messageCreate } from "./bot-to-client/message-create";
+import { messageAck } from "./bot-to-client/message-ack";
+import { messageRevokeEveryone } from "./bot-to-client/message-revoke-everyone";
 
 const server = http.createServer();
 const io = new Server(server, { cors: { origin: "*" } });
@@ -25,22 +27,13 @@ io.on("connection", (socket) => {
   disconnected(socket);
   message(socket);
   messageCreate(socket);
-  ack(socket);
+  messageAck(socket);
+  messageRevokeEveryone(socket);
 
   //Client to Bot
   logout(socket);
   messageSend(socket);
 
-
-  // socket.on("instance_message_create", (data) => {
-  //   console.log("messageCreated");
-  //   socket.broadcast.emit("message_create", data);
-  // });
-
-  // socket.on("instance_message_ack", (data) => {
-  //   console.log("instance_message_ack", data);
-  //   socket.broadcast.emit("message_ack", data);
-  // });
 });
 
 server.listen(PORT, () => {
