@@ -46,7 +46,7 @@ type MessageData = z.infer<typeof messageSchema>;
 export const messageCreate = (socket: Socket) => {
   socket.on("message_create", async (data: MessageData) => {
     socket.broadcast.emit(`message-${data.toInfo.phone}`, data);
-    console.log(`message-${data.toInfo.phone}`, data);
+    // console.log(`message-${data.toInfo.phone}`, data);
     const parse = messageSchema.safeParse(data);
     const instance = await prisma.whatsappInstance.findMany();
 
@@ -55,7 +55,7 @@ export const messageCreate = (socket: Socket) => {
     const fromInfo = await createOrUpdateContact(parse.data.fromInfo);
     const toInfo = await createOrUpdateContact(parse.data.toInfo);
 
-    const hasChat = await getHasChat({ contactId: parse.data.message.fromMe ? fromInfo.id : toInfo.id, instanceId: instance[0].id })
+    const hasChat = await getHasChat({ contactId: toInfo.id, instanceId: instance[0].id })
 
     await createOrUpdateMessage({
       id: {

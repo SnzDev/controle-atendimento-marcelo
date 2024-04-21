@@ -113,17 +113,18 @@ model Service {
 }
 
 model Client {
-  id         String       @id @default(cuid())
-  name       String
-  cpf        String?
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  deletedAt  DateTime?
-  deletedBy  String?
-  user       User?        @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  externalId String?
-  phone      String?
-  Assignment Assignment[]
+  id           String         @id @default(cuid())
+  name         String
+  cpf          String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+  deletedBy    String?
+  user         User?          @relation(fields: [deletedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  externalId   String?
+  phone        String?
+  Assignment   Assignment[]
+  WhatsappChat WhatsappChat[]
 
   @@index([deletedBy])
   @@index([externalId])
@@ -282,7 +283,7 @@ model WhatsappMessages {
   to        String
   ack       Int
   fromMe    Boolean
-  body      String
+  body      String   @db.Text
   protocol  String
   timestamp Int
   fileKey   String?
@@ -304,13 +305,17 @@ model WhatsappMessages {
 }
 
 model WhatsappChat {
-  id         String    @id @default(cuid())
+  id         String   @id @default(cuid())
   instanceId String
   contactId  String
-  step       ChatSteps @default(START)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  step       String   @default("START")
+  clientId   String?
+  tries      Int      @default(0)
+  variables  Json     @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
+  client           Client?            @relation(fields: [clientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   instance         WhatsappInstance   @relation(fields: [instanceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   contact          WhatsappContact    @relation(fields: [contactId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   WhatsappMessages WhatsappMessages[]
@@ -318,6 +323,7 @@ model WhatsappChat {
 
   @@index([instanceId])
   @@index([contactId])
+  @@index([clientId])
 }
 
 model Region {

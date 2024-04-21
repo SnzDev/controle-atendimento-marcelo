@@ -35,13 +35,15 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
       protocol: props.id.id
     }
   });
+  console.log({ props })
+  const body = ['chat', 'document', 'image'].includes(props.type) ? props.body : '';
 
   if (message) return await prisma.whatsappMessages.update({
     where: { id: props.id.id },
     data: {
       protocol: props.id.id,
       ack: props.ack,
-      body: ['chat', 'document'].includes(props.type) ? props.body : '',
+      body,
       from: props.fromContactId,
       to: props.toContactId,
       fromMe: props.fromMe,
@@ -58,7 +60,7 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
     data: {
       protocol: props.id.id,
       ack: props.ack,
-      body: ['chat', 'document'].includes(props.type) ? props.body : '',
+      body,
       type: props.type,
       vcard: props.vCards,
       location: props.location,

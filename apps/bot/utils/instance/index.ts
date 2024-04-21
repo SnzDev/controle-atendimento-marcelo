@@ -30,7 +30,7 @@ export interface InstanceInfo {
   phone: string;
   profilePicUrl: string;
 }
-const VERSION_CACHE = "2.2409.2";
+const VERSION_CACHE = "2.2412.50";
 
 class Instance {
   client: Client;

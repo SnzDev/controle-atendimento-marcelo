@@ -3,6 +3,7 @@ import { type Socket } from "socket.io";
 type MessageData = {
   phone: string;
   message: string;
+  fileUrl?: string;
 }
 
 export const messageSend = (socket: Socket) => {

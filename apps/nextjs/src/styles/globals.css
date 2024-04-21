@@ -40,3 +40,11 @@ textarea {
 
   resize: none; /*remove the resize handle on the bottom right*/
 }
+
+code {
+  font-family: Consolas,"courier new";
+  background-color: rgba(27, 27, 27, 0.1);
+  padding: 3px;
+  font-size: 105%;
+  border-radius: 10px;
+}

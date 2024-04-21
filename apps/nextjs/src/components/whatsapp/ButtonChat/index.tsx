@@ -45,7 +45,6 @@ const ModalChat = ({ disclose, contactId, chatId }: ModalChatProps) => {
 
 
   useEffect(() => {
-    console.log(contact?.phone);
 
     if (!contact?.phone) return;
 
@@ -71,7 +70,6 @@ const ModalChat = ({ disclose, contactId, chatId }: ModalChatProps) => {
         fileUrl: data.fileKey ?? null,
         createdAt: new Date(data.message.timestamp * 1000),
         updatedAt: new Date(data.message.timestamp * 1000),
-
       };
       queryClient.whatsapp.messagesFromContact.setData({ contactId, chatId }, (prev) =>
         prev ? [...prev, info] : [info]
@@ -92,10 +90,7 @@ const ModalChat = ({ disclose, contactId, chatId }: ModalChatProps) => {
 
       );
       void dbMessages.refetch();
-
-    }
-
-    );
+    });
 
     messageAck((data) => {
       console.log("message ack", data);
@@ -124,7 +119,7 @@ const ModalChat = ({ disclose, contactId, chatId }: ModalChatProps) => {
       messageAckOff();
     }
   }, [contact?.phone])
-
+  console.log(contact?.phone, dbMessages.data)
   return (
     <Portal>
       <div className="fixed inset-0 z-[1200] flex items-center justify-center w-screen h-screen bg-gray-900 bg-opacity-50 backdrop-blur-sm">

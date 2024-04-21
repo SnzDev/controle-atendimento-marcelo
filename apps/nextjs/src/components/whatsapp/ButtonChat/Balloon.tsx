@@ -22,9 +22,25 @@ export const Balloon = ({ message }: BalloonProps) => {
   const isAudio = message.type === 'ptt';
   const isLocation = message.type === 'location';
   const isDocument = message.type === 'document';
+  //body can be \n to break line
+  //body can be *bold* to bold
+  //body can be _italic_ to italic
+  //body can be ~strikethrough~ to strikethrough
+  //body can be `monospace` to monospace and 
+  //whitout any of this it will be a paragraph
 
+
+  const messageHtml = message.body
+    .replace(/\n/g, '<br>')
+    .replace(/\*(.*?)\*/g, '<b>$1</b>')
+    .replace(/_(.*?)_/g, '<i>$1</i>')
+    .replace(/~(.*?)~/g, '<s>$1</s>')
+    .replace(/`(.*?)`/g, "<code>$1</code>")
+    .replace(/"(.*?)"/g, "<p>$1</p>")
+
+  console.log({ messageHtml })
   return (
-    <div className={`flex gap-1 max-w-[20rem] h-fit flex-col flex-wrap p-2 items-end rounded-lg ${message.fromMe ? 'self-end bg-green-500 text-white' : 'self-start bg-white text-slate-800'}`}>
+    <div className={`flex relative  gap-1 max-w-[20rem] h-fit flex-col flex-wrap p-2 items-end rounded-lg ${message.fromMe ? 'self-end bg-green-300 text-black' : 'self-start bg-white text-slate-800'}`}>
       {message.isRevoked &&
         <div>
           <p className="text-gray-500 flex flex-row gap-2 items-center">
@@ -39,8 +55,10 @@ export const Balloon = ({ message }: BalloonProps) => {
       {message.location && isLocation && <LocationBody location={message.location as Location} />}
       {message.fileUrl && isDocument && <DocumentBody documentUrl={message.fileUrl} />}
 
-      <span className="text-lg">{message.body}</span>
-      <span className="text-xs mt-[-5px] w-full flex items-center justify-end" >
+
+      <div className="w-full break-words" dangerouslySetInnerHTML={{ __html: messageHtml }}></div>
+
+      <span className="text-xs mt-[-5px] w-full flex items-center justify-end gap-1" >
         {date}
         {message.fromMe && <AckIcon ack={message.ack} />}
       </span>

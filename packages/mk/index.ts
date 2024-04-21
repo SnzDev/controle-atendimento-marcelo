@@ -9,8 +9,8 @@ import { getInvoicePdf } from "./src/getInvoicePdf";
 import { getPendingInvoices } from "./src/getPendingInvoices";
 import { loginSac } from "./src/loginSac";
 import { selfUnblock } from "./src/selfUnblock";
-
-
+import { getConnectionsWithContract } from "./src/getConnectionsWithContract";
+import { getInvoiceWithPdfAndBar } from "./src/getInvoiceWithPdfAndBar";
 export {
   getClientInfoCpf,
   mk,
@@ -23,5 +23,7 @@ export {
   getInvoicePdf,
   getPendingInvoices,
   loginSac,
-  selfUnblock
+  selfUnblock,
+  getConnectionsWithContract,
+  getInvoiceWithPdfAndBar
 };

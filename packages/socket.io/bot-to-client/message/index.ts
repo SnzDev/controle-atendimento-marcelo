@@ -4,8 +4,10 @@ import { z } from "zod";
 import { getHasChat } from "../utils/chat";
 import { createOrUpdateContact } from "../utils/contact";
 import { createOrUpdateMessage, typeMessageSchema } from "../utils/message";
-import { sendStepLogin } from "./steps/login";
-import { sendStepStart } from "./steps/start";
+import { sendStepLogin, sendStepMenuAfterLogin } from "./steps/login";
+import { sendMenu, sendResponseMenu } from "./steps/menu";
+import { sendStepInternetIssues } from "./steps/internetIssues";
+import { sendStepFinancialIssues, sendStepSecondVia } from "./steps/financialIssues";
 const messageSchema = z.object({
   fileKey: z.string().optional(),
   mimeType: z.string().optional(),
@@ -45,8 +47,8 @@ type MessageData = z.infer<typeof messageSchema>;
 export const message = (socket: Socket) => {
 
   socket.on("message", async (data: MessageData) => {
-    socket.broadcast.emit(`message-${data.fromInfo.phone}`, data);
-    console.log(`message-${data.fromInfo.phone}`, data);
+    socket.broadcast.emit(`message-${data.fromInfo.phone}`, { ...data, fileKey: data.fileKey ? `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}/${data.fileKey}` : undefined });
+    // console.log(`message-${data.fromInfo.phone}`, data);
     const parse = messageSchema.safeParse(data);
     const instance = await prisma.whatsappInstance.findMany();
 
@@ -76,20 +78,67 @@ export const message = (socket: Socket) => {
       isGif: parse.data.message.isGif
     });
 
-    if (hasChat.step === 'START')
-      await sendStepStart({
-        socket,
-        chatId: hasChat.id,
-        phone: fromInfo.phone,
-      })
+    switch (hasChat.step) {
+      case 'START':
+        await sendMenu({
+          socket,
+          chatId: hasChat.id,
+          phone: fromInfo.phone,
+        })
+        break;
+      case 'START_MENU':
+        await sendResponseMenu({
+          socket,
+          chatId: hasChat.id,
+          phone: fromInfo.phone,
+          body: parse.data.message.body,
+        })
+        break;
+      case 'LOGIN':
+        await sendStepLogin({
+          socket,
+          chatId: hasChat.id,
+          phone: fromInfo.phone,
+          body: parse.data.message.body,
+        })
+        break;
 
-    if (hasChat.step === 'LOGIN') {
-      await sendStepLogin({
-        socket,
-        chatId: hasChat.id,
-        phone: fromInfo.phone,
-        cpf: parse.data.message.body?.replace(/\D/g, ''),
-      })
+      case 'MENU_AFTER_LOGIN':
+        await sendStepMenuAfterLogin({
+          socket,
+          chatId: hasChat.id,
+          phone: fromInfo.phone,
+          body: parse.data.message.body,
+        })
+        break;
+
+      case 'INTERNET_ISSUES':
+        await sendStepInternetIssues({
+          socket,
+          chatId: hasChat.id,
+          phone: fromInfo.phone,
+          body: parse.data.message.body,
+        })
+        break;
+
+      case 'FINANCIAL_ISSUES':
+        await sendStepFinancialIssues({
+          socket,
+          chatId: hasChat.id,
+          phone: fromInfo.phone,
+          body: parse.data.message.body,
+        })
+        break;
+
+      case 'SECOND_VIA':
+        await sendStepSecondVia({
+          socket,
+          chatId: hasChat.id,
+          phone: fromInfo.phone,
+          body: parse.data.message.body,
+        })
+      default:
+        break;
     }
 
     if (!parse.data.message.id.id) return;
