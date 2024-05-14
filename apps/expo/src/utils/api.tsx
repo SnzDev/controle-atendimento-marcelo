@@ -29,7 +29,7 @@ export const getBaseUrl = () => {
   const debuggerHost = Constants.expoConfig?.hostUri;
   const localhost = debuggerHost?.split(":")[0];
 
-  return "http://177.10.118.1:3001";
+  return "http://morpheus.acessenettelecom.com.br:3001";
 
   if (!localhost) {
     const apiUrl = process.env.EXPO_PUBLIC_API_URL;
