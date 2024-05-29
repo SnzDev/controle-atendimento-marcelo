@@ -120,6 +120,7 @@ class Instance {
     this.client.on("qr", (data) => {
       qr(data);
       this.status = "DISCONNECTED";
+      console.log("qr");
     });
 
     this.client.on("authenticated", authenticated);
@@ -143,9 +144,14 @@ class Instance {
     });
 
     this.client.on("message", async (data) => {
-      if (data.to.includes("@g.us") ||
-        data.from.includes("@g.us") ||
-        data.id.remote.includes("@broadcast")) return;
+      if (
+        // data.to.includes("@g.us") ||
+        // data.from.includes("@g.us") ||
+        // data.id.remote.includes("@broadcast")
+        !data.to.includes("@c.us") ||
+        !data.from.includes("@c.us")
+      )
+        return;
       const contact = await this.client.getContactById(
         data.from
       );
@@ -170,10 +176,16 @@ class Instance {
     });
 
     this.client.on("message_create", async (message) => {
-      if (message.to.includes("@g.us") ||
-        message.from.includes("@g.us") ||
-        message.id.remote.includes("@broadcast") ||
-        !message.fromMe) return;
+      if (
+        // data.to.includes("@g.us") ||
+        // data.from.includes("@g.us") ||
+        // data.id.remote.includes("@broadcast")
+        !message.to.includes("@c.us") ||
+        !message.from.includes("@c.us") ||
+        !message.fromMe
+
+      )
+        return;
 
       const contact = await this.client.getContactById(
         message.to
