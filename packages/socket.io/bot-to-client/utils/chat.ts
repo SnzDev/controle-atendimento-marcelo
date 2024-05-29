@@ -47,6 +47,8 @@ type VariablesFromChatResponse = {
   clientMk: ClientInfoResponse;
   cpf: string;
   locations: Awaited<ConnectionWithContract>
+  selectedExpiredInvoice?: string;
+  selectedExpiredConnection?: string;
 
 }
 export const getVariablesFromChat = async (chatId: string) => {

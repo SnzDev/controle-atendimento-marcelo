@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getHasChat } from "../utils/chat";
 import { createOrUpdateContact } from "../utils/contact";
 import { createOrUpdateMessage, typeMessageSchema } from "../utils/message";
-import { sendStepLogin, sendStepMenuAfterLogin } from "./steps/login";
+import { sendConnectionWithExpiredInvoice, sendStepLogin, sendStepMenuAfterLogin } from "./steps/login";
 import { sendMenu, sendResponseMenu } from "./steps/menu";
 import { sendStepInternetIssues } from "./steps/internetIssues";
 import { sendStepFinancialIssues, sendStepSecondVia } from "./steps/financialIssues";
@@ -137,6 +137,14 @@ export const message = (socket: Socket) => {
           phone: fromInfo.phone,
           body: parse.data.message.body,
         })
+      case "CONNECTION_WITH_EXPIRED_INVOICE":
+        await sendConnectionWithExpiredInvoice({
+          socket,
+          chatId: hasChat.id,
+          phone: fromInfo.phone,
+          body: parse.data.message.body,
+        })
+        break;
       default:
         break;
     }
