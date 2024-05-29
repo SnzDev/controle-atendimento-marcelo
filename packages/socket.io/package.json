@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx index.ts",
+    "start": "tsx index.ts",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix",
