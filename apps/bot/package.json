@@ -6,11 +6,12 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx index.ts",
-    "start": "tsx index.ts",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "start": "pnpm with-env tsx index.ts",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "minio": "^7.1.3",
