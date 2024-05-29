@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { getClientInfo, getConnections, getContracts, getInvoiceBarNumber, getInvoicePdf, getPendingInvoices, loginSac, mkGetToken, selfUnblock } from "@acme/mk";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-
+export { mkGetToken };
 
 export const mkRouter = createTRPCRouter({
   loginSac: publicProcedure

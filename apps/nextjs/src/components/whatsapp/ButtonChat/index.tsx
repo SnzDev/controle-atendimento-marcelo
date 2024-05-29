@@ -1,17 +1,23 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { MessageSquare, X } from "lucide-react";
+import Image from "next/image";
+import { useEffect } from "react";
+import { ImageExpand } from "~/components/ImageExpand";
 import { Portal } from "~/components/Portal";
 import { useDiscloseSelect } from "~/hooks";
 import { type DiscloseSelect } from "~/hooks/useDiscloseSelect";
 import useScrollToEnd from "~/hooks/useScrollToEnd";
 import { api } from "~/utils/api";
+import { messageAck, messageAckOff } from "~/utils/socket/sub/message-ack";
+import { messageRevokeEveryone, messageRevokeEveryoneOff } from "~/utils/socket/sub/message-revoke-everyone";
+import { messageRoom, messageRoomOff } from "~/utils/socket/sub/message-room";
 import { Balloon } from "./Balloon";
 import { SendMessage } from "./SendMessage";
-import Image from "next/image";
-import { ImageExpand } from "~/components/ImageExpand";
-import { useEffect, useState } from "react";
-import { type MessageData, messageRoom, messageRoomOff } from "~/utils/socket/sub/message-room";
-import { messageRevokeEveryone, messageRevokeEveryoneOff } from "~/utils/socket/sub/message-revoke-everyone";
-import { messageAck, messageAckOff } from "~/utils/socket/sub/message-ack";
 
 interface ButtonQrCodeProps {
   contactId: string;
@@ -84,7 +90,11 @@ const ModalChat = ({ disclose, contactId, chatId }: ModalChatProps) => {
       queryClient.whatsapp.messagesFromContact.setData({ contactId, chatId }, (prev) => {
         const index = prev?.findIndex(message => message.timestamp === data.timestamp);
         if (!index || index === -1 || !prev?.[index]) return prev;
-        prev[index].isRevoked = true
+
+        const info = prev[index];
+
+        if (info) info.isRevoked = true;
+
         return [...prev];
       }
 
@@ -97,13 +107,11 @@ const ModalChat = ({ disclose, contactId, chatId }: ModalChatProps) => {
       queryClient.whatsapp.messagesFromContact.setData({ contactId, chatId }, (prev) => {
 
         const index = prev?.findIndex(message => message.protocol === data.protocol || message.id === data.protocol);
-        console.log(index, prev?.[index]);
 
         if (!index || index === -1 || !prev?.[index]) return prev;
-        console.log(prev[index].ack);
+        const info = prev[index];
 
-        prev[index].ack = data.ack;
-        console.log(prev[index].ack);
+        if (info) info.ack = data.ack;
 
         return [...prev];
       }

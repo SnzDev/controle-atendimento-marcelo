@@ -206,7 +206,7 @@ async function messageReceived(data: IBody) {
     })
 
   if (hasChat.step === 'LOGIN' && !data.message.fromMe) {
-    const token = await mkGetToken(prisma);
+    const token = await mkGetToken();
     const client = await getClientInfoCpf({
       cpfCnpj: data.message.body?.replace(/\D/g, ''),
       token: token.personCode

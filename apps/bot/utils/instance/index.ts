@@ -30,7 +30,7 @@ export interface InstanceInfo {
   phone: string;
   profilePicUrl: string;
 }
-const VERSION_CACHE = "2.2412.50";
+const VERSION_CACHE = process.env.WA_VERSION ?? "2.2412.54";
 
 class Instance {
   client: Client;
