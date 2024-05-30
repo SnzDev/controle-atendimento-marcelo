@@ -56,11 +56,11 @@ export const userRouter = createTRPCRouter({
           message: "Usuário já em uso",
         });
       const saltRounds = 10;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+
       const encryptedPassword = bcrypt.hashSync(password, saltRounds);
 
       const created = await ctx.prisma.user.create({
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         data: { password: encryptedPassword, ...input },
       });
       if (created)
@@ -90,9 +90,9 @@ export const userRouter = createTRPCRouter({
         role: z.enum([UserRole.ADMIN, UserRole.TECH, UserRole.USER]),
       })
     )
-    .mutation(async ({ ctx, input: { password, ...input } }) => {
+    .mutation(async ({ ctx, input: { password, id, ...input } }) => {
       const existsUserWithEmail = await ctx.prisma.user.findFirst({
-        where: { userName: input.userName, id: { not: input.id } },
+        where: { userName: input.userName, id: { not: id } },
       });
       if (existsUserWithEmail)
         throw new TRPCError({
@@ -101,14 +101,14 @@ export const userRouter = createTRPCRouter({
         });
 
       const saltRounds = 10;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+
       const encryptedPassword = bcrypt.hashSync(password ?? "", saltRounds);
 
       const updated = await ctx.prisma.user.update({
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         data: { password: password ? encryptedPassword : undefined, ...input },
         where: {
-          id: input.id,
+          id: id,
         },
       });
 
