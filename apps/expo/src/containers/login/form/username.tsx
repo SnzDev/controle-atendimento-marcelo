@@ -1,28 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { withMask } from "use-mask-input";
 
 import Input from "~/components/ui/input";
 import MaskInput from "~/components/ui/mask-input";
 import type { FieldValues } from "./schema";
+import { Masks } from 'react-native-mask-input';
 
-const CPF_MASK = [
-  "",
-  /\d/,
-  /\d/,
-  /\d/,
-  ".",
-  /\d/,
-  /\d/,
-  /\d/,
-  ".",
-  /\d/,
-  /\d/,
-  /\d/,
-  "-",
-  /\d/,
-  /\d/,
-];
+
 
 const Username = () => {
   const hookform = useFormContext<FieldValues>();
@@ -39,7 +24,7 @@ const Username = () => {
           }}
           placeholder="Usuário"
           error={fieldState.error?.message}
-          mask={CPF_MASK}
+          mask={Masks.BRL_CPF_CNPJ}
         />
       )}
     />

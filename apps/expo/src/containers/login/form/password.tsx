@@ -17,7 +17,7 @@ const Password = () => {
                 <Input
                     {...field}
                     onChangeText={text => {
-                        onChange(text.toLowerCase());
+                        onChange(text.toLowerCase().replace(/\D/g, ''));
                     }}
                     placeholder="Senha"
                     secureTextEntry={!showPassword}
