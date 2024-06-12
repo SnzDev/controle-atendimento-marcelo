@@ -54,8 +54,8 @@ importers:
         specifier: ^4.6.2
         version: 4.6.2
       whatsapp-web.js:
-        specifier: 1.23.1-alpha.5
-        version: 1.23.1-alpha.5
+        specifier: github:pedroslopez/whatsapp-web.js#webpack-exodus
+        version: github.com/pedroslopez/whatsapp-web.js/bbb8d18274ab887c20f1778a9b17706cbbeac472
       zod:
         specifier: ^3.21.4
         version: 3.22.4
@@ -5622,8 +5622,8 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
-  /devtools-protocol@0.0.981744:
-    resolution: {integrity: sha512-0cuGS8+jhR67Fy7qG3i3Pc7Aw494sb9yG9QgpG97SFVWwolgYjlhJg7n+UaHxOQT30d1TYu/EYe9k01ivLErIg==}
+  /devtools-protocol@0.0.1045489:
+    resolution: {integrity: sha512-D+PTmWulkuQW4D1NTiCRCFxF7pQPn0hgp4YyX4wAQ6xYXKOadSWPR3ENGDQ47MW/Ewc9v2rpC/UEEGahgBYpSQ==}
     dev: false
 
   /didyoumean@1.2.2:
@@ -6966,6 +6966,7 @@ packages:
   /fstream@1.0.12:
     resolution: {integrity: sha512-WvJ193OHa0GHPEL+AycEJgxvBEwyfRkN1vhjca23OaPVMCaLCXTd5qAu82AjTcgP1UJmytkOKb63Ypde7raDIg==}
     engines: {node: '>=0.6'}
+    deprecated: This package is no longer supported.
     requiresBuild: true
     dependencies:
       graceful-fs: 4.2.11
@@ -9051,8 +9052,8 @@ packages:
     engines: {node: '>=0.12.0'}
     dev: false
 
-  /node-webpmux@3.1.0:
-    resolution: {integrity: sha512-0fBo2eDIxLBVyFLqLJwPxQAgwRnMhv/l8M8kKWRuFvPz+InrLh+AAt8faVLaOlO8bQBA7MPEt5o12nc9uHu21g==}
+  /node-webpmux@3.1.7:
+    resolution: {integrity: sha512-ySkL4lBCto86OyQ0blAGzylWSECcn5I0lM3bYEhe75T8Zxt/BFUMHa8ktUguR7zwXNdS/Hms31VfSsYKN1383g==}
     dev: false
 
   /nopt@5.0.0:
@@ -9510,13 +9511,6 @@ packages:
       find-up: 3.0.0
     dev: false
 
-  /pkg-dir@4.2.0:
-    resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
-    engines: {node: '>=8'}
-    dependencies:
-      find-up: 4.1.0
-    dev: false
-
   /pkg-up@3.1.0:
     resolution: {integrity: sha512-nDywThFk1i4BQK4twPQ6TA4RT8bDY96yeuCVBWL3ePARCiEKDRSrNGbFIgUJpLp+XeIR65v8ra7WuJOFUBtkMA==}
     engines: {node: '>=8'}
@@ -9832,24 +9826,37 @@ packages:
     resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
     engines: {node: '>=6'}
 
-  /puppeteer@13.7.0:
-    resolution: {integrity: sha512-U1uufzBjz3+PkpCxFrWzh4OrMIdIb2ztzCu0YEPfRHjHswcSwHZswnK+WdsOQJsRV8WeTg3jLhJR4D867+fjsA==}
-    engines: {node: '>=10.18.1'}
-    deprecated: < 21.8.0 is no longer supported
-    requiresBuild: true
+  /puppeteer-core@18.2.1:
+    resolution: {integrity: sha512-MRtTAZfQTluz3U2oU/X2VqVWPcR1+94nbA2V6ZrSZRVEwLqZ8eclZ551qGFQD/vD2PYqHJwWOW/fpC721uznVw==}
+    engines: {node: '>=14.1.0'}
     dependencies:
       cross-fetch: 3.1.5
       debug: 4.3.4
-      devtools-protocol: 0.0.981744
+      devtools-protocol: 0.0.1045489
       extract-zip: 2.0.1
       https-proxy-agent: 5.0.1
-      pkg-dir: 4.2.0
-      progress: 2.0.3
       proxy-from-env: 1.1.0
       rimraf: 3.0.2
       tar-fs: 2.1.1
       unbzip2-stream: 1.4.3
-      ws: 8.5.0
+      ws: 8.9.0
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+    dev: false
+
+  /puppeteer@18.2.1:
+    resolution: {integrity: sha512-7+UhmYa7wxPh2oMRwA++k8UGVDxh3YdWFB52r9C3tM81T6BU7cuusUSxImz0GEYSOYUKk/YzIhkQ6+vc0gHbxQ==}
+    engines: {node: '>=14.1.0'}
+    deprecated: < 22.6.4 is no longer supported
+    requiresBuild: true
+    dependencies:
+      https-proxy-agent: 5.0.1
+      progress: 2.0.3
+      proxy-from-env: 1.1.0
+      puppeteer-core: 18.2.1
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -11791,27 +11798,6 @@ packages:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
     dev: false
 
-  /whatsapp-web.js@1.23.1-alpha.5:
-    resolution: {integrity: sha512-eA2CWGZI4zmbFfX2buITZo/If31mzk/hVYGN07aDJublj4RxHCuGYiop4rouHH0e6HK9FX6Ak8Zp2Sr2BbTYcw==}
-    engines: {node: '>=12.0.0'}
-    dependencies:
-      '@pedroslopez/moduleraid': 5.0.2
-      fluent-ffmpeg: 2.1.2
-      mime: 3.0.0
-      node-fetch: 2.7.0
-      node-webpmux: 3.1.0
-      puppeteer: 13.7.0
-    optionalDependencies:
-      archiver: 5.3.2
-      fs-extra: 10.1.0
-      unzipper: 0.10.14
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - utf-8-validate
-    dev: false
-
   /whatwg-fetch@3.6.19:
     resolution: {integrity: sha512-d67JP4dHSbm2TrpFj8AbO8DnL1JXL5J9u0Kq2xW6d0TFDbCA3Muhdt8orXC22utleTVj7Prqt82baN6RBvnEgw==}
     dev: false
@@ -11980,8 +11966,8 @@ packages:
         optional: true
     dev: false
 
-  /ws@8.5.0:
-    resolution: {integrity: sha512-BWX0SWVgLPzYwF8lTzEy1egjhS4S4OEAHfsO8o65WOVsrnSRGaSiUaa9e0ggGlkMTtBlmOpEXiie9RUcBO86qg==}
+  /ws@8.9.0:
+    resolution: {integrity: sha512-Ja7nszREasGaYUYCI2k4lCKIRTt+y7XuqVoHR44YpI49TtryyqbqvDMn5eqfW7e6HzTukDRIsXqzVHScqRcafg==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -12136,4 +12122,27 @@ packages:
 
   /zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
+    dev: false
+
+  github.com/pedroslopez/whatsapp-web.js/bbb8d18274ab887c20f1778a9b17706cbbeac472:
+    resolution: {tarball: https://codeload.github.com/pedroslopez/whatsapp-web.js/tar.gz/bbb8d18274ab887c20f1778a9b17706cbbeac472}
+    name: whatsapp-web.js
+    version: 1.23.1-alpha.5
+    engines: {node: '>=18.0.0'}
+    dependencies:
+      '@pedroslopez/moduleraid': 5.0.2
+      fluent-ffmpeg: 2.1.2
+      mime: 3.0.0
+      node-fetch: 2.7.0
+      node-webpmux: 3.1.7
+      puppeteer: 18.2.1
+    optionalDependencies:
+      archiver: 5.3.2
+      fs-extra: 10.1.0
+      unzipper: 0.10.14
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
     dev: false
