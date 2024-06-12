@@ -6,7 +6,6 @@ const QrSchema = z.string();
 
 export const qr = (socket: Socket): void => {
   socket.on("qr", async (qr) => {
-    console.log("qr")
     const data = QrSchema.safeParse(qr);
 
     if (!data.success)

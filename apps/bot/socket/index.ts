@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const PORT = process.env.SOCKETIO_PORT ?? 4000;
-const SOCKET_URL = `${process.env.SOCKETIO_URL}:${PORT}`;
+const SOCKET_URL = `127.0.0.1:${PORT}`;
 
 
 export const socket = io(SOCKET_URL, {
