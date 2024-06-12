@@ -341,6 +341,9 @@ export const assignmentRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const assignment = await ctx.prisma.assignment.findUnique({
         where: { id: input.id },
+        include: {
+          Chat: { select: { id: true } },
+        }
       });
       if (!assignment)
         throw new TRPCError({
@@ -391,6 +394,18 @@ export const assignmentRouter = createTRPCRouter({
         where: { id: input.id },
         data,
       });
+
+      if (assignment.Chat?.id && input.status === "FINALIZED") {
+        await ctx.prisma.whatsappChat.update({
+          where: {
+            id: assignment.Chat.id
+          },
+          data: {
+            step: "FINISHED"
+          }
+        })
+      }
+
 
       await ctx.prisma.historyAssignment.create({
         data: {
@@ -631,10 +646,10 @@ export const assignmentRouter = createTRPCRouter({
           HistoryAssignment: { include: { userAction: true } },
           service: true,
           shop: true,
-          Chat:{
-            select:{
-              id:true,
-              contactId:true,
+          Chat: {
+            select: {
+              id: true,
+              contactId: true,
             },
           }
         },
