@@ -140,7 +140,12 @@ export const startAttendance = async (props: SendStepMenuAfterLoginProps) => {
   let messageOk = `Estaremos encaminhando esse atendimento para o setor responsável. 🔄`;
   messageOk += `\nEm breve, um de nossos atendentes entrará em contato com você.`;
   messageOk += `\n\nMande mais detalhes sobre o seu problema, para que possamos te ajudar melhor.`;
+  const actualDateTime = new Date();
+  const actualHour = actualDateTime.getHours();
 
+  if (actualHour >= 19 || actualHour < 8) {
+    messageOk = `Olá! 🖐️ Nosso horário de atendimento já se encerrou ⌛, mas logo consigo te responder. Deixe sua dúvida para adiantar 📝. Em breve, entraremos em contato com você 📞 e, desde já, agradecemos o contato! 🙏`;
+  }
 
   props.socket.emit("message-send", { message: messageOk, phone: props.phone });
 

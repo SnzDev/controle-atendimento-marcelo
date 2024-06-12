@@ -160,6 +160,7 @@ export const sendStepMenuAfterLogin = async (props: SendStepMenuAfterLoginProps)
   await delay(2000);
 
   if (response === "1") {
+
     const message = `Sobre qual desses assuntos você deseja falar?\n*[1]* - Internet Lenta\n*[2]* - Internet Oscilando\n*[3]* - Sem Internet\n*[4]* - Outro Assunto\n`;
     props.socket.emit("message-send", { message, phone: props.phone });
     await updateStep(props.chatId, 'INTERNET_ISSUES');
