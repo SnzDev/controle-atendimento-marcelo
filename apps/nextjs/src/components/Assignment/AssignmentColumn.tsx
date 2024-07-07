@@ -32,8 +32,6 @@ const AssignmentColumn = (props: AssignmentColumn) => {
     dateActivity: props.dateActivity,
   });
 
-  console.log(props.clientName?.toLowerCase());
-
   const filteredAssignment = assignments.data?.filter(
     (assignment) =>
       (!props.services ||

@@ -20,25 +20,28 @@ export const MessageAudio = () => {
     };
 
 
-    function onMessageCreated(value: IBody) {
+    async function onMessageCreated(value: IBody) {
       setMessages((prev) => [...prev, value]);
       const pushname = value.message?.fromMe ? value.fromInfo?.pushname : value.toInfo?.pushname;
       speak(`${pushname} disse: ${value.message?.body}`);
+      console.log({ value });
+      await play();
     }
-    socket.on('message_create', onMessageCreated);
+    socket.on('message-kanban', () => {
+      console.log('message-kanban')
+    });
 
     return () => {
-      socket.off('message_create', onMessageCreated);
+      // socket.off('message-kanban', onMessageCreated);
     };
   }, []);
 
   return (<div>
+    <p className="text-white">{JSON.stringify({ messages }, null, 2)
+    }</p>
     <button className="text-white" onClick={play}> Play </button>
     <audio ref={audioRef} src='/sounds/notification-message.mp3' />
   </div >
   );
-
-
-
 
 }

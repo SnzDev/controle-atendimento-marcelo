@@ -149,6 +149,18 @@ export const startAttendance = async (props: SendStepMenuAfterLoginProps) => {
 
   props.socket.emit("message-send", { message: messageOk, phone: props.phone });
 
+  const contact = await prisma.whatsappChat.findFirst({
+    where: {
+      id: props.chatId
+    },
+    select: {
+      contact: {
+        select: {
+          name: true,
+        }
+      }
+    }
+  });
   const region = await prisma.region.findFirst({
     where: {
       name: { contains: "piripiri" }
@@ -171,7 +183,6 @@ export const startAttendance = async (props: SendStepMenuAfterLoginProps) => {
     }
   });
 
-
   const shop = await prisma.shop.findFirst({
     where: {
       name: { contains: "piripiri" }
@@ -185,7 +196,19 @@ export const startAttendance = async (props: SendStepMenuAfterLoginProps) => {
       id: props.chatId
     }
   });
-  if (!region || !user || !service || !shop || !chat?.clientId) return;
+  let clientId = chat?.clientId;
+
+  if (!clientId) {
+    const newClient = await prisma.client.create({
+      data: {
+        name: contact?.contact?.name ?? "Não definido",
+        phone: props.phone,
+        cpf: '',
+      }
+    });
+    clientId = newClient.id;
+  }
+  if (!region || !user || !service || !shop) return;
 
   await updateStep(props.chatId, 'ATTENDANCE');
 
@@ -198,7 +221,7 @@ export const startAttendance = async (props: SendStepMenuAfterLoginProps) => {
       shopId: shop.id,
       status: "PENDING",
       dateActivity: new Date(),
-      clientId: chat.clientId,
+      clientId: clientId,
       chatId: props.chatId,
     }
   });

@@ -145,6 +145,9 @@ export const message = (socket: Socket) => {
           body: parse.data.message.body,
         })
         break;
+      case "ATTENDANCE":
+        socket.broadcast.emit(`message-kanban`, { ...data, fileKey: data.fileKey ? `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}/${data.fileKey}` : undefined });
+        break;
       default:
         break;
     }
