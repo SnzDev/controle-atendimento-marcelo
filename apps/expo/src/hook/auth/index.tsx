@@ -1,6 +1,6 @@
-import { type ClientInfoResponse } from '@acme/api/src/mkServices/getClientInfo';
-import { type Connections, type GetConnectionsResponse } from '@acme/api/src/mkServices/getConnections';
-import { type Contracts, type GetContractsResponse } from '@acme/api/src/mkServices/getContracts';
+import { type ClientInfoResponse } from '@morpheus/api/src/mkServices/getClientInfo';
+import { type Connections, type GetConnectionsResponse } from '@morpheus/api/src/mkServices/getConnections';
+import { type Contracts, type GetContractsResponse } from '@morpheus/api/src/mkServices/getContracts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';

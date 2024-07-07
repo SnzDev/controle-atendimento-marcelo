@@ -29,7 +29,7 @@ import React from "react";
 import ChangeRegion from "../Menus/ChangeRegion";
 import { ButtonChat } from "../whatsapp/ButtonChat";
 import type { inferRouterOutputs } from '@trpc/server';
-import type { AppRouter } from "@acme/api";
+import type { AppRouter } from "@morpheus/api";
 
 type Assignments = inferRouterOutputs<AppRouter>['assignment']['getAssignment']
 interface AssignmentRows {
@@ -181,9 +181,9 @@ const AssignmentRows = (props: AssignmentRows) => {
                       </IconButton>
 
                       {assignment.Chat?.contactId && (
-                        <ButtonChat 
-                          chatId={assignment.Chat.id} 
-                          contactId={assignment.Chat.contactId} 
+                        <ButtonChat
+                          chatId={assignment.Chat.id}
+                          contactId={assignment.Chat.contactId}
                         />
                       )}
                     </div>

@@ -1,4 +1,4 @@
-import { prisma } from "@acme/db";
+import { prisma } from "@morpheus/db";
 import { type Socket } from "socket.io";
 
 type MessageRevokeEveryoneData = {

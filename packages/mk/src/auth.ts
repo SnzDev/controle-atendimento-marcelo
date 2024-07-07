@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { type MkCustomError } from "./mk";
-import { prisma } from "@acme/db";
+import { prisma } from "@morpheus/db";
 import moment from "moment";
 
 export type AuthResponse =

@@ -1,5 +1,5 @@
 {
-  "name": "@acme/api",
+  "name": "@morpheus/api",
   "version": "0.1.0",
   "main": "./index.ts",
   "types": "./index.ts",
@@ -11,9 +11,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@acme/auth": "^0.1.0",
-    "@acme/mk": "^0.1.0",
-    "@acme/db": "^0.1.0",
+    "@morpheus/auth": "workspace: ^0.1.0",
+    "@morpheus/mk": "workspace: ^0.1.0",
+    "@morpheus/db": "workspace: ^0.1.0",
     "@trpc/client": "^10.20.0",
     "@trpc/server": "^10.20.0",
     "axios": "^1.3.5",
@@ -21,7 +21,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@acme/eslint-config": "^0.1.0",
+    "@morpheus/eslint-config": "workspace: ^0.1.0",
     "eslint": "^8.38.0",
     "typescript": "^5.0.4"
   }

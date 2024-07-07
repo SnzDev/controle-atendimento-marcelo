@@ -1,5 +1,5 @@
-import { getClientInfoCpf, getConnectionsWithContract, getInvoiceWithPdfAndBar, getPendingInvoices, mkGetToken, selfUnblock } from "@acme/mk";
-import { prisma } from "@acme/db";
+import { getClientInfoCpf, getConnectionsWithContract, getInvoiceWithPdfAndBar, getPendingInvoices, mkGetToken, selfUnblock } from "@morpheus/mk";
+import { prisma } from "@morpheus/db";
 import { type Socket } from "socket.io";
 import { delay } from "~/bot-to-client/utils/delay";
 import { Retry, getVariablesFromChat, updateStep } from "~/bot-to-client/utils/chat";

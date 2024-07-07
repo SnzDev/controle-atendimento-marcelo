@@ -12,7 +12,7 @@ import React from "react";
 import { api } from "../../utils/api";
 import AssignmentRows from "./AssignmentRows";
 import { type inferRouterOutputs } from "@trpc/server";
-import { type AppRouter } from "@acme/api";
+import { type AppRouter } from "@morpheus/api";
 
 interface AssignmentColumn {
   userId: string;

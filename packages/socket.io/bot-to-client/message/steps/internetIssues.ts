@@ -1,4 +1,4 @@
-import { prisma } from "@acme/db";
+import { prisma } from "@morpheus/db";
 import { type Socket } from "socket.io";
 import { Retry, startAttendance, updateStep } from "~/bot-to-client/utils/chat";
 import { delay } from "~/bot-to-client/utils/delay";

@@ -1,5 +1,5 @@
-import { prisma } from "@acme/db";
-import { getConnectionsWithContract, getInvoiceWithPdfAndBar, getPendingInvoices, mkGetToken } from "@acme/mk";
+import { prisma } from "@morpheus/db";
+import { getConnectionsWithContract, getInvoiceWithPdfAndBar, getPendingInvoices, mkGetToken } from "@morpheus/mk";
 import { type Socket } from "socket.io";
 import { Retry, getVariablesFromChat, startAttendance, updateStep } from "~/bot-to-client/utils/chat";
 import { delay } from "~/bot-to-client/utils/delay";

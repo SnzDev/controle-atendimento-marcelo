@@ -1,4 +1,4 @@
-import { prisma } from "@acme/db";
+import { prisma } from "@morpheus/db";
 import { type Socket } from "socket.io";
 import { z } from "zod";
 import { createOrUpdateMessage, typeMessageSchema } from "./utils/message";

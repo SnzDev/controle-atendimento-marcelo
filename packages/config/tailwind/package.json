@@ -1,5 +1,5 @@
 {
-  "name": "@acme/tailwind-config",
+  "name": "@morpheus/tailwind-config",
   "version": "0.1.0",
   "main": "index.ts",
   "license": "MIT",
@@ -7,6 +7,9 @@
     "index.ts",
     "postcss.js"
   ],
+  "dependencies": {
+    "tailwindcss-animate": "^1.0.7"
+  },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.22",

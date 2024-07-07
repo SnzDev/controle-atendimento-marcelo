@@ -13,7 +13,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 
 
-import { authOptions } from "@acme/auth";
+import { authOptions } from "@morpheus/auth";
 
 moment.locale("pt-br");
 

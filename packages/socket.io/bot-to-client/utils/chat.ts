@@ -1,8 +1,8 @@
 
 
-import { prisma } from '@acme/db';
-import { type ClientInfoResponse } from '@acme/mk/src/getClientInfoCpf';
-import { type ConnectionWithContract } from '@acme/mk/src/getConnectionsWithContract';
+import { prisma } from '@morpheus/db';
+import { type ClientInfoResponse } from '@morpheus/mk/src/getClientInfoCpf';
+import { type ConnectionWithContract } from '@morpheus/mk/src/getConnectionsWithContract';
 import { type Socket } from 'socket.io';
 const MAX_TRIES = 3;
 interface HasChatProps {

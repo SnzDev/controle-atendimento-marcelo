@@ -4,7 +4,7 @@ import * as bcrypt from "bcrypt";
 import { type DefaultSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { prisma } from "@acme/db";
+import { prisma } from "@morpheus/db";
 
 /**
  * Module augmentation for `next-auth` types

@@ -1,4 +1,4 @@
-import { type AppRouter } from "@acme/api";
+import { type AppRouter } from "@morpheus/api";
 import { type inferRouterOutputs } from "@trpc/server";
 import Image from "next/image";
 import { AckIcon } from "./Ack";

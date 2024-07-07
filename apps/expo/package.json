@@ -1,5 +1,5 @@
 {
-  "name": "Acessenet Telecom",
+  "name": "expo",
   "version": "0.1.0",
   "main": "index.tsx",
   "scripts": {
@@ -14,6 +14,7 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
+    "@morpheus/api": "workspace:^0.1.0",
     "@expo/metro-config": "^0.10.7",
     "@expo/vector-icons": "^13.0.0",
     "@hookform/resolvers": "^3.1.0",
@@ -51,9 +52,8 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@acme/api": "*",
-    "@acme/eslint-config": "*",
-    "@acme/tailwind-config": "*",
+    "@morpheus/eslint-config": "workspace: ^0.1.0",
+    "@morpheus/tailwind-config": "workspace: ^0.1.0",
     "@babel/core": "^7.21.4",
     "@babel/preset-env": "^7.21.4",
     "@babel/runtime": "^7.21.0",

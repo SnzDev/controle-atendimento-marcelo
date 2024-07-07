@@ -1,11 +1,11 @@
-import { prisma } from '@acme/db';
+import { prisma } from '@morpheus/db';
 import { type NextApiRequest, type NextApiResponse } from 'next';
 import { string, z } from 'zod';
-import { whatsappServices } from '@acme/api';
-import { sendStepLogin, sendStepStart } from '@acme/api/src/whatsappServices/chat';
-import { mkGetToken } from '@acme/api/src/router/mk';
+import { whatsappServices } from '@morpheus/api';
+import { sendStepLogin, sendStepStart } from '@morpheus/api/src/whatsappServices/chat';
+import { mkGetToken } from '@morpheus/api/src/router/mk';
 import { getClientInfoCpf } from '../../../../../../packages/mk';
-import { sendMessageQueue } from '@acme/api/src/whatsappServices/api/sendMessage';
+import { sendMessageQueue } from '@morpheus/api/src/whatsappServices/api/sendMessage';
 
 export enum Events {
   READY = 'ready',

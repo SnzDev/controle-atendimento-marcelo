@@ -1,10 +1,10 @@
 {
-  "name": "@acme/db",
+  "name": "@morpheus/db",
   "version": "0.1.0",
   "main": "./index.ts",
   "types": "./index.ts",
   "license": "MIT",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "db:generate": "pnpm with-env prisma generate",

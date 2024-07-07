@@ -1,6 +1,6 @@
 
 
-import { prisma } from '@acme/db';
+import { prisma } from '@morpheus/db';
 import { sendMessageQueue } from './api/sendMessage';
 
 interface HasChatProps {
