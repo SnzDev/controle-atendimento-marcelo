@@ -8,8 +8,9 @@ const MAX_TRIES = 3;
 interface HasChatProps {
   contactId: string;
   instanceId: string;
+  fromMe: boolean;
 }
-export const getHasChat = async ({ contactId, instanceId }: HasChatProps) => {
+export const getHasChat = async ({ contactId, instanceId, fromMe }: HasChatProps) => {
 
   const hasChat = await prisma.whatsappChat.findFirst({
     where: {
@@ -20,7 +21,7 @@ export const getHasChat = async ({ contactId, instanceId }: HasChatProps) => {
     }
   });
 
-  if (!hasChat) return await prisma.whatsappChat.create({
+  if (!hasChat && !fromMe) return await prisma.whatsappChat.create({
     data: {
       contactId,
       step: 'START',

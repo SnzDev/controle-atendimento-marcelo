@@ -17,8 +17,18 @@ export default {
         "2xl": "1400px",
       },
     },
+    backgroundImage: {
+      chatBackground: "url(/img/backgroundChat.jpg)",
+      "login-aside": "url(/img/login-aside.png)",
+      "business-decisions": "url(/img/business-decisions.png)",
+      "client-Layout": "url(/illustrations/bgLayoutBubles.svg)",
+    },
     extend: {
       colors: {
+        contrast: "#009282",
+        alternative: "#4BB8ED",
+        dark: "#2A3547",
+        gray: "#5C5C5C",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

@@ -2,13 +2,14 @@ import * as React from "react";
 
 import { cn } from "~/lib/utils";
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
-  icon?: React.ReactNode;
-}
+export type InputProps =
+  React.InputHTMLAttributes<HTMLInputElement> & {
+    icon?: React.ReactNode;
+    inputClassName?: React.InputHTMLAttributes<HTMLInputElement>['className']
+  }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, icon, ...props }, ref) => {
+  ({ className, inputClassName, type, icon, ...props }, ref) => {
     return (
       <div
         className={cn(
@@ -17,7 +18,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}>
         <input
           type={type}
-          className="w-full p-2 placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className={cn("w-full p-2 placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50", inputClassName)}
           ref={ref}
           {...props}
         />

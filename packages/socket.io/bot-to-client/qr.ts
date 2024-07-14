@@ -1,6 +1,8 @@
 import { prisma } from "@morpheus/db";
+import { BotActionTypes } from "@morpheus/validators";
 import { type Socket } from "socket.io";
 import { z } from "zod";
+import { BotActionPubSub } from "~/pub-sub";
 
 const QrSchema = z.string();
 
@@ -8,10 +10,16 @@ export const qr = (socket: Socket): void => {
   socket.on("qr", async (qr) => {
     const data = QrSchema.safeParse(qr);
 
+
     if (!data.success)
       return console.log({ ErrorParseSchema: data.error })
 
-    socket.broadcast.emit("qr", data.data);
+    const botAction = new BotActionPubSub(
+      socket,
+      BotActionTypes.QR,
+      { qr: data.data }
+    );
+    botAction.pub();
 
     const instance = await prisma.whatsappInstance.findMany();
 
@@ -30,6 +38,5 @@ export const qr = (socket: Socket): void => {
         profilePicUrl: null
       }
     });
-
   });
 }

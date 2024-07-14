@@ -1,72 +1,96 @@
-import { type AppRouter } from "@morpheus/api";
-import { type inferRouterOutputs } from "@trpc/server";
+"use client";
+
+// import { type AppRouter } from "@acme/api";
+import type { inferRouterOutputs } from "@trpc/server";
 import Image from "next/image";
-import { AckIcon } from "./Ack";
-import { Ban, ExternalLink, FileText } from "lucide-react";
-import { GifVideoExpand, ImageExpand } from "~/components/ImageExpand";
+// import { GifVideoExpand, ImageExpand } from "~/components/ImageExpand";
 import Link from "next/link";
+import { Check } from "iconsax-react";
+// import { AckIcon } from "./Ack";
+import { Ban, ExternalLink, FileText } from "lucide-react";
 
-type Message = inferRouterOutputs<AppRouter>['whatsapp']['messagesFromContact'][number]
+import type { RouterOutputs } from "@morpheus/api";
+import { AppRouter } from "@morpheus/api";
 
+import { AckIcon } from "./Ack";
+import { GifVideoExpand, ImageExpand } from "~/components/ImageExpand";
 
-type BalloonProps = {
+export type Message = RouterOutputs["chat"]["getMessagesByChatId"][number];
+
+interface BalloonProps {
   message: Message;
 }
 export const Balloon = ({ message }: BalloonProps) => {
   // but this timestamp is utc how to resolve
-  const date = Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(message.createdAt));
+  const date = Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(message.createdAt ?? new Date());
 
-  const isImage = message.type === 'image' || message.type === 'sticker';
-  const isVideo = message.type === 'video' && !message.isGif;
-  const isGif = message.type === 'video' && !!message.isGif;
-  const isAudio = message.type === 'ptt';
-  const isLocation = message.type === 'location';
-  const isDocument = message.type === 'document';
+  const isImage = message.type === "image" || message.type === "sticker";
+  const isVideo = message.type === "video" && !message.isGif;
+  const isGif = message.type === "video" && !!message.isGif;
+  const isAudio = message.type === "ptt";
+  const isLocation = message.type === "location";
+  const isDocument = message.type === "document";
   //body can be \n to break line
   //body can be *bold* to bold
   //body can be _italic_ to italic
   //body can be ~strikethrough~ to strikethrough
-  //body can be `monospace` to monospace and 
+  //body can be `monospace` to monospace and
   //whitout any of this it will be a paragraph
-
-
   const messageHtml = message.body
-    .replace(/\n/g, '<br>')
-    .replace(/\*(.*?)\*/g, '<b>$1</b>')
-    .replace(/_(.*?)_/g, '<i>$1</i>')
-    .replace(/~(.*?)~/g, '<s>$1</s>')
+    .replace(/\*(.*?)\*/g, "<b>$1</b>")
+    .replace(/_(.*?)_/g, "<i>$1</i>")
+    .replace(/~(.*?)~/g, "<s>$1</s>")
     .replace(/`(.*?)`/g, "<code>$1</code>")
-    .replace(/"(.*?)"/g, "<p>$1</p>")
+    .replace(/"(.*?)"/g, "<p>$1</p>");
 
-  console.log({ messageHtml })
   return (
-    <div className={`flex relative  gap-1 max-w-[20rem] h-fit flex-col flex-wrap p-2 items-end rounded-lg ${message.fromMe ? 'self-end bg-green-300 text-black' : 'self-start bg-white text-slate-800'}`}>
-      {message.isRevoked &&
-        <div>
-          <p className="text-gray-500 flex flex-row gap-2 items-center">
-            <Ban size={18} /> Mensagem apagada</p>
-        </div>
-      }
+    <div
+      className={`flex h-fit max-w-[20rem] flex-col flex-wrap items-end gap-1 rounded-lg p-2 ${message.fromMe ? "self-end bg-primary pl-4 text-white" : "self-start bg-primary/75 pr-4 text-white"}`}
+    >
+      {message.isRevoked && (
+        <p className="text-gray-500 mb-1 flex flex-row items-center gap-2">
+          <Ban size={15} /> Mensagem apagada
+        </p>
+      )}
 
-      {message.fileUrl && isImage && <ImageBody fileUrl={message.fileUrl} />}
-      {message.fileUrl && isVideo && <VideoBody mimeType={message.mimetype} fileUrl={message.fileUrl} />}
-      {message.fileUrl && isGif && <GifBody mimeType={message.mimetype} fileUrl={message.fileUrl} />}
-      {message.fileUrl && isAudio && <AudioBody mimeType={message.mimetype} fileUrl={message.fileUrl} />}
-      {message.location && isLocation && <LocationBody location={message.location as Location} />}
-      {message.fileUrl && isDocument && <DocumentBody documentUrl={message.fileUrl} />}
+      <div
+        dangerouslySetInnerHTML={{ __html: messageHtml }}
+        className="text-gray-500 dont-break-out w-full items-center gap-2 whitespace-pre-wrap break-words"
+      />
+      {/* {message.fileUrl && isImage && <ImageBody fileUrl={message.fileUrl} />}
+      {message.fileUrl && isVideo && (
+        <VideoBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
+      )}
+      {message.fileUrl && isGif && (
+        <GifBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
+      )}
+      {message.fileUrl && isAudio && (
+        <AudioBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
+      )}
+      {message.location && isLocation && (
+        <LocationBody location={message.location as Location} />
+      )}
+      {message.fileUrl && isDocument && (
+        <DocumentBody documentUrl={message.fileUrl} />
+      )} */}
 
+      {/* <div
+        className="w-full break-words"
+        dangerouslySetInnerHTML={{ __html: messageHtml }}
+      ></div> */}
 
-      <div className="w-full break-words" dangerouslySetInnerHTML={{ __html: messageHtml }}></div>
-
-      <span className="text-xs mt-[-5px] w-full flex items-center justify-end gap-1" >
+      <span className="mt-[-3px] flex w-full items-center justify-end text-xs">
         {date}
         {message.fromMe && <AckIcon ack={message.ack} />}
       </span>
     </div>
-  )
-}
+  );
+};
 
-type ImageBodyProps = {
+interface ImageBodyProps {
   fileUrl: string;
 }
 
@@ -81,14 +105,14 @@ export const ImageBody = ({ fileUrl }: ImageBodyProps) => {
           width={600}
           height={600}
           alt="file"
-          className="max-w-[300px] max-h-[300px] w-56 h-56 hover:z-50 hover:rotate-2 transition-all delay-100 rounded-md"
+          className="h-56 max-h-[300px] w-56 max-w-[300px] rounded-md transition-all delay-100 hover:z-50 hover:rotate-2"
         />
       </ImageExpand>
     </div>
-  )
-}
+  );
+};
 
-type VideoBodyProps = {
+interface VideoBodyProps {
   fileUrl: string;
   mimeType: string | null;
 }
@@ -101,10 +125,10 @@ export const VideoBody = ({ fileUrl, mimeType }: VideoBodyProps) => {
         Your browser does not support the video tag.
       </video>
     </div>
-  )
-}
+  );
+};
 
-type GifBodyProps = {
+interface GifBodyProps {
   fileUrl: string;
   mimeType: string | null;
 }
@@ -122,10 +146,10 @@ export const GifBody = ({ fileUrl, mimeType }: GifBodyProps) => {
         </video>
       </GifVideoExpand>
     </div>
-  )
-}
+  );
+};
 
-type AudioBodyProps = {
+interface AudioBodyProps {
   fileUrl: string;
   mimeType: string | null;
 }
@@ -138,16 +162,15 @@ export const AudioBody = ({ fileUrl, mimeType }: AudioBodyProps) => {
         Your browser does not support the audio element.
       </audio>
     </div>
-  )
-}
+  );
+};
 
-
-type Location = {
+interface Location {
   latitude: number;
   longitude: number;
   description?: string;
 }
-type LocationBodyProps = {
+interface LocationBodyProps {
   location: Location;
 }
 
@@ -160,9 +183,9 @@ export const LocationBody = ({ location }: LocationBodyProps) => {
         height="300"
       ></iframe>
 
-      <div className="flex justify-center items-center mt-2">
+      <div className="mt-2 flex items-center justify-center">
         <Link
-          className="text-blue-400 flex flex-row gap-2 items-center hover:underline transition-all"
+          className="flex flex-row items-center gap-2 text-blue-400 transition-all hover:underline"
           href={`https://maps.google.com/maps?q=${location.latitude},${location.longitude}`}
           rel="noreferrer"
           target="_blank"
@@ -171,23 +194,21 @@ export const LocationBody = ({ location }: LocationBodyProps) => {
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-
-type DocumentBodyProps = {
+interface DocumentBodyProps {
   documentUrl: string;
 }
 
 export const DocumentBody = ({ documentUrl }: DocumentBodyProps) => {
   return (
-    <div className="relative flex flex-col justify-center items-center">
-
+    <div className="relative flex flex-col items-center justify-center">
       <FileText size={64} />
 
-      <div className="flex justify-center items-center mt-2">
+      <div className="mt-2 flex items-center justify-center">
         <Link
-          className="text-blue-400 flex flex-row gap-2 items-center hover:underline transition-all"
+          className="flex flex-row items-center gap-2 text-blue-400 transition-all hover:underline"
           href={documentUrl}
           rel="noreferrer"
           target="_blank"
@@ -196,6 +217,5 @@ export const DocumentBody = ({ documentUrl }: DocumentBodyProps) => {
         </Link>
       </div>
     </div>
-  )
-}
-
+  );
+};

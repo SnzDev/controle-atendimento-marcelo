@@ -35,7 +35,6 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
       protocol: props.id.id
     }
   });
-  console.log({ props })
   const body = ['chat', 'document', 'image'].includes(props.type) ? props.body : '';
 
   if (message) return await prisma.whatsappMessages.update({

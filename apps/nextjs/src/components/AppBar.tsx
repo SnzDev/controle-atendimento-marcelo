@@ -31,17 +31,17 @@ import type {
 import type { UserRole } from "@prisma/client";
 type ResponsiveAppBarProps =
   | {
-      screenAssignment: true;
-      openModalSummary: () => void;
-      filterAssignment: FilterAssignment;
-      onChange: (props: HandleChangeFilterAssignment) => void;
-    }
+    screenAssignment: true;
+    openModalSummary: () => void;
+    filterAssignment: FilterAssignment;
+    onChange: (props: HandleChangeFilterAssignment) => void;
+  }
   | {
-      screenAssignment?: false;
-      filterAssignment?: FilterAssignment;
-      onChange?: undefined;
-      openModalSummary?: undefined;
-    };
+    screenAssignment?: false;
+    filterAssignment?: FilterAssignment;
+    onChange?: undefined;
+    openModalSummary?: undefined;
+  };
 interface IMenu {
   name: string;
   href: string;

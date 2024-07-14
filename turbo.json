@@ -10,11 +10,19 @@
       "inputs": ["prisma/schema.prisma"],
       "cache": false
     },
+    "db:studio": {
+      "inputs": ["prisma/schema.prisma"],
+      "cache": false
+    },
     "db:seed": {
       "inputs": ["prisma/seed.ts"],
       "cache": false
     },
     "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "dev:web": {
       "persistent": true,
       "cache": false
     },

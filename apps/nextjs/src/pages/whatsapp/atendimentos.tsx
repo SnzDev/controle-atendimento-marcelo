@@ -1,93 +1,114 @@
-import { faker } from "@faker-js/faker";
+"use client";
+
 import {
   Inbox as InboxIcon,
   Plus,
   Search,
   SquareCheckBigIcon,
+  User,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { useParams } from "next/navigation";
 
+import type { RouterOutputs } from "@morpheus/api";
+
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { useToast } from "~/components/ui/use-toast";
+import { ChatWhatsapp } from "~/components/whatsapp/ButtonChat";
+import { AckIcon } from "~/components/whatsapp/ButtonChat/Ack";
+import { BotActionsProvider, useBotActions } from "~/hooks/useBotActions";
+import { useQueryParams } from "~/hooks/useQueryParams";
+import { cn } from "~/lib/utils";
+import { api } from "~/utils/api";
+import TabLayout from "~/components/Layout";
 
 export default function Assignments() {
-  const session = useSession();
-  const sessionUserId = session?.data?.user.id;
-  const sessionUserName = session?.data?.user.name;
-  const date = new Date().toISOString();
+  const { searchParams, setQueryParam } = useQueryParams();
+  const selectedChatId = searchParams.get("selectedChat") ?? undefined;
+  const selectedTab = searchParams.get("tab") ?? "inbox";
+  return (
+    <TabLayout>
+      <BotActionsProvider >
+        <Tabs
+          defaultValue={selectedTab}
+          onValueChange={(e) => setQueryParam("tab", e)}
+          className="w-max-[400px] h-full    min-w-[400px]"
+        >
+          <TabsList className="grid h-fit w-full grid-cols-3 gap-2">
+            <TabsTrigger value="inbox">
+              <div className="flex flex-col items-center gap-2">
+                <InboxIcon />
+                <span>Entrada</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="finished">
+              <div className="flex flex-col items-center gap-2">
+                <SquareCheckBigIcon />
+                <span>Resolvido</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="search">
+              <div className="flex flex-col items-center gap-2">
+                <Search />
+                <span>Buscar</span>
+              </div>
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent className="h-full" value="inbox">
+            <Inbox />
+          </TabsContent>
+          <TabsContent className="h-full" value="finished">
+            <Finished />
+          </TabsContent>
+          <TabsContent className="h-full" value="search">
+            password
+          </TabsContent>
+        </Tabs>
+        <ChatWhatsapp chatId={selectedChatId} />
+      </BotActionsProvider>
+    </TabLayout>
+  );
+}
+
+export function Finished() {
+  const { searchParams, setQueryParam } = useQueryParams();
+  const filterFinished = searchParams.get("filterFinished") ?? undefined;
 
   return (
-    <main className="min-w-screen flex min-h-screen flex-1 flex-col items-center overflow-y-hidden bg-black ">
-      {/* <div
-        className={`mt-20 flex w-full h-full flex-1 flex-row gap-2 px-4 `}
-      >
-        <div className="flex flex-row gap-2">
-          <AssignmentColumn
-            dateActivity={date}
-            userId={sessionUserId ?? ""}
-            userName={sessionUserName ?? ""}
-          />
-        </div>
-        <div className="flex flex-row gap-2 overflow-x-auto">
-
-          <AssignmentColumn
-            dateActivity={date}
-            userId="clq63rc3s0000i0aq3ntbwewu"
-            userName="Whatsapp"
-          />
-        </div>
+    <div className="flex h-full w-full flex-col gap-2 bg-white ">
+      <div className="px-2">
+        <Input
+          defaultValue={filterFinished}
+          onChange={(e) => setQueryParam("filterFinished", e.target.value)}
+          className="mt-2 w-full"
+          placeholder="Buscar"
+        />
       </div>
+      <Separator />
 
-
-      <MessageAudio /> */}
-
-      <div>
-        <div>
-          <Tabs defaultValue="account">
-            <TabsList className="grid h-fit w-full grid-cols-3 gap-2">
-              <TabsTrigger value="inbox" className="w-full px-20">
-                <div className="flex flex-col items-center gap-2">
-                  <InboxIcon />
-                  <span>Entrada</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger value="finished" className="flex flex-col">
-                <div className="flex flex-col items-center gap-2">
-                  <SquareCheckBigIcon />
-                  <span>Resolvido</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger value="search" className="flex flex-col">
-                <div className="flex flex-col items-center gap-2">
-                  <Search />
-                  <span>Buscar</span>
-                </div>
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="inbox">
-              <Inbox />
-            </TabsContent>
-            <TabsContent value="finished">password</TabsContent>
-            <TabsContent value="search">password</TabsContent>
-          </Tabs>
-        </div>
-        <div></div>
-      </div>
-    </main>
+      <FinishedQueue />
+    </div>
   );
 }
 
 export function Inbox() {
+  const { searchParams, setQueryParam } = useQueryParams();
+  const filterInbox = searchParams.get("filterInbox") ?? undefined;
   return (
     <div className="flex h-full w-full flex-col gap-2 bg-white ">
       <div className="px-2">
-        <Input className="w-200 mt-2" placeholder="Buscar" icon={<Search />} />
+        <Input
+          defaultValue={filterInbox}
+          onChange={(e) => setQueryParam("filterInbox", e.target.value)}
+          className="mt-2 w-full"
+          placeholder="Buscar"
+        />
       </div>
       <Separator />
 
@@ -102,70 +123,122 @@ export function Inbox() {
   );
 }
 
-const fakeAssignmentQueueCards = new Array(5).fill(0).map((_, i) => ({
-  id: faker.string.uuid(),
-  name: faker.person.fullName(),
-  phone: faker.phone.number(),
-  avatarUrl: faker.image.avatar(),
-  updatedAt: faker.date.past(),
-}));
+type ChatCardsProps =
+  RouterOutputs["chat"]["findChats"][number] & {
+    isPending?: boolean;
+    isFinished?: boolean;
+  };
+export function ChatCards({
+  contact,
+  lastMessage,
+  isPending = false,
+  isFinished = false,
+  unreadMessagesLenth,
 
-type ChatCards = {
-  id: string;
-  name: string;
-  phone: string;
-  avatarUrl: string;
-  updatedAt: string;
-}
-export function ChatCards({ avatarUrl, id, name, phone, updatedAt, }: ChatCards) {
+  ...props
+}: ChatCardsProps) {
+  const apiUtils = api.useUtils();
+  const { toast } = useToast();
+  const startAssignment = api.chat.startAssignmentByChatId.useMutation();
+  const { searchParams, setQueryParam } = useQueryParams();
+  const selectedChatId = searchParams.get("selectedChat") ?? undefined;
+  const formatedDate = lastMessage?.createdAt
+    ? lastMessage.createdAt.toLocaleTimeString().slice(0, 5)
+    : "";
   return (
-    <div className="flex items-center justify-between py-5 px-2 ">
-      <div className="flex items-center space-x-4">
+    <div
+      className={cn(
+        "flex w-full h-full cursor-pointer items-center justify-between border border-slate-100 px-2 py-5",
+        selectedChatId === props.chatId ? "bg-primary/10" : "bg-white",
+      )}
+      onClick={() => setQueryParam("selectedChat", props.chatId ?? "")}
+    >
+      <div className="mr-2 flex w-full h-full items-center space-x-4">
         <span className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-          <Avatar >
-            <AvatarImage src={avatarUrl} />
-            <AvatarFallback>{name}</AvatarFallback>
+          <Avatar>
+            <AvatarImage src={contact?.profilePicUrl ?? undefined} />
+            <AvatarFallback><User /></AvatarFallback>
           </Avatar>
         </span>
-        <div>
-          <div className="flex gap-2 items-center"><p className="text-sm font-medium leading-none">{name}</p> <p className="text-sm text-muted-foreground">{phone}</p></div>
-          <p className="text-sm text-muted-foreground">m@example.com</p>
+        <div className="w-full">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium leading-none">
+              {contact?.name}
+            </p>
+            <Badge className="capitalize">{props.service?.name?.toLocaleLowerCase()}</Badge>
+          </div>
+          {props?.client?.externalId && <p className="text-xs text-muted-foreground">MK: {props.client.externalId} - {props?.client?.name}</p>}
+          <p className="text-sm text-muted-foreground">{contact?.phone}</p>
+          <div className="flex items-center gap-1">
+            {lastMessage?.fromMe && <AckIcon ack={lastMessage.ack} />}{" "}
+            <p className="max-w-[200px] truncate text-xs text-muted-foreground">
+              {lastMessage?.body}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          {isPending && (
+            <Button
+              size="xs"
+              type="button"
+              onClick={() => {
+                startAssignment.mutate(
+                  { chatId: props.chatId ?? "" },
+                  {
+                    onSuccess: () =>
+                      toast({
+                        title: "Sucesso",
+                        description: "Chat atribuído com sucesso",
+                        variant: "success",
+                      }),
+                    onError: (error) =>
+                      toast({
+                        title: "Erro",
+                        description: error.message,
+                        variant: "destructive",
+                      }),
+                    onSettled: () => {
+                      void apiUtils.chat.findChats.invalidate();
+                    },
+                  },
+                );
+              }}
+            >
+              Atender
+            </Button>
+          )}
+          <div className="flex flex-col items-center">
+            <span
+              className={cn(
+                "text-xs text-muted-foreground",
+                !!unreadMessagesLenth && "font-medium text-green-600",
+              )}
+            >
+              {formatedDate}
+            </span>
+
+            {!!unreadMessagesLenth && (
+              <Badge size="sm" variant="success">
+                {unreadMessagesLenth}
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
-      <button
-        className="ml-auto inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-        type="button"
-        aria-haspopup="dialog"
-        aria-expanded="false"
-        aria-controls="radix-:r9s:"
-        data-state="closed"
-      >
-        Owner{" "}
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 15 15"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="ml-2 h-4 w-4 text-muted-foreground"
-        >
-          <path
-            d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z"
-            fill="currentColor"
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-          ></path>
-        </svg>
-      </button>
     </div>
   );
 }
 export function AssignmentQueue() {
+  const { searchParams } = useQueryParams();
+  const filterInbox = searchParams.get("filterInbox") ?? "";
+  const { assignmentChats } = useBotActions();
+
   return (
-    <div>
+    <>
       <div className="flex min-h-[40px] w-full items-center justify-between px-2">
         <div className="flex items-center gap-1">
-          <Label>Trabalhando em </Label> <span className="text-sm">2</span>
+          <Label>Trabalhando em </Label>{" "}
+          <span className="text-sm">{assignmentChats.length ?? 0}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center space-x-2 ">
@@ -179,22 +252,94 @@ export function AssignmentQueue() {
         </div>
       </div>
 
-      <div>
-        {fakeAssignmentQueueCards.map((card) => (
-          <ChatCards {...card} key={card.id} />
-        ))}
+      <div className="flex max-h-[400px] w-full flex-col gap-2 overflow-auto">
+        {assignmentChats
+          .filter(
+            (card) =>
+              card.contact?.name
+                ?.toLowerCase()
+                .includes(filterInbox.toLowerCase()) ||
+              card.contact?.phone
+                ?.toLowerCase()
+                .includes(filterInbox.toLowerCase()) ||
+              card.lastMessage?.body
+                .toLowerCase()
+                .includes(filterInbox.toLowerCase()),
+          )
+          .map((card) => (
+            <ChatCards {...card} key={card.id} />
+          ))}
+      </div>
+    </>
+  );
+}
+
+export function PendingQueue() {
+  const { searchParams } = useQueryParams();
+  const filterInbox = searchParams.get("filterInbox") ?? "";
+  const params = useParams();
+  const { pendingChats } = useBotActions();
+
+  return (
+    <div>
+      <div className="flex min-h-[40px] w-full items-center justify-between px-2">
+        <div className="flex items-center gap-1">
+          <Label>Pendente</Label>{" "}
+          <span className="text-sm">{pendingChats.length ?? 0}</span>
+        </div>
+      </div>
+      <div className="flex max-h-[400px] w-full flex-col gap-2 overflow-auto">
+        {pendingChats
+          .filter(
+            (card) =>
+              card.contact?.name
+                ?.toLowerCase()
+                .includes(filterInbox.toLowerCase()) ||
+              card.contact?.phone
+                ?.toLowerCase()
+                .includes(filterInbox.toLowerCase()) ||
+              card.lastMessage?.body
+                .toLowerCase()
+                .includes(filterInbox.toLowerCase()),
+          )
+          .map((card) => (
+            <ChatCards isPending {...card} key={card.id} />
+          ))}
       </div>
     </div>
   );
 }
 
-export function PendingQueue() {
+export function FinishedQueue() {
+  const { searchParams } = useQueryParams();
+  const filterInbox = searchParams.get("filterInbox") ?? "";
+  const { finishedChats } = useBotActions();
+
   return (
     <div>
       <div className="flex min-h-[40px] w-full items-center justify-between px-2">
         <div className="flex items-center gap-1">
-          <Label>Fila </Label> <span className="text-sm">0</span>
+          <Label>Finalizados</Label>
+          <span className="text-sm">{finishedChats.length ?? 0}</span>
         </div>
+      </div>
+      <div className="flex max-h-[400px] w-full flex-col gap-2 overflow-auto">
+        {finishedChats
+          .filter(
+            (card) =>
+              card.contact?.name
+                ?.toLowerCase()
+                .includes(filterInbox.toLowerCase()) ||
+              card.contact?.phone
+                ?.toLowerCase()
+                .includes(filterInbox.toLowerCase()) ||
+              card.lastMessage?.body
+                .toLowerCase()
+                .includes(filterInbox.toLowerCase()),
+          )
+          .map((card) => (
+            <ChatCards {...card} key={card.id} />
+          ))}
       </div>
     </div>
   );

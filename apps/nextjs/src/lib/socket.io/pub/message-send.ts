@@ -1,9 +1,9 @@
-import { socket } from ".."
+import { socket } from "..";
 
-type MessageData = {
+interface MessageData {
   phone: string;
   message: string;
 }
 export const messageSend = (data: MessageData) => {
   socket.emit("message-send", data);
-}
+};

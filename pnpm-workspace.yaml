@@ -8,3 +8,4 @@ packages:
   - packages/mk
   - packages/config/*
   - packages/socket.io
+  - packages/validators

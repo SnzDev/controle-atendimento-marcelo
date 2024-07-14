@@ -13,12 +13,13 @@ import { messageRevokeEveryone } from "./bot-to-client/message-revoke-everyone";
 const server = http.createServer();
 const io = new Server(server, { cors: { origin: "*" } });
 
-export const PORT = process.env.SOCKETIO_PORT ?? 4000;
+export const PORT = process.env.SOCKET_IO_PORT ?? 4000;
 
 io.on("connection", (socket) => {
   console.log(`⚡: ${socket.id} user just connected`);
   socket.on("disconnect", () => {
-    console.log("A user disconnected");
+
+    console.log("A user disconnected", socket.disconnected);
   });
 
   //Bot to Client
@@ -31,11 +32,11 @@ io.on("connection", (socket) => {
   messageRevokeEveryone(socket);
 
   //Client to Bot
-  logout(socket);
-  messageSend(socket);
+  // logout(socket);
+  // messageSend(socket);
 
 });
 
 server.listen(PORT, () => {
-  return console.log(`Socket.Io is listening at http://localhost:${PORT}`);
+  return console.log(`Socket.Io is listening at 0.0.0.0:${PORT}`);
 });

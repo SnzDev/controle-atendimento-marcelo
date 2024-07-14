@@ -9,6 +9,7 @@ import { shopRouter } from "./router/shop";
 import { userRouter } from "./router/user";
 import { createTRPCRouter } from "./trpc";
 import { whatsappRouter } from "./router/whatsapp";
+import { chatRouter } from "./router/chat";
 
 export const appRouter = createTRPCRouter({
   service: serviceRouter,
@@ -20,7 +21,8 @@ export const appRouter = createTRPCRouter({
   region: regionRouter,
   auth: authRouter,
   mk: mkRouter,
-  whatsapp: whatsappRouter
+  whatsapp: whatsappRouter,
+  chat: chatRouter,
 });
 
 // export type definition of API

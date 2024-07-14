@@ -1,13 +1,15 @@
 import { prisma } from "@morpheus/db";
+import { BotActionTypes, typeMessageSchema } from "@morpheus/validators";
 import { type Socket } from "socket.io";
 import { z } from "zod";
+import { BotActionPubSub } from "~/pub-sub";
 import { getHasChat } from "../utils/chat";
 import { createOrUpdateContact } from "../utils/contact";
-import { createOrUpdateMessage, typeMessageSchema } from "../utils/message";
+import { createOrUpdateMessage } from "../utils/message";
+import { sendStepFinancialIssues, sendStepSecondVia } from "./steps/financialIssues";
+import { sendStepInternetIssues } from "./steps/internetIssues";
 import { sendConnectionWithExpiredInvoice, sendStepLogin, sendStepMenuAfterLogin } from "./steps/login";
 import { sendMenu, sendResponseMenu } from "./steps/menu";
-import { sendStepInternetIssues } from "./steps/internetIssues";
-import { sendStepFinancialIssues, sendStepSecondVia } from "./steps/financialIssues";
 const messageSchema = z.object({
   fileKey: z.string().optional(),
   mimeType: z.string().optional(),
@@ -47,8 +49,17 @@ type MessageData = z.infer<typeof messageSchema>;
 export const message = (socket: Socket) => {
 
   socket.on("message", async (data: MessageData) => {
-    socket.broadcast.emit(`message-${data.fromInfo.phone}`, { ...data, fileKey: data.fileKey ? `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}/${data.fileKey}` : undefined });
-    // console.log(`message-${data.fromInfo.phone}`, data);
+    const botAction = new BotActionPubSub(
+      socket,
+      BotActionTypes.MessageReceived,
+      {
+        ...data,
+        ack: data.message.ack,
+        protocol: data.message.id.id,
+      },
+    );
+    botAction.pub();
+
     const parse = messageSchema.safeParse(data);
     const instance = await prisma.whatsappInstance.findMany();
 
@@ -57,8 +68,9 @@ export const message = (socket: Socket) => {
     const fromInfo = await createOrUpdateContact(parse.data.fromInfo);
     const toInfo = await createOrUpdateContact(parse.data.toInfo);
 
-    const hasChat = await getHasChat({ contactId: fromInfo.id, instanceId: instance[0].id })
-
+    const hasChat = await getHasChat({ contactId: fromInfo.id, instanceId: instance[0].id, fromMe: parse.data.message.fromMe });
+    if (!hasChat) return;
+    console.log({ protocol: parse.data.message.id.id })
     await createOrUpdateMessage({
       id: {
         id: parse.data.message.id.id
@@ -144,9 +156,6 @@ export const message = (socket: Socket) => {
           phone: fromInfo.phone,
           body: parse.data.message.body,
         })
-        break;
-      case "ATTENDANCE":
-        socket.broadcast.emit(`message-kanban`, { ...data, fileKey: data.fileKey ? `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}/${data.fileKey}` : undefined });
         break;
       default:
         break;

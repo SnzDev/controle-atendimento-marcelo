@@ -9,6 +9,7 @@
     "clean": "rm -rf .turbo node_modules",
     "db:generate": "pnpm with-env prisma generate",
     "db:seed": "pnpm with-env prisma db seed",
+    "db:studio": "pnpm with-env prisma studio",
     "db:push": "pnpm with-env prisma db push --skip-generate",
     "with-env": "dotenv -e ../../.env --"
   },

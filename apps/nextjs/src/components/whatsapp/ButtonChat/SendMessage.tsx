@@ -1,45 +1,78 @@
-import { useSession } from "next-auth/react";
-import { useRef, type FormEvent, type KeyboardEvent } from "react";
-import { Spinner } from "~/components/Spinner";
-import { messageSend } from "~/utils/socket/pub/message-send";
+"use client";
 
-type SendMessageProps = {
+import { ArrowSquareRight } from "iconsax-react";
+import type { FormEvent, KeyboardEvent } from "react";
+import { useState } from "react";
+
+import { Textarea } from "~/components/ui/textarea";
+import { messageSend } from "~/lib/socket.io/pub/message-send";
+import { api } from "~/utils/api";
+
+interface SendMessageProps {
   phone: string;
+  chatId: string;
 }
 
-export const SendMessage = ({ phone }: SendMessageProps) => {
-  const session = useSession();
-  const ref = useRef<HTMLDivElement>(null);
+export function SendMessage({ phone, chatId }: SendMessageProps) {
+  const [handleInputMessage, setHandleInputMessage] = useState("");
+  const { data } = api.auth.getSession.useQuery();
+  const apiUtils = api.useUtils();
 
-  if (!session.data) return (<Spinner />);
-
-  const handleSubmit = (e: KeyboardEvent<HTMLDivElement> | FormEvent<HTMLFormElement> | undefined) => {
+  const handleSubmit = (
+    e: KeyboardEvent<HTMLDivElement> | FormEvent<HTMLFormElement> | KeyboardEvent<HTMLTextAreaElement> | undefined,
+  ) => {
     e?.preventDefault();
-    if (!ref.current) return;
+    if (!handleInputMessage) return;
+    messageSend({
+      phone,
+      message: `*${data?.user.name}*: ${handleInputMessage}`,
+    });
 
-    messageSend({ phone, message: `*${session.data.user.name}*: ${ref.current.textContent}` });
-    ref.current.textContent = "";
-  }
+    apiUtils.chat.getMessagesByChatId.setData({ chatId }, (prev) => {
+      return prev ? [...prev, {
+        fromMe: true, ack: 0, body: `*${data?.user.name}*: ${handleInputMessage}`, chatId, createdAt: new Date(),
+        fileKey: null,
+        from: "",
+        id: "",
+        isGif: false,
+        isRevoked: false,
+        location: null,
+        mimetype: null,
+        protocol: "",
+        timestamp: new Date().getTime(),
+        to: phone,
+        type: "chat",
+        updatedAt: new Date,
+        vcard: null
+      }] : [];
+    })
+    setHandleInputMessage("");
+  };
 
-  return (<form onSubmit={handleSubmit} className="flex gap-3 w-full p-4 items-end ease-in">
-    <div
-      ref={ref}
-      contentEditable
-      role="textbox"
-      content="Digite uma mensagem123"
-      onKeyDown={e => e.key === 'Enter' && handleSubmit(e)}
-      spellCheck
-      aria-autocomplete="list"
-      title="Digite uma mensagem"
-      className="outline-none rounded max-h-[7.35em] min-h-[1.47em] user-select-text whitespace-pre-wrap break-words w-full bg-slate-500 p-2 text-slate-100 "
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex w-full items-center gap-2 px-4"
     >
-    </div>
-    <button
+      <Textarea
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) handleSubmit(e);
+          //if key shift + enter then add a new line
+          if (e.key === "Enter" && e.shiftKey)
+            setHandleInputMessage(handleInputMessage + "\n");
+        }}
+        onChange={(e) => setHandleInputMessage(e.target.value ?? "")}
+        value={handleInputMessage}
+        placeholder="Digite uma mensagem"
+        className=" max-h-24 min-h-14 w-full rounded-xl pl-3 pt-3 text-black shadow-md "
+      />
 
-      type="submit"
-      className="rounded-md h-fit border-slate-100 bg-slate-500 p-2 text-slate-100 shadow-lg hover:opacity-80 transition-opacity font-bold"
-    >
-      Enviar
-    </button>
-  </form>)
+      <button
+        type="submit"
+        className="h-fit transition-opacity hover:opacity-90"
+      >
+        <ArrowSquareRight size="38" variant="Bold" />
+      </button>
+    </form>
+  );
 }

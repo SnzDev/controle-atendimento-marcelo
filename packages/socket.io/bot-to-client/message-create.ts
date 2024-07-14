@@ -4,6 +4,8 @@ import { z } from "zod";
 import { createOrUpdateMessage, typeMessageSchema } from "./utils/message";
 import { createOrUpdateContact } from "./utils/contact";
 import { getHasChat } from "./utils/chat";
+import { BotActionPubSub } from "~/pub-sub";
+import { BotActionTypes } from "@morpheus/validators";
 
 
 
@@ -45,8 +47,17 @@ const messageSchema = z.object({
 type MessageData = z.infer<typeof messageSchema>;
 export const messageCreate = (socket: Socket) => {
   socket.on("message_create", async (data: MessageData) => {
-    socket.broadcast.emit(`message-${data.toInfo.phone}`, data);
-    // console.log(`message-${data.toInfo.phone}`, data);
+
+    const botAction = new BotActionPubSub(
+      socket,
+      BotActionTypes.MessageCreated,
+      {
+        ...data,
+        ack: data.message.ack,
+        protocol: data.message.id.id,
+      },
+    );
+    botAction.pub();
     const parse = messageSchema.safeParse(data);
     const instance = await prisma.whatsappInstance.findMany();
 

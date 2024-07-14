@@ -1,6 +1,8 @@
 import { prisma } from "@morpheus/db";
+import { BotActionTypes } from "@morpheus/validators";
 import { type Socket } from "socket.io";
 import { z } from "zod";
+import { BotActionPubSub } from "~/pub-sub";
 
 
 
@@ -28,6 +30,11 @@ export const disconnected = (socket: Socket): void => {
     });
 
     socket.broadcast.emit("disconnected");
+    const botAction = new BotActionPubSub(
+      socket,
+      BotActionTypes.Disconnected,
+    );
+    botAction.pub();
 
   });
 }

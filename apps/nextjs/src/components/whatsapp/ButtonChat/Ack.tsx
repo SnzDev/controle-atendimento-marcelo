@@ -1,31 +1,34 @@
-import { ChevronDown, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import Image from "next/image";
 
 interface AckIconProps {
   ack: number;
 }
+const ackOptions = [
+  { ack: 1, alt: "enviado", src: "/icons/whatsapp/ack-1.svg" },
+  { ack: 2, alt: "enviado e recebido", src: "/icons/whatsapp/ack-2.svg" },
+  { ack: 3, alt: "lido", src: "/icons/whatsapp/ack-3.svg" },
+  { ack: 4, alt: "ouvido", src: "/icons/whatsapp/ack-4.svg" },
+];
 export const AckIcon = ({ ack }: AckIconProps) => {
+  const ackOption = ackOptions.find((option) => option.ack === ack);
 
-  if (ack === 1) {
-    return <span className="text-xs text-gray-500">
-      <Image alt="enviado" src="/icons/whatsapp/ack-1.svg" width={16} height={16} />
-    </span >
-  }
-  if (ack === 2) {
-    return <div className="flex">
-      <Image alt="enviado e recebido" src="/icons/whatsapp/ack-2.svg" width={16} height={16} />
-    </div>
-  }
-  if (ack === 3) {
-    return <div className="flex">
-      <Image alt="lido" src="/icons/whatsapp/ack-3.svg" width={16} height={16} />
-    </div>
-  }
+  if (!ackOption)
+    return (
+      <span>
+        <Clock size="16" className="h-[11px] w-[16px] text-white" />
+      </span>
+    );
 
-  if (ack === 4) {
-    return <div className="flex">
-      <Image alt="ouvido" src="/icons/whatsapp/ack-4.svg" width={16} height={16} />
-    </div>
-  }
-  return <span className="text-xs"><Clock /></span>
-}
+  return (
+    <span>
+      <Image
+        alt={ackOption.alt}
+        src={ackOption.src}
+        width={16}
+        height={16}
+        className="h-[11px] w-[16px]"
+      />
+    </span>
+  );
+};
