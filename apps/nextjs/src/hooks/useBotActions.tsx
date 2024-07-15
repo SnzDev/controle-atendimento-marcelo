@@ -27,16 +27,17 @@ const pathToSound = "/sounds/notification.mp3";
 
 export const BotActionsProvider = ({ children }: BotActionsProviderProps) => {
   const apiUtils = api.useUtils();
+  const { data: session } = api.auth.getSession.useQuery();
   const [actions, setActions] = useState<ActionBotSchema[]>([]);
   const { data: findChatsFromInstance } = api.chat.findChats.useQuery();
 
   const finishedChats =
     findChatsFromInstance?.filter((chat) => !!chat.finalizedAt) ?? [];
   const pendingChats =
-    findChatsFromInstance?.filter((chat) => !chat.userId) ?? [];
+    findChatsFromInstance?.filter((chat) => !chat.userId && !chat.finalizedAt) ?? [];
   const assignmentChats =
     findChatsFromInstance?.filter(
-      (chat) => !!chat.userId && !chat.finalizedAt,
+      (chat) => !!chat.userId && chat.userId === session?.user.id && !chat.finalizedAt,
     ) ?? [];
 
   const { toast } = useToast();
@@ -136,7 +137,7 @@ body - main content of the notification
               body: data.payload.message.body,
               ack: data.payload.message.ack,
               type: data.payload.message.type,
-              chatId: "",
+              chatId: findChatsFromInstance?.[isPendingOrMyAssignment]?.chatId ?? "",
               fileKey: data.payload.message.fileKey ?? null,
               from: data.payload.fromInfo.phone,
               isGif: data.payload.message.isGif ?? false,

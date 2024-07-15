@@ -27,7 +27,7 @@ import { IconButton, TableCell, TableRow } from "@mui/material";
 import { useSession } from "next-auth/react";
 import React from "react";
 import ChangeRegion from "../Menus/ChangeRegion";
-import { ButtonChat } from "../whatsapp/ButtonChat";
+import { ChatWhatsapp } from "../whatsapp/ButtonChat";
 import type { inferRouterOutputs } from '@trpc/server';
 import type { AppRouter } from "@morpheus/api";
 
@@ -181,9 +181,9 @@ const AssignmentRows = (props: AssignmentRows) => {
                       </IconButton>
 
                       {assignment.Chat?.contactId && (
-                        <ButtonChat
+                        <ChatWhatsapp
                           chatId={assignment.Chat.id}
-                          contactId={assignment.Chat.contactId}
+                        // contactId={assignment.Chat.contactId}
                         />
                       )}
                     </div>

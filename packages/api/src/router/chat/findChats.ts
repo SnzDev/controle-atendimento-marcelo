@@ -1,11 +1,4 @@
-
-
-
-
-
-
 import { protectedProcedure } from "../../trpc";
-
 
 
 
@@ -61,6 +54,7 @@ export const findChats = protectedProcedure.query(async ({ ctx, input }) => {
     const lastMessage = lastMessages?.find(item => item.chatId === chat.chatId ?? "")
     const unreadMessagesLenth = lastMessages?.filter(item => (item.chatId === chat.chatId ?? "") && !item.fromMe).filter(item => item.ack > 2).length
     const contact = contacts.find(item => item.id === chat.Chat?.contactId ?? "")
+    chat.userId = chat.userId === userWhatsapp.id ? "" : chat.userId
 
     return {
       ...chat,

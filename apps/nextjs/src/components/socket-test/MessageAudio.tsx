@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { socket } from "~/lib/socket.io";
 import { type IBody } from "~/pages/api/webhook/whatsapp";
-import { socket } from "~/utils/socket";
 
 export const MessageAudio = () => {
   const [messages, setMessages] = useState<IBody[]>([]);
