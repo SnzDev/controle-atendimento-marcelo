@@ -40,7 +40,7 @@ export const createOrUpdateContact = async ({ phone, platform, profilePicUrl, pu
         profilePicUrl: profilePicUrl,
         name: pushname,
         platform: platform,
-        isGroup: isGroup,
+        isGroup: platform === "group",
       }
     });
 
