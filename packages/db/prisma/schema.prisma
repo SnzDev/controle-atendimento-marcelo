@@ -263,16 +263,18 @@ model WhatsappInstance {
 }
 
 model WhatsappContact {
-  id                   String             @id @default(cuid())
-  name                 String
-  phone                String
-  profilePicUrl        String?            @db.VarChar(255)
-  platform             String?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-  WhatsappMessagesFrom WhatsappMessages[] @relation("fromContact")
-  WhatsappMessagesTo   WhatsappMessages[] @relation("toContact")
-  WhatsappChat         WhatsappChat[]
+  id                     String             @id @default(cuid())
+  name                   String
+  phone                  String
+  profilePicUrl          String?            @db.VarChar(255)
+  platform               String?
+  isGroup                Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  WhatsappMessagesFrom   WhatsappMessages[] @relation("fromContact")
+  WhatsappMessagesTo     WhatsappMessages[] @relation("toContact")
+  WhatsappMessagesAuthor WhatsappMessages[] @relation("author")
+  WhatsappChat           WhatsappChat[]
 }
 
 model WhatsappMessages {
@@ -281,6 +283,7 @@ model WhatsappMessages {
   chatId    String
   from      String
   to        String
+  author    String?
   ack       Int
   fromMe    Boolean
   body      String   @db.Text
@@ -295,19 +298,22 @@ model WhatsappMessages {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  fromContact WhatsappContact @relation("fromContact", fields: [from], references: [id])
-  toContact   WhatsappContact @relation("toContact", fields: [to], references: [id])
-  chat        WhatsappChat    @relation(fields: [chatId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  fromContact   WhatsappContact  @relation("fromContact", fields: [from], references: [id])
+  toContact     WhatsappContact  @relation("toContact", fields: [to], references: [id])
+  authorContact WhatsappContact? @relation("author", fields: [author], references: [id])
+  chat          WhatsappChat     @relation(fields: [chatId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([chatId])
   @@index([from])
   @@index([to])
+  @@index([author])
 }
 
 model WhatsappChat {
   id         String   @id @default(cuid())
   instanceId String
   contactId  String
+  isGroup    Boolean  @default(false)
   step       String   @default("START")
   clientId   String?
   tries      Int      @default(0)

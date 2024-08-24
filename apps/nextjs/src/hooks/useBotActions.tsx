@@ -151,7 +151,90 @@ body - main content of the notification
               vcard: data.payload.message.vCards ?? null,
             },
             unreadMessagesLenth: (newValue?.[isPendingOrMyAssignment]?.unreadMessagesLenth ?? 0) + 1
+          }
 
+          newValue[isPendingOrMyAssignment] = {
+            ...dataPayload,
+          };
+          return newValue;
+        });
+
+        void apiUtils.chat.getMessagesByChatId.invalidate({
+          chatId: findChatsFromInstance?.[isPendingOrMyAssignment]?.chatId ?? undefined,
+        });
+
+        await play();
+
+        const status = findChatsFromInstance?.[isPendingOrMyAssignment]?.userId
+          ? "Em Atendimento"
+          : "Pendente";
+
+        await checkPageStatus(
+          `${data.payload.fromInfo.pushname} (${status})`,
+          `Disse: ${data.payload.message.body}`,
+        );
+        toast({
+          title: `Nova mensagem - ${data.payload.fromInfo.pushname} (${status})`,
+          description: (
+            <div className="flex gap-2">
+              <Avatar>
+                <AvatarImage src={data.payload.fromInfo.profilePicUrl} />
+                <AvatarFallback>
+                  {data.payload.fromInfo.pushname}
+                </AvatarFallback>
+              </Avatar>
+
+              <div>
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">
+                    {data.payload.fromInfo.phone}
+                  </span>
+                  <div className="flex gap-2">
+                    <strong>{data.payload.fromInfo.pushname}</strong>
+                    <p className="max-w-[200px] truncate">
+                      Disse: {data.payload.message.body}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ),
+        });
+      }
+      if (data.action === BotActionTypes.MessageGroup) {
+        const isPendingOrMyAssignment = findChatsFromInstance?.findIndex(
+          (chat) =>
+            (chat.contact?.phone === data.payload.fromInfo.phone ||
+              !chat.userId) &&
+            !chat.finalizedAt,
+        );
+        if (isPendingOrMyAssignment == -1 || !isPendingOrMyAssignment) return;
+
+        apiUtils.chat.findChats.setData(undefined, (prev) => {
+          const newValue = prev ? [...prev] : [];
+          const dataPayload = {
+            ...newValue[isPendingOrMyAssignment],
+            lastMessage: {
+              fromMe: data.payload.message.fromMe,
+              id: "",
+              createdAt: new Date(),
+              body: data.payload.message.body,
+              ack: data.payload.message.ack,
+              type: data.payload.message.type,
+              chatId: findChatsFromInstance?.[isPendingOrMyAssignment]?.chatId ?? "",
+              fileKey: data.payload.message.fileKey ?? null,
+              from: data.payload.fromInfo.phone,
+              isGif: data.payload.message.isGif ?? false,
+              isRevoked: false,
+              location: data.payload.message.location ?? null,
+              mimetype: "",
+              protocol: "",
+              timestamp: data.payload.message.timestamp,
+              to: data.payload.toInfo.phone,
+              updatedAt: new Date(),
+              vcard: data.payload.message.vCards ?? null,
+            },
+            unreadMessagesLenth: (newValue?.[isPendingOrMyAssignment]?.unreadMessagesLenth ?? 0) + 1
           }
 
           newValue[isPendingOrMyAssignment] = {

@@ -12,11 +12,12 @@
   },
   "dependencies": {
     "@morpheus/auth": "workspace: ^0.1.0",
-    "@morpheus/mk": "workspace: ^0.1.0",
     "@morpheus/db": "workspace: ^0.1.0",
+    "@morpheus/mk": "workspace: ^0.1.0",
     "@trpc/client": "^10.20.0",
     "@trpc/server": "^10.20.0",
     "axios": "^1.3.5",
+    "minio": "^7.1.3",
     "superjson": "1.9.1",
     "zod": "^3.21.4"
   },

@@ -23,6 +23,7 @@ export function SendMessage({ phone, chatId }: SendMessageProps) {
   ) => {
     e?.preventDefault();
     if (!handleInputMessage) return;
+    console.log({ phone, message: `*${data?.user.name}*: ${handleInputMessage}` });
     messageSend({
       phone,
       message: `*${data?.user.name}*: ${handleInputMessage}`,
@@ -30,7 +31,8 @@ export function SendMessage({ phone, chatId }: SendMessageProps) {
 
     apiUtils.chat.getMessagesByChatId.setData({ chatId }, (prev) => {
       return prev ? [...prev, {
-        fromMe: true, ack: 0, body: `*${data?.user.name}*: ${handleInputMessage}`, chatId, createdAt: new Date(),
+        fromMe: true, ack: 0, body: `*${data?.user.name}*: ${handleInputMessage}`,
+        chatId,
         fileKey: null,
         from: "",
         id: "",
@@ -42,7 +44,8 @@ export function SendMessage({ phone, chatId }: SendMessageProps) {
         timestamp: new Date().getTime(),
         to: phone,
         type: "chat",
-        updatedAt: new Date,
+        updatedAt: new Date(),
+        createdAt: new Date(),
         vcard: null
       }] : [];
     })

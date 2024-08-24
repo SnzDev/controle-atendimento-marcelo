@@ -7,13 +7,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check } from "iconsax-react";
 // import { AckIcon } from "./Ack";
-import { Ban, ExternalLink, FileText } from "lucide-react";
+import { Ban, ExternalLink, FileText, Trash, Trash2 } from "lucide-react";
 
 import type { RouterOutputs } from "@morpheus/api";
 import { AppRouter } from "@morpheus/api";
 
 import { AckIcon } from "./Ack";
 import { GifVideoExpand, ImageExpand } from "~/components/ImageExpand";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "~/components/ui/context-menu";
 
 export type Message = RouterOutputs["chat"]["getMessagesByChatId"][number];
 
@@ -47,46 +48,49 @@ export const Balloon = ({ message }: BalloonProps) => {
     .replace(/"(.*?)"/g, "<p>$1</p>");
 
   return (
-    <div
-      className={`flex h-fit max-w-[20rem] flex-col flex-wrap items-end gap-1 rounded-lg p-2 ${message.fromMe ? "self-end bg-primary pl-4 text-white" : "self-start bg-primary/75 pr-4 text-white"}`}
-    >
-      {message.isRevoked && (
-        <p className="text-gray-500 mb-1 flex flex-row items-center gap-2">
-          <Ban size={15} /> Mensagem apagada
-        </p>
-      )}
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div
+          className={`flex h-fit max-w-[20rem] flex-col flex-wrap items-end gap-1 rounded-lg p-2 ${message.fromMe ? "self-end bg-primary pl-4 text-white" : "self-start bg-primary/75 pr-4 text-white"}`}
+        >
+          {message.isRevoked && (
+            <p className="text-gray-500 mb-1 flex flex-row items-center gap-2">
+              <Ban size={15} /> Mensagem apagada
+            </p>
+          )}
 
-      <div
-        dangerouslySetInnerHTML={{ __html: messageHtml }}
-        className="text-gray-500 dont-break-out w-full items-center gap-2 whitespace-pre-wrap break-words"
-      />
-      {/* {message.fileUrl && isImage && <ImageBody fileUrl={message.fileUrl} />}
-      {message.fileUrl && isVideo && (
-        <VideoBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
-      )}
-      {message.fileUrl && isGif && (
-        <GifBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
-      )}
-      {message.fileUrl && isAudio && (
-        <AudioBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
-      )}
-      {message.location && isLocation && (
-        <LocationBody location={message.location as Location} />
-      )}
-      {message.fileUrl && isDocument && (
-        <DocumentBody documentUrl={message.fileUrl} />
-      )} */}
+          {message.fileUrl && isImage && <ImageBody fileUrl={message.fileUrl} />}
+          {message.fileUrl && isVideo && (
+            <VideoBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
+          )}
+          {message.fileUrl && isGif && (
+            <GifBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
+          )}
+          {message.fileUrl && isAudio && (
+            <AudioBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
+          )}
+          {message.location && isLocation && (
+            <LocationBody location={message.location as unknown as Location} />
+          )}
+          {message.fileUrl && isDocument && (
+            <DocumentBody documentUrl={message.fileUrl} />
+          )}
+          <div
+            dangerouslySetInnerHTML={{ __html: messageHtml }}
+            className="text-gray-500 dont-break-out w-full items-center gap-2 whitespace-pre-wrap break-words"
+          />
 
-      {/* <div
-        className="w-full break-words"
-        dangerouslySetInnerHTML={{ __html: messageHtml }}
-      ></div> */}
 
-      <span className="mt-[-3px] flex w-full items-center justify-end text-xs">
-        {date}
-        {message.fromMe && <AckIcon ack={message.ack} />}
-      </span>
-    </div>
+          <span className="mt-[-3px] flex w-full items-center justify-end text-xs">
+            {date}
+            {message.fromMe && <AckIcon ack={message.ack} />}
+          </span>
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onClick={() =>}><Trash2 size="16" className="mr-2" /> Excluir</ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 };
 

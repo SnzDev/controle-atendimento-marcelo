@@ -8,6 +8,7 @@ interface CreateOrUpdateContactProps {
   pushname: string;
   profilePicUrl?: string;
   platform?: string;
+
 }
 export const createOrUpdateContact = async ({ phone, platform, profilePicUrl, pushname }: CreateOrUpdateContactProps) => {
   const contact = await prisma.whatsappContact.findFirst({
@@ -22,7 +23,8 @@ export const createOrUpdateContact = async ({ phone, platform, profilePicUrl, pu
         phone: phone,
         profilePicUrl: profilePicUrl,
         name: pushname,
-        platform: platform
+        platform: platform,
+        isGroup: platform === "group"
       }
     });
 
@@ -37,7 +39,8 @@ export const createOrUpdateContact = async ({ phone, platform, profilePicUrl, pu
         phone: phone,
         profilePicUrl: profilePicUrl,
         name: pushname,
-        platform: platform
+        platform: platform,
+        isGroup: isGroup,
       }
     });
 

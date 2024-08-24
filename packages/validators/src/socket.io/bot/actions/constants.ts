@@ -1,5 +1,6 @@
 export enum BotActionTypes {
   MessageReceived = "message-received",
+  MessageGroup = "message-group",
   MessageCreated = "message-created",
   Ack = "ack",
   QR = "qr",

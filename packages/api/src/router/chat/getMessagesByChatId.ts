@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
-
+import { client, bucketName } from "../../lib/minio/client"
 export const getMessagesByChatId = protectedProcedure.input(z.object({
   chatId: z.string(),
 
@@ -12,5 +12,14 @@ export const getMessagesByChatId = protectedProcedure.input(z.object({
     },
   });
 
-  return data;
+
+  // Gerar URLs públicos para as chaves de arquivos
+  const messagesWithUrls = await Promise.all(data.map(async (message) => {
+    let fileUrl: string | null = null;
+    if (message.fileKey)
+      fileUrl = await client.presignedGetObject(bucketName, message.fileKey);
+    return { ...message, fileUrl }
+  }));
+
+  return messagesWithUrls;
 })

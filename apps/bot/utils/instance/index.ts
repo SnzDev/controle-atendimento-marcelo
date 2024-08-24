@@ -1,3 +1,4 @@
+import type WAWebJS from "whatsapp-web.js";
 import {
   Client,
   LocalAuth,
@@ -22,6 +23,8 @@ import { messageAck } from "~/socket/pub/message-ack";
 import { getWid } from "./getWid";
 import { messageSend } from "~/socket/sub/message-send";
 import { logout } from "~/socket/sub/logout";
+import { messageGroup } from "~/socket/pub/messageGroup";
+import { deleteMessageEveryone } from "~/socket/sub/delete-message-everyone";
 
 
 export interface InstanceInfo {
@@ -30,8 +33,6 @@ export interface InstanceInfo {
   phone: string;
   profilePicUrl: string;
 }
-const VERSION_CACHE = process.env.WA_VERSION ?? "2.2412.54";
-
 class Instance {
   client: Client;
   status: "CONNECTED" | "DISCONNECTED" | "CONNECTED" | "OFFLINE";
@@ -50,7 +51,7 @@ class Instance {
       authStrategy: new LocalAuth(),
       puppeteer: {
         executablePath: process.env.CHROME_PATH,
-        headless: true,
+        headless: false,
         args: [
           "--no-sandbox",
           // "--no-first-run",
@@ -74,6 +75,7 @@ class Instance {
     this.status = "OFFLINE";
     console.log("Starting instance...");
     await this.client.initialize();
+
   };
   closeInstance = async () => {
     disconnected("NAVIGATION");
@@ -144,24 +146,22 @@ class Instance {
     });
 
     this.client.on("message", async (data) => {
-      if (
-        // data.to.includes("@g.us") ||
-        // data.from.includes("@g.us") ||
-        // data.id.remote.includes("@broadcast")
-        !data.to.includes("@c.us") ||
-        !data.from.includes("@c.us")
-      )
-        return;
-      const contact = await this.client.getContactById(
-        data.from
-      );
+
+      // if (
+      //   !data.id.remote.includes("@c.us")
+      // )
+      return;
+
+      const chat = await data.getChat();
+
+      const contact = await chat.getContact();
+
       const contactInfo: InstanceInfo = {
-        phone: contact.number,
-        platform: data?.fromMe ? "" : data.deviceType,
-        pushname: contact.pushname,
+        phone: chat.id._serialized,
+        platform: 'group',
+        pushname: contact.pushname ?? contact.name,
         profilePicUrl: await contact.getProfilePicUrl(),
       };
-
       const s3Uploaded = await SaveIfHaveFileS3(data);
 
       const response = {
@@ -172,41 +172,81 @@ class Instance {
         fileKey: s3Uploaded?.fileKey,
       };
 
-      message(response);
+
+      return message(response);
+
     });
 
-    this.client.on("message_create", async (message) => {
+    this.client.on("message_create", async (data) => {
+      console.log('message');
+      console.log(!data.id.remote.includes("@c.us") ||
+        !data.id.remote.includes("@g.us"), { remote: data.id.remote });
       if (
-        // data.to.includes("@g.us") ||
-        // data.from.includes("@g.us") ||
-        // data.id.remote.includes("@broadcast")
-        !message.to.includes("@c.us") ||
-        !message.from.includes("@c.us") ||
-        !message.fromMe
-
+        !data.id.remote.includes("@c.us") &&
+        !data.id.remote.includes("@g.us")
       )
         return;
 
+      const chat = await data.getChat();
+      const isGroup = chat.isGroup;
+
+      console.log({ from: data.from, author: data.author, isGroup, to: data.to, fromMe: data.fromMe });
       const contact = await this.client.getContactById(
-        message.to
+        data.id.remote
       );
+
+
       const contactInfo: InstanceInfo = {
-        phone: contact.number,
-        platform: message?.fromMe ? "" : message.deviceType,
-        pushname: contact.pushname,
+        phone: contact.number ?? data.id.remote,
+        platform: 'group',
+        pushname: contact.pushname ?? contact.name,
         profilePicUrl: await contact.getProfilePicUrl(),
       };
+      const s3Uploaded = await SaveIfHaveFileS3(data);
 
-      const s3Uploaded = await SaveIfHaveFileS3(message);
+      if (isGroup && data.author) {
+        const author = await this.client.getContactById(
+          data.author?.replace(/:(.*?)@/, "@")
+        );
+        const authorInfo: InstanceInfo = {
+          phone: author.number,
+          platform: data.deviceType,
+          pushname: author.pushname,
+          profilePicUrl: await author.getProfilePicUrl(),
+        };
 
-      const data = {
-        message,
+        console.log({ authorInfo, contactInfo });
+
+
+        console.log({
+          receive: false,
+          message: data,
+          toInfo: data.fromMe ? contactInfo : this.info,
+          fromInfo: data.fromMe ? this.info : contactInfo,
+          authorInfo: authorInfo,
+          mimeType: s3Uploaded?.mimeType,
+          fileKey: s3Uploaded?.fileKey,
+        })
+
+        return messageGroup({
+          message: data,
+          toInfo: data.fromMe ? contactInfo : this.info,
+          fromInfo: data.fromMe ? this.info : contactInfo,
+          authorInfo: authorInfo,
+          mimeType: s3Uploaded?.mimeType,
+          fileKey: s3Uploaded?.fileKey,
+        });
+      }
+
+      const response = {
+        message: data,
         toInfo: contactInfo,
         fromInfo: this.info,
         mimeType: s3Uploaded?.mimeType,
         fileKey: s3Uploaded?.fileKey,
       };
-      messageCreate(data);
+      if (data.id.remote.includes("@c.us")) return messageCreate(response);
+
     });
 
     this.client.on("disconnected", async (reason) => {
@@ -235,6 +275,7 @@ class Instance {
   addSocketListeners = () => {
     logout(this.logout);
     messageSend(this.client);
+    deleteMessageEveryone(this.client);
   }
 
 }

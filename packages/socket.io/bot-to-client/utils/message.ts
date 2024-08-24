@@ -27,6 +27,7 @@ interface CreateOrUpdateMessage {
   fileKey?: string;
   mimeType?: string;
   isGif?: boolean;
+  author?: string;
 }
 
 export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
@@ -37,7 +38,7 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
   });
   const body = ['chat', 'document', 'image'].includes(props.type) ? props.body : '';
 
-  if (message) return await prisma.whatsappMessages.update({
+  if (message && props.id.id) return await prisma.whatsappMessages.update({
     where: { id: props.id.id },
     data: {
       protocol: props.id.id,
@@ -52,6 +53,7 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
       mimetype: props.mimeType,
       isGif: props.isGif,
       location: props.location,
+      author: props.author,
     }
   });
 
@@ -71,6 +73,7 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
       fileKey: props.fileKey,
       mimetype: props.mimeType,
       isGif: props.isGif,
+      author: props.author,
     }
   });
 }

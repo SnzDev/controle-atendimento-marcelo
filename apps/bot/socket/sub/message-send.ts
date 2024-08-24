@@ -19,16 +19,12 @@ export const messageSend = (client: Client) => {
 
     const { phone, message, fileUrl } = parse.data;
 
-    const contact = await client.getNumberId(getWid(phone))
-    if (!contact)
-      return console.log('Contact not found');
 
     if (fileUrl) {
       const media = await MessageMedia.fromUrl(fileUrl);
-      await client.sendMessage(contact._serialized, media, { caption: message });
+      await client.sendMessage(phone, media, { caption: message });
       return;
     }
-
-    await client.sendMessage(contact._serialized, message);
+    await client.sendMessage(phone, message);
   });
 }

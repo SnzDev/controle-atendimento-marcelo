@@ -9,8 +9,9 @@ interface HasChatProps {
   contactId: string;
   instanceId: string;
   fromMe: boolean;
+  isGroup?: boolean;
 }
-export const getHasChat = async ({ contactId, instanceId, fromMe }: HasChatProps) => {
+export const getHasChat = async ({ contactId, instanceId, fromMe, isGroup }: HasChatProps) => {
 
   const hasChat = await prisma.whatsappChat.findFirst({
     where: {
@@ -21,11 +22,12 @@ export const getHasChat = async ({ contactId, instanceId, fromMe }: HasChatProps
     }
   });
 
-  if (!hasChat && !fromMe) return await prisma.whatsappChat.create({
+  if (!hasChat && (!fromMe || isGroup)) return await prisma.whatsappChat.create({
     data: {
       contactId,
       step: 'START',
       instanceId: instanceId,
+      isGroup
     }
   });
 

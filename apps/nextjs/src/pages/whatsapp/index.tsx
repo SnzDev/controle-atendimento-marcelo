@@ -1,11 +1,10 @@
 import Image from "next/image";
+import { useEffect } from "react";
+import { ButtonLogout } from "~/components/whatsapp/ButtonLogout";
 import { ButtonQrCode } from "~/components/whatsapp/ButtonQrCode";
 import { ButtonRestart } from "~/components/whatsapp/ButtonRestart";
-import { ButtonLogout } from "~/components/whatsapp/ButtonLogout";
 import { api } from "~/utils/api";
-import { useEffect } from "react";
 import { disconnected, off } from "~/utils/socket/sub/disconnected";
-import { socket } from "~/utils/socket";
 
 
 export default function Whatsapp() {

@@ -14,6 +14,7 @@ import {
 } from "./message-received/schema";
 import { disconnectedSchema, disconnectedPayloadShema } from "./disconnected/schema";
 import { qrPayloadShema, qrSchema } from "./qr/schema";
+import { messageGroupPayloadSchema, messageGroupSchema } from "./message-group/schema";
 
 export const actionBotSchemas = [
   messageAckSchema,
@@ -21,6 +22,7 @@ export const actionBotSchemas = [
   messageReceivedSchema,
   disconnectedSchema,
   qrSchema,
+  messageGroupSchema
 ] as const;
 
 export const actonPayloads = [
@@ -29,6 +31,7 @@ export const actonPayloads = [
   messageReceivedPayloadSchema,
   disconnectedPayloadShema,
   qrPayloadShema,
+  messageGroupPayloadSchema
 ] as const;
 
 export const actionBotSchema = z.discriminatedUnion("action", [

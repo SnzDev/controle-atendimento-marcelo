@@ -152,4 +152,48 @@ export const whatsappRouter = createTRPCRouter({
 
     return contact;
   }),
+
+  getGroupChats: protectedProcedure.query(async ({ ctx }) => {
+    const chats = await ctx.prisma.whatsappChat.findMany({
+      where: {
+        isGroup: true
+      },
+      include: {
+        contact: true,
+      }
+    });
+
+    const lastMessages = await ctx.prisma.whatsappMessages.findMany({
+      where: {
+        chatId: {
+          in: chats.filter(item => !!item.id).map(chat => chat.id ?? "")
+        }
+      }
+    });
+
+    const contacts = await ctx.prisma.whatsappContact.findMany({
+      where: {
+        id: {
+          in: chats.filter(item => !!item?.contactId).map(item => item?.contactId ?? "")
+        }
+      }
+    });
+
+
+    return chats.map((chat) => {
+      const lastMessage = lastMessages?.find(item => item.chatId === chat.id ?? "")
+      const unreadMessagesLenth = lastMessages?.filter(item => (item.chatId === chat.id ?? "") && !item.fromMe).filter(item => item.ack > 2).length
+      const contact = contacts.find(item => item.id === chat?.contactId ?? "")
+
+      return {
+        ...chat,
+        contact,
+        lastMessage,
+        unreadMessagesLenth,
+      };
+
+    })
+
+  })
 });
+

@@ -27,6 +27,9 @@ import { useQueryParams } from "~/hooks/useQueryParams";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 import TabLayout from "~/components/Layout";
+import { FinishedQueue } from "~/components/whatsapp/Tabs/Queue/FinishQueue";
+import { InboxQueue } from "~/components/whatsapp/Tabs/Queue/InboxQueue";
+import { GroupsQueue } from "~/components/whatsapp/Tabs/Queue/GroupsQueue";
 
 export default function Assignments() {
   const { searchParams, setQueryParam } = useQueryParams();
@@ -56,18 +59,18 @@ export default function Assignments() {
             <TabsTrigger value="search">
               <div className="flex flex-col items-center gap-2">
                 <Search />
-                <span>Buscar</span>
+                <span>Grupos</span>
               </div>
             </TabsTrigger>
           </TabsList>
           <TabsContent className="h-full" value="inbox">
-            <Inbox />
+            <InboxQueue />
           </TabsContent>
           <TabsContent className="h-full" value="finished">
-            <Finished />
+            <FinishedQueue />
           </TabsContent>
           <TabsContent className="h-full" value="search">
-            password
+            <GroupsQueue />
           </TabsContent>
         </Tabs>
         <ChatWhatsapp chatId={selectedChatId} />
@@ -76,52 +79,9 @@ export default function Assignments() {
   );
 }
 
-export function Finished() {
-  const { searchParams, setQueryParam } = useQueryParams();
-  const filterFinished = searchParams.get("filterFinished") ?? undefined;
 
-  return (
-    <div className="flex h-full w-full flex-col gap-2 bg-white ">
-      <div className="px-2">
-        <Input
-          defaultValue={filterFinished}
-          onChange={(e) => setQueryParam("filterFinished", e.target.value)}
-          className="mt-2 w-full"
-          placeholder="Buscar"
-        />
-      </div>
-      <Separator />
 
-      <FinishedQueue />
-    </div>
-  );
-}
 
-export function Inbox() {
-  const { searchParams, setQueryParam } = useQueryParams();
-  const filterInbox = searchParams.get("filterInbox") ?? undefined;
-  return (
-    <div className="flex h-full w-full flex-col gap-2 bg-white ">
-      <div className="px-2">
-        <Input
-          defaultValue={filterInbox}
-          onChange={(e) => setQueryParam("filterInbox", e.target.value)}
-          className="mt-2 w-full"
-          placeholder="Buscar"
-        />
-      </div>
-      <Separator />
-
-      <AssignmentQueue />
-
-      <Separator />
-
-      <PendingQueue />
-
-      <Separator />
-    </div>
-  );
-}
 
 type ChatCardsProps =
   RouterOutputs["chat"]["findChats"][number] & {
@@ -228,56 +188,11 @@ export function ChatCards({
     </div>
   );
 }
-export function AssignmentQueue() {
-  const { searchParams } = useQueryParams();
-  const filterInbox = searchParams.get("filterInbox") ?? "";
-  const { assignmentChats } = useBotActions();
 
-  return (
-    <>
-      <div className="flex min-h-[40px] w-full items-center justify-between px-2">
-        <div className="flex items-center gap-1">
-          <Label>Trabalhando em </Label>{" "}
-          <span className="text-sm">{assignmentChats.length ?? 0}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center space-x-2 ">
-            <Label htmlFor="all">Todos</Label>
-            <Switch id="all" />
-          </div>
-
-          <Button className="h-fit w-fit rounded-full p-2" variant="ghost">
-            <Plus />
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex max-h-[400px] w-full flex-col gap-2 overflow-auto">
-        {assignmentChats
-          .filter(
-            (card) =>
-              card.contact?.name
-                ?.toLowerCase()
-                .includes(filterInbox.toLowerCase()) ||
-              card.contact?.phone
-                ?.toLowerCase()
-                .includes(filterInbox.toLowerCase()) ||
-              card.lastMessage?.body
-                .toLowerCase()
-                .includes(filterInbox.toLowerCase()),
-          )
-          .map((card) => (
-            <ChatCards {...card} key={card.id} />
-          ))}
-      </div>
-    </>
-  );
-}
 
 export function PendingQueue() {
   const { searchParams } = useQueryParams();
   const filterInbox = searchParams.get("filterInbox") ?? "";
-  const params = useParams();
   const { pendingChats } = useBotActions();
 
   return (
@@ -310,37 +225,5 @@ export function PendingQueue() {
   );
 }
 
-export function FinishedQueue() {
-  const { searchParams } = useQueryParams();
-  const filterInbox = searchParams.get("filterInbox") ?? "";
-  const { finishedChats } = useBotActions();
 
-  return (
-    <div>
-      <div className="flex min-h-[40px] w-full items-center justify-between px-2">
-        <div className="flex items-center gap-1">
-          <Label>Finalizados</Label>
-          <span className="text-sm">{finishedChats.length ?? 0}</span>
-        </div>
-      </div>
-      <div className="flex max-h-[400px] w-full flex-col gap-2 overflow-auto">
-        {finishedChats
-          .filter(
-            (card) =>
-              card.contact?.name
-                ?.toLowerCase()
-                .includes(filterInbox.toLowerCase()) ||
-              card.contact?.phone
-                ?.toLowerCase()
-                .includes(filterInbox.toLowerCase()) ||
-              card.lastMessage?.body
-                .toLowerCase()
-                .includes(filterInbox.toLowerCase()),
-          )
-          .map((card) => (
-            <ChatCards {...card} key={card.id} />
-          ))}
-      </div>
-    </div>
-  );
-}
+

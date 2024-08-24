@@ -1,14 +1,15 @@
 import http from "http";
 import { Server } from "socket.io";
+import { disconnected } from "./bot-to-client/disconnected";
+import { message } from "./bot-to-client/message";
+import { messageAck } from "./bot-to-client/message-ack";
+import { messageCreate } from "./bot-to-client/message-create";
+import { messageGroup } from "./bot-to-client/message-group";
+import { messageRevokeEveryone } from "./bot-to-client/message-revoke-everyone";
 import { qr } from "./bot-to-client/qr";
 import { ready } from "./bot-to-client/ready";
-import { logout } from "./client-to-bot/logout";
-import { disconnected } from "./bot-to-client/disconnected";
 import { messageSend } from "./client-to-bot/message-send";
-import { message } from "./bot-to-client/message";
-import { messageCreate } from "./bot-to-client/message-create";
-import { messageAck } from "./bot-to-client/message-ack";
-import { messageRevokeEveryone } from "./bot-to-client/message-revoke-everyone";
+import { logout } from "./client-to-bot/logout";
 
 const server = http.createServer();
 const io = new Server(server, { cors: { origin: "*" } });
@@ -27,13 +28,15 @@ io.on("connection", (socket) => {
   ready(socket);
   disconnected(socket);
   message(socket);
+  message(socket);
   messageCreate(socket);
   messageAck(socket);
   messageRevokeEveryone(socket);
+  messageGroup(socket);
 
-  //Client to Bot
-  // logout(socket);
-  // messageSend(socket);
+  // Client to Bot
+  logout(socket);
+  messageSend(socket);
 
 });
 
