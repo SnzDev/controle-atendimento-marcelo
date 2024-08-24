@@ -51,7 +51,7 @@ class Instance {
       authStrategy: new LocalAuth(),
       puppeteer: {
         executablePath: process.env.CHROME_PATH,
-        headless: false,
+        headless: true,
         args: [
           "--no-sandbox",
           // "--no-first-run",
@@ -147,10 +147,10 @@ class Instance {
 
     this.client.on("message", async (data) => {
 
-      // if (
-      //   !data.id.remote.includes("@c.us")
-      // )
-      return;
+      if (
+        !data.id.remote.includes("@c.us")
+      )
+        return;
 
       const chat = await data.getChat();
 
