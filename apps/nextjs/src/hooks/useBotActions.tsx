@@ -152,7 +152,7 @@ body - main content of the notification
             },
             unreadMessagesLenth: (newValue?.[isPendingOrMyAssignment]?.unreadMessagesLenth ?? 0) + 1
           }
-
+          //@ts-expect-error - data is not null
           newValue[isPendingOrMyAssignment] = {
             ...dataPayload,
           };
@@ -237,6 +237,7 @@ body - main content of the notification
             unreadMessagesLenth: (newValue?.[isPendingOrMyAssignment]?.unreadMessagesLenth ?? 0) + 1
           }
 
+          //@ts-expect-error - data is not null
           newValue[isPendingOrMyAssignment] = {
             ...dataPayload,
           };

@@ -1,4 +1,3 @@
-import { socket } from "~/utils/socket";
 import { ConnectionManager } from "./ConnectionManager";
 import { ConnectionState } from "./ConnectionState";
 import { Events } from "./Events";
@@ -6,6 +5,7 @@ import { MyForm } from "./MyForm";
 import { useEffect, useState } from "react";
 import { type IBody } from "~/pages/api/webhook/whatsapp";
 import { QrCode } from "./QrCode";
+import { socket } from "~/lib/socket.io";
 
 export default function SocketTest() {
   const [isConnected, setIsConnected] = useState(socket.connected);

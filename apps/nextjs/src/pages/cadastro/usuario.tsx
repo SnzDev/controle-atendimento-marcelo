@@ -375,7 +375,7 @@ const ModalCreate = ({ isOpen, onClose, userId }: ModalCreateProps) => {
             <select
               {...register("role")}
               className="my-2 w-60 items-center rounded border-[1px] border-stone-100 bg-stone-900 p-2 pl-10 text-stone-100 md:w-80"
-              placeholder="Usuário"
+            // placeholder="Usuário"
             >
               <option value={UserRole.ADMIN}>Admin</option>
               <option value={UserRole.USER}>Usuário</option>

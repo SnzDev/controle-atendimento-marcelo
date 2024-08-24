@@ -1,11 +1,10 @@
 import { QrCode, X } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { useEffect, useState } from "react";
+import { Loading } from "~/components/Loading";
 import { useDiscloseSelect } from "~/hooks";
 import { type DiscloseSelect } from "~/hooks/useDiscloseSelect";
-import { QRCodeSVG } from "qrcode.react";
-import { Loading } from "~/components/Loading";
-import Swal from "sweetalert2";
-import { useEffect, useState } from "react";
-import { socket } from "~/utils/socket";
+import { socket } from "~/lib/socket.io";
 import { api } from "~/utils/api";
 
 

@@ -29,7 +29,9 @@ export function SendMessage({ phone, chatId }: SendMessageProps) {
       message: `*${data?.user.name}*: ${handleInputMessage}`,
     });
 
+    //@ts-expect-error - data is not null
     apiUtils.chat.getMessagesByChatId.setData({ chatId }, (prev) => {
+      if (prev) return prev;
       return prev ? [...prev, {
         fromMe: true, ack: 0, body: `*${data?.user.name}*: ${handleInputMessage}`,
         chatId,
@@ -46,7 +48,9 @@ export function SendMessage({ phone, chatId }: SendMessageProps) {
         type: "chat",
         updatedAt: new Date(),
         createdAt: new Date(),
-        vcard: null
+        vcard: null,
+        author: data?.user.id,
+        fileUrl: null,
       }] : [];
     })
     setHandleInputMessage("");

@@ -1,20 +1,18 @@
 "use client";
 
 // import { type AppRouter } from "@acme/api";
-import type { inferRouterOutputs } from "@trpc/server";
 import Image from "next/image";
 // import { GifVideoExpand, ImageExpand } from "~/components/ImageExpand";
 import Link from "next/link";
-import { Check } from "iconsax-react";
 // import { AckIcon } from "./Ack";
-import { Ban, ExternalLink, FileText, Trash, Trash2 } from "lucide-react";
+import { Ban, ExternalLink, FileText, Trash2 } from "lucide-react";
 
 import type { RouterOutputs } from "@morpheus/api";
-import { AppRouter } from "@morpheus/api";
 
-import { AckIcon } from "./Ack";
 import { GifVideoExpand, ImageExpand } from "~/components/ImageExpand";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "~/components/ui/context-menu";
+import { AckIcon } from "./Ack";
+import { deleteMessageEveryone } from "~/lib/socket.io/pub/delete-message-everyone";
 
 export type Message = RouterOutputs["chat"]["getMessagesByChatId"][number];
 
@@ -88,7 +86,11 @@ export const Balloon = ({ message }: BalloonProps) => {
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onClick={() =>}><Trash2 size="16" className="mr-2" /> Excluir</ContextMenuItem>
+        <ContextMenuItem onClick={() => {
+          deleteMessageEveryone({
+            protocol: message.protocol,
+          })
+        }}><Trash2 size="16" className="mr-2" /> Excluir</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );

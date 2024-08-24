@@ -197,7 +197,6 @@ function ResponsiveAppBar({
                       onChange({ key: "shopId", value: e.target.value });
                   }}
                   className="rounded-md border-slate-100 bg-slate-700 p-2 text-slate-100 shadow-lg"
-                  placeholder="Loja"
                 >
                   <option value="">Revenda</option>
                   {listShop?.data?.map((item) => (
@@ -343,7 +342,6 @@ function ResponsiveAppBar({
                         onChange({ key: "shopId", value: e.target.value });
                       }}
                       style={{ background: "rgb(30 41 59)" }}
-                      placeholder="Loja"
                     >
                       <option disabled value="">
                         Revenda

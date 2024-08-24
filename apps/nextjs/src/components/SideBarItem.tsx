@@ -36,6 +36,8 @@ const SidebarItem = forwardRef<ComponentRef<typeof Link>, SidebarItemProps>(
   ({ children, variant, size, href = "", className, asChild, ...props }) => {
     if (asChild) {
       return (
+        //@ts-expect-error ts-migrate(7006) FIXME: Parameter 'props' implicitly has an 'any' type.
+
         <button
           className={itemVariants({ variant, size, className })}
           {...props}

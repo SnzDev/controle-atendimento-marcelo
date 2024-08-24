@@ -23,7 +23,7 @@ export function ConnectionManager() {
       console.log('disconnected');
     }
 
-    function onBotActions(data) {
+    function onBotActions(data: unknown) {
       console.log(data);
     }
 

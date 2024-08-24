@@ -1,6 +1,5 @@
 import { MessageSquare } from "lucide-react";
 import Image from "next/image";
-import { ButtonChat } from "~/components/whatsapp/ButtonChat";
 import { api } from "~/utils/api";
 
 export default function WhatsappContacts() {
@@ -47,7 +46,7 @@ export default function WhatsappContacts() {
                   {new Date(contact.createdAt).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                 </td>
                 <td align="left" className="px-6 py-4" >
-                  <ButtonChat contactId={contact.id} />
+                  {/* <ButtonChat contactId={contact.id} /> */}
                 </td>
               </tr>
             ))

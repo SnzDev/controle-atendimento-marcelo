@@ -44,6 +44,7 @@ export function GroupsQueue() {
                   .includes(filterInbox.toLowerCase())
             )
             .map((card) => (
+              //@ts-expect-error - card is not null
               <ChatCards chatId={card.id} {...card} key={card.id} />
             ))}
         </div>

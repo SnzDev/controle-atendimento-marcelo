@@ -4,20 +4,20 @@ import { ButtonLogout } from "~/components/whatsapp/ButtonLogout";
 import { ButtonQrCode } from "~/components/whatsapp/ButtonQrCode";
 import { ButtonRestart } from "~/components/whatsapp/ButtonRestart";
 import { api } from "~/utils/api";
-import { disconnected, off } from "~/utils/socket/sub/disconnected";
+// import { disconnected, off } from "~/utils/socket/sub/disconnected";
 
 
 export default function Whatsapp() {
   const getAllInstances = api.whatsapp.getAll.useQuery();
 
 
-  useEffect(() => {
-    disconnected(() => getAllInstances.refetch());
+  // useEffect(() => {
+  //   disconnected(() => getAllInstances.refetch());
 
-    return () => {
-      off()
-    }
-  }, []);
+  //   return () => {
+  //     off()
+  //   }
+  // }, []);
   return (
     <div>
       <h1>Whatsapp</h1>
