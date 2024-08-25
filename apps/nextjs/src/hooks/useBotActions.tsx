@@ -244,6 +244,7 @@ body - main content of the notification
           return newValue;
         });
         await apiUtils.whatsapp.getGroupChats.invalidate();
+        await apiUtils.chat.getMessagesByChatId.invalidate();
         if (data.payload.message.fromMe || !data.payload.authorInfo) return;
         await play();
 
