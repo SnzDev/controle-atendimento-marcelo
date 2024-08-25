@@ -7,7 +7,7 @@ type MessageProps =
     message: Message;
     toInfo: InstanceInfo;
     fromInfo: InstanceInfo;
-    authorInfo: InstanceInfo;
+    authorInfo?: InstanceInfo | null;
     mimeType: string | undefined;
     fileKey: string | undefined;
 

@@ -6,6 +6,7 @@ import { createOrUpdateContact } from "./utils/contact";
 import { getHasChat } from "./utils/chat";
 import { BotActionPubSub } from "~/pub-sub";
 import { BotActionTypes } from "@morpheus/validators";
+import { serialize } from "superjson";
 
 
 
@@ -14,7 +15,8 @@ const messageSchema = z.object({
   mimeType: z.string().optional(),
   message: z.object({
     id: z.object({
-      id: z.string()
+      id: z.string(),
+      _serialized: z.string()
     }),
     isGif: z.boolean().optional(),
     type: typeMessageSchema,
@@ -70,7 +72,8 @@ export const messageCreate = (socket: Socket) => {
     if (!hasChat) return;
     await createOrUpdateMessage({
       id: {
-        id: parse.data.message.id.id
+        id: parse.data.message.id.id,
+        serialized: parse.data.message.id._serialized
       },
       ack: parse.data.message.ack,
       body: parse.data.message.body,

@@ -202,18 +202,19 @@ body - main content of the notification
         });
       }
       if (data.action === BotActionTypes.MessageGroup) {
-        const isPendingOrMyAssignment = findChatsFromInstance?.findIndex(
-          (chat) =>
-            (chat.contact?.phone === data.payload.fromInfo.phone ||
-              !chat.userId) &&
-            !chat.finalizedAt,
-        );
-        if (isPendingOrMyAssignment == -1 || !isPendingOrMyAssignment) return;
 
-        apiUtils.chat.findChats.setData(undefined, (prev) => {
+
+        apiUtils.whatsapp.getGroupChats.setData(undefined, (prev) => {
           const newValue = prev ? [...prev] : [];
+
+          const groupIndex = newValue.findIndex(
+            (chat) => chat.contactId === data.payload.message.id.remote,
+          );
+          if (!groupIndex) return prev;
+
+
           const dataPayload = {
-            ...newValue[isPendingOrMyAssignment],
+            ...newValue[groupIndex],
             lastMessage: {
               fromMe: data.payload.message.fromMe,
               id: "",
@@ -221,7 +222,7 @@ body - main content of the notification
               body: data.payload.message.body,
               ack: data.payload.message.ack,
               type: data.payload.message.type,
-              chatId: findChatsFromInstance?.[isPendingOrMyAssignment]?.chatId ?? "",
+              chatId: newValue[groupIndex]?.id ?? "",
               fileKey: data.payload.message.fileKey ?? null,
               from: data.payload.fromInfo.phone,
               isGif: data.payload.message.isGif ?? false,
@@ -234,48 +235,41 @@ body - main content of the notification
               updatedAt: new Date(),
               vcard: data.payload.message.vCards ?? null,
             },
-            unreadMessagesLenth: (newValue?.[isPendingOrMyAssignment]?.unreadMessagesLenth ?? 0) + 1
           }
 
           //@ts-expect-error - data is not null
-          newValue[isPendingOrMyAssignment] = {
+          newValue[groupIndex] = {
             ...dataPayload,
           };
           return newValue;
         });
 
-        void apiUtils.chat.getMessagesByChatId.invalidate({
-          chatId: findChatsFromInstance?.[isPendingOrMyAssignment]?.chatId ?? undefined,
-        });
-
+        if (data.payload.message.fromMe || !data.payload.authorInfo) return;
         await play();
 
-        const status = findChatsFromInstance?.[isPendingOrMyAssignment]?.userId
-          ? "Em Atendimento"
-          : "Pendente";
 
         await checkPageStatus(
-          `${data.payload.fromInfo.pushname} (${status})`,
+          `${data.payload.authorInfo?.pushname}`,
           `Disse: ${data.payload.message.body}`,
         );
         toast({
-          title: `Nova mensagem - ${data.payload.fromInfo.pushname} (${status})`,
+          title: `${data.payload.authorInfo?.pushname}`,
           description: (
             <div className="flex gap-2">
               <Avatar>
                 <AvatarImage src={data.payload.fromInfo.profilePicUrl} />
                 <AvatarFallback>
-                  {data.payload.fromInfo.pushname}
+                  {data.payload.authorInfo?.pushname}
                 </AvatarFallback>
               </Avatar>
 
               <div>
                 <div className="flex flex-col">
                   <span className="text-sm text-muted-foreground">
-                    {data.payload.fromInfo.phone}
+                    {data.payload.authorInfo?.phone}
                   </span>
                   <div className="flex gap-2">
-                    <strong>{data.payload.fromInfo.pushname}</strong>
+                    <strong>{data.payload.authorInfo?.pushname}</strong>
                     <p className="max-w-[200px] truncate">
                       Disse: {data.payload.message.body}
                     </p>

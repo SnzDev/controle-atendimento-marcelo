@@ -9,6 +9,7 @@ type TypeMessage = z.infer<typeof typeMessageSchema>;
 interface CreateOrUpdateMessage {
   id: {
     id: string;
+    serialized: string;
   };
   ack: number;
   body: string;
@@ -43,6 +44,7 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
   if (message) return await prisma.whatsappMessages.update({
     where: { id: props.id.id },
     data: {
+      serialized: props.id.serialized,
       protocol: props.id.id,
       ack: props.ack,
       body,
@@ -61,6 +63,7 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
 
   return await prisma.whatsappMessages.create({
     data: {
+      serialized: props.id.serialized,
       protocol: props.id.id,
       ack: props.ack,
       body,

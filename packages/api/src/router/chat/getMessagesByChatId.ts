@@ -10,6 +10,9 @@ export const getMessagesByChatId = protectedProcedure.input(z.object({
     where: {
       chatId: input.chatId,
     },
+    include: {
+      authorContact: true
+    }
   });
 
 

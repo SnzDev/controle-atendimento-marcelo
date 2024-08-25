@@ -10,9 +10,17 @@ import { Ban, ExternalLink, FileText, Trash2 } from "lucide-react";
 import type { RouterOutputs } from "@morpheus/api";
 
 import { GifVideoExpand, ImageExpand } from "~/components/ImageExpand";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "~/components/ui/context-menu";
-import { AckIcon } from "./Ack";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "~/components/ui/context-menu";
 import { deleteMessageEveryone } from "~/lib/socket.io/pub/delete-message-everyone";
+import { AckIcon } from "./Ack";
+import { cn } from "~/lib/utils";
+import { MessageIsRevoked } from "./MessageIsRevoked";
 
 export type Message = RouterOutputs["chat"]["getMessagesByChatId"][number];
 
@@ -45,54 +53,98 @@ export const Balloon = ({ message }: BalloonProps) => {
     .replace(/`(.*?)`/g, "<code>$1</code>")
     .replace(/"(.*?)"/g, "<p>$1</p>");
 
+  const showAuthor = message.author && !message.fromMe;
+  const canBeDeleted = !!message.serialized && !!message.createdAt && (new Date().getTime() - message.timestamp * 1000 < 1000 * 60 * 60 * 24);
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <div
-          className={`flex h-fit max-w-[20rem] flex-col flex-wrap items-end gap-1 rounded-lg p-2 ${message.fromMe ? "self-end bg-primary pl-4 text-white" : "self-start bg-primary/75 pr-4 text-white"}`}
+        <div className={cn("flex gap-2",
+          message.fromMe && "self-end ",
+          !message.fromMe && "self-start")}
         >
-          {message.isRevoked && (
-            <p className="text-gray-500 mb-1 flex flex-row items-center gap-2">
-              <Ban size={15} /> Mensagem apagada
-            </p>
-          )}
-
-          {message.fileUrl && isImage && <ImageBody fileUrl={message.fileUrl} />}
-          {message.fileUrl && isVideo && (
-            <VideoBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
-          )}
-          {message.fileUrl && isGif && (
-            <GifBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
-          )}
-          {message.fileUrl && isAudio && (
-            <AudioBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
-          )}
-          {message.location && isLocation && (
-            <LocationBody location={message.location as unknown as Location} />
-          )}
-          {message.fileUrl && isDocument && (
-            <DocumentBody documentUrl={message.fileUrl} />
+          {showAuthor && (
+            <Avatar>
+              <AvatarImage
+                src={message.authorContact?.profilePicUrl ?? undefined}
+                alt={message.authorContact?.name}
+              />
+              <AvatarFallback>
+                {message.authorContact?.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
           )}
           <div
-            dangerouslySetInnerHTML={{ __html: messageHtml }}
-            className="text-gray-500 dont-break-out w-full items-center gap-2 whitespace-pre-wrap break-words"
-          />
+            className={cn("flex gap-1 flex-col rounded-lg p-2 items-end flex-wrap max-w-[20rem] h-fit",
+              message.fromMe && "bg-primary pl-4 text-white",
+              !message.fromMe && " bg-primary/75 pr-4 text-white"
+            )}
+          >
+
+            <MessageIsRevoked isRevoked={message.isRevoked}>
+
+              {showAuthor && (
+                <span className="mb-2 self-start font-bold">
+                  {message.authorContact?.name}
+                </span>
+              )}
 
 
-          <span className="mt-[-3px] flex w-full items-center justify-end text-xs">
-            {date}
-            {message.fromMe && <AckIcon ack={message.ack} />}
-          </span>
+
+              {message.fileUrl && isImage && (
+                <ImageBody fileUrl={message.fileUrl} />
+              )}
+              {message.fileUrl && isVideo && (
+                <VideoBody
+                  mimeType={message.mimetype}
+                  fileUrl={message.fileUrl}
+                />
+              )}
+              {message.fileUrl && isGif && (
+                <GifBody mimeType={message.mimetype} fileUrl={message.fileUrl} />
+              )}
+              {message.fileUrl && isAudio && (
+                <AudioBody
+                  mimeType={message.mimetype}
+                  fileUrl={message.fileUrl}
+                />
+              )}
+              {message.location && isLocation && (
+                <LocationBody
+                  location={message.location as unknown as Location}
+                />
+              )}
+              {message.fileUrl && isDocument && (
+                <DocumentBody documentUrl={message.fileUrl} />
+              )}
+
+
+              <div
+                dangerouslySetInnerHTML={{ __html: messageHtml }}
+                className="text-gray-500 dont-break-out w-full items-center gap-2 whitespace-pre-wrap break-words"
+              />
+            </MessageIsRevoked>
+
+            <span className="mt-[-3px] flex w-full items-center justify-end text-xs">
+              {date}
+              {message.fromMe && <AckIcon ack={message.ack} />}
+            </span>
+          </div>
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onClick={() => {
-          deleteMessageEveryone({
-            protocol: message.protocol,
-          })
-        }}><Trash2 size="16" className="mr-2" /> Excluir</ContextMenuItem>
+
+        {canBeDeleted && <ContextMenuItem
+          onClick={() => {
+            if (message.serialized)
+              deleteMessageEveryone({
+                protocol: message.serialized,
+              });
+          }}
+        >
+          <Trash2 size="16" className="mr-2" /> Excluir
+        </ContextMenuItem>}
       </ContextMenuContent>
-    </ContextMenu>
+    </ContextMenu >
   );
 };
 
@@ -103,9 +155,7 @@ interface ImageBodyProps {
 export const ImageBody = ({ fileUrl }: ImageBodyProps) => {
   return (
     <div className="relative">
-      <ImageExpand
-        imageUrl={fileUrl}
-      >
+      <ImageExpand imageUrl={fileUrl}>
         <Image
           src={fileUrl}
           width={600}
@@ -142,10 +192,7 @@ interface GifBodyProps {
 export const GifBody = ({ fileUrl, mimeType }: GifBodyProps) => {
   return (
     <div className="relative">
-      <GifVideoExpand
-        videoUrl={fileUrl}
-        mimeType={mimeType ?? undefined}
-      >
+      <GifVideoExpand videoUrl={fileUrl} mimeType={mimeType ?? undefined}>
         <video width="100%" autoPlay loop>
           <source src={fileUrl} type={mimeType ?? "application/mp4"} />
           Your browser does not support the video tag.

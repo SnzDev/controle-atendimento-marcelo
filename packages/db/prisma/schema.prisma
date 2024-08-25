@@ -278,25 +278,26 @@ model WhatsappContact {
 }
 
 model WhatsappMessages {
-  id        String   @id @default(cuid())
-  type      String   @default("chat")
-  chatId    String
-  from      String
-  to        String
-  author    String?
-  ack       Int
-  fromMe    Boolean
-  body      String   @db.Text
-  protocol  String
-  timestamp Int
-  fileKey   String?
-  isGif     Boolean  @default(false)
-  mimetype  String?
-  vcard     Json?
-  location  Json?
-  isRevoked Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  type       String   @default("chat")
+  chatId     String
+  from       String
+  to         String
+  author     String?
+  ack        Int
+  fromMe     Boolean
+  body       String   @db.Text
+  protocol   String
+  serialized String?
+  timestamp  Int
+  fileKey    String?
+  isGif      Boolean  @default(false)
+  mimetype   String?
+  vcard      Json?
+  location   Json?
+  isRevoked  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   fromContact   WhatsappContact  @relation("fromContact", fields: [from], references: [id])
   toContact     WhatsappContact  @relation("toContact", fields: [to], references: [id])

@@ -158,7 +158,7 @@ class Instance {
 
       const contactInfo: InstanceInfo = {
         phone: chat.id._serialized,
-        platform: 'group',
+        platform: data.deviceType,
         pushname: contact.pushname ?? contact.name,
         profilePicUrl: await contact.getProfilePicUrl(),
       };
@@ -178,8 +178,8 @@ class Instance {
     });
 
     this.client.on("message_create", async (data) => {
-      console.log('message');
-      console.log(!data.id.remote.includes("@c.us") ||
+      console.log('message_create');
+      console.log(!data.id.remote.includes("@c.us") &&
         !data.id.remote.includes("@g.us"), { remote: data.id.remote });
       if (
         !data.id.remote.includes("@c.us") &&
@@ -195,56 +195,41 @@ class Instance {
         data.id.remote
       );
 
-
       const contactInfo: InstanceInfo = {
-        phone: contact.number ?? data.id.remote,
-        platform: 'group',
-        pushname: contact.pushname ?? contact.name,
+        phone: contact.isGroup ? data.id.remote : contact.number,
+        platform: contact.isGroup ? 'group' : data.deviceType,
+        pushname: contact.isGroup ? contact.pushname ?? contact.name : contact.pushname,
         profilePicUrl: await contact.getProfilePicUrl(),
       };
       const s3Uploaded = await SaveIfHaveFileS3(data);
 
-      if (isGroup && data.author) {
-        const author = await this.client.getContactById(
-          data.author?.replace(/:(.*?)@/, "@")
-        );
-        const authorInfo: InstanceInfo = {
-          phone: author.number,
-          platform: data.deviceType,
-          pushname: author.pushname,
-          profilePicUrl: await author.getProfilePicUrl(),
-        };
-
-        console.log({ authorInfo, contactInfo });
-
-
-        console.log({
-          receive: false,
-          message: data,
-          toInfo: data.fromMe ? contactInfo : this.info,
-          fromInfo: data.fromMe ? this.info : contactInfo,
-          authorInfo: authorInfo,
-          mimeType: s3Uploaded?.mimeType,
-          fileKey: s3Uploaded?.fileKey,
-        })
-
-        return messageGroup({
-          message: data,
-          toInfo: data.fromMe ? contactInfo : this.info,
-          fromInfo: data.fromMe ? this.info : contactInfo,
-          authorInfo: authorInfo,
-          mimeType: s3Uploaded?.mimeType,
-          fileKey: s3Uploaded?.fileKey,
-        });
-      }
-
       const response = {
         message: data,
-        toInfo: contactInfo,
-        fromInfo: this.info,
+        toInfo: data.fromMe ? contactInfo : this.info,
+        fromInfo: data.fromMe ? this.info : contactInfo,
         mimeType: s3Uploaded?.mimeType,
         fileKey: s3Uploaded?.fileKey,
+        authorInfo: null as null | InstanceInfo,
       };
+      if (isGroup) {
+        if (data.author) {
+          const author = await this.client.getContactById(
+            data.author?.replace(/:(.*?)@/, "@")
+          );
+          const authorInfo: InstanceInfo = {
+            phone: author.number,
+            platform: data.deviceType,
+            pushname: author.pushname,
+            profilePicUrl: await author.getProfilePicUrl(),
+          };
+          response.authorInfo = authorInfo;
+        }
+        console.log(response)
+
+        return messageGroup(response);
+      }
+
+
       if (data.id.remote.includes("@c.us")) return messageCreate(response);
 
     });

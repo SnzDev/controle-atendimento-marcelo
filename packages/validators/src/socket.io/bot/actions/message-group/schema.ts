@@ -7,6 +7,7 @@ export const messageGroupPayloadSchema = z.object({
   message: z.object({
     id: z.object({
       id: z.string(),
+      remote: z.string(),
     }),
     ack: z.number(),
     body: z.string(),
@@ -42,7 +43,7 @@ export const messageGroupPayloadSchema = z.object({
     pushname: z.string(),
     phone: z.string(),
     profilePicUrl: z.string().optional(),
-  }),
+  }).nullish(),
 });
 
 export const messageGroupSchema = defaultSchemaBot.merge(

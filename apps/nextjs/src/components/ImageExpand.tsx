@@ -16,7 +16,7 @@ export const ImageExpand = ({ imageUrl, children }: ImageExpandProps) => {
       {children}
     </button>
     {disclose.isVisible &&
-      <div className="fixed inset-0 z-[1300] flex items-center backdrop-blur-sm justify-center w-screen h-screen bg-gray-900 bg-opacity-50">
+      <div className="fixed inset-0 z-[1300] flex items-center backdrop-blur-sm bg-black justify-center w-screen h-screen bg-gray-900 bg-opacity-60">
         <div ref={disclose.ref} className=" h-fit w-fit  flex flex-col justify-center items-center  shadow-md ">
           <Image src={imageUrl} alt='image' className="rounded-md" width={500} height={500} />
         </div>

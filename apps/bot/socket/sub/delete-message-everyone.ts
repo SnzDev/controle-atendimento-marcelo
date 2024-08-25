@@ -15,12 +15,12 @@ export const deleteMessageEveryone = (client: Client) => {
     if (!parse.success) return console.log(parse.error.format());
 
     const { protocol } = parse.data;
-
-    const message = await client.getMessageById(protocol);
-
-    if (!message) return;
     try {
-      await message.delete();
+      const message = await client.getMessageById(protocol);
+
+      console.log({ message })
+      if (!message) return;
+      await message.delete(true);
     }
     catch (e) {
       console.log(e);

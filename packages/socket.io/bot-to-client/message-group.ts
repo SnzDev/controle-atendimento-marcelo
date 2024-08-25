@@ -14,7 +14,9 @@ const messageSchema = z.object({
   mimeType: z.string().optional(),
   message: z.object({
     id: z.object({
-      id: z.string()
+      id: z.string(),
+      remote: z.string(),
+      _serialized: z.string(),
     }),
     isGif: z.boolean().optional(),
     type: typeMessageSchema,
@@ -48,7 +50,7 @@ const messageSchema = z.object({
     platform: z.string().optional(),
     profilePicUrl: z.string().optional(),
     phone: z.string()
-  }),
+  }).nullish(),
 })
 type MessageData = z.infer<typeof messageSchema>;
 export const messageGroup = (socket: Socket) => {
@@ -71,16 +73,19 @@ export const messageGroup = (socket: Socket) => {
 
     const fromInfo = await createOrUpdateContact(parse.data.fromInfo);
     const toInfo = await createOrUpdateContact(parse.data.toInfo);
-    const authorInfo = await createOrUpdateContact(parse.data.authorInfo);
+
+    let authorInfo = null;
+    if (!!parse.data.authorInfo?.phone)
+      authorInfo = await createOrUpdateContact(parse.data.authorInfo);
 
     const hasChat = await getHasChat({ contactId: fromInfo.isGroup ? fromInfo.id : toInfo.id, instanceId: instance[0].id, fromMe: parse.data.message.fromMe, isGroup: true, });
     console.log({ hasChat });
     if (!hasChat) return;
     await createOrUpdateMessage({
       id: {
-        id: parse.data.message.id.id
+        id: parse.data.message.id.id,
+        serialized: parse.data.message.id._serialized,
       },
-
       ack: parse.data.message.ack,
       body: parse.data.message.body,
       fromMe: parse.data.message.fromMe,
@@ -92,7 +97,7 @@ export const messageGroup = (socket: Socket) => {
       fromContactId: fromInfo.id,
       toContactId: toInfo.id,
       chatId: hasChat.id,
-      author: authorInfo.id,
+      author: authorInfo?.id,
       mimeType: parse.data.mimeType,
       isGif: parse.data.message.isGif
     });

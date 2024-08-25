@@ -6,13 +6,15 @@ import { useState } from "react";
 
 import { Textarea } from "~/components/ui/textarea";
 import { messageSend } from "~/lib/socket.io/pub/message-send";
-import { api } from "~/utils/api";
+import { api, type RouterOutputs } from "~/utils/api";
 
 interface SendMessageProps {
   phone: string;
   chatId: string;
 }
 
+
+type Message = RouterOutputs["chat"]["getMessagesByChatId"][number];
 export function SendMessage({ phone, chatId }: SendMessageProps) {
   const [handleInputMessage, setHandleInputMessage] = useState("");
   const { data } = api.auth.getSession.useQuery();
@@ -29,14 +31,15 @@ export function SendMessage({ phone, chatId }: SendMessageProps) {
       message: `*${data?.user.name}*: ${handleInputMessage}`,
     });
 
-    //@ts-expect-error - data is not null
     apiUtils.chat.getMessagesByChatId.setData({ chatId }, (prev) => {
-      if (prev) return prev;
-      return prev ? [...prev, {
+      if (!prev) return prev;
+
+      const info: Message = {
         fromMe: true, ack: 0, body: `*${data?.user.name}*: ${handleInputMessage}`,
         chatId,
         fileKey: null,
         from: "",
+        type: "chat",
         id: "",
         isGif: false,
         isRevoked: false,
@@ -45,13 +48,24 @@ export function SendMessage({ phone, chatId }: SendMessageProps) {
         protocol: "",
         timestamp: new Date().getTime(),
         to: phone,
-        type: "chat",
         updatedAt: new Date(),
         createdAt: new Date(),
         vcard: null,
-        author: data?.user.id,
+        author: data?.user.id ?? null,
         fileUrl: null,
-      }] : [];
+        authorContact: {
+          id: "",
+          name: "",
+          phone: "",
+          profilePicUrl: "",
+          isGroup: false,
+          platform: "",
+
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      }
+      return prev ? [...prev, info] : [];
     })
     setHandleInputMessage("");
   };

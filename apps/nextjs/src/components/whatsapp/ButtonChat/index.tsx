@@ -9,6 +9,7 @@ import { useQueryParams } from "~/hooks/useQueryParams";
 import { api } from "~/utils/api";
 import { Balloon } from "./Balloon";
 import { SendMessage } from "./SendMessage";
+import { useEffect, useRef } from "react";
 
 interface ChatWhatsappProps {
   chatId?: string;
@@ -34,17 +35,22 @@ export function ChatWhatsapp({ chatId = "" }: ChatWhatsappProps) {
     },
   );
 
+  const bottomRef = useRef<HTMLDivElement>(null);
+
   function scrollToBottom() {
-    const element = document.getElementById("modal-chat");
-    if (element) {
-      element.scrollTop = element.scrollHeight;
-    }
+    if (!bottomRef.current) return;
+    bottomRef.current.scrollIntoView({ behavior: "auto" });
   }
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [bottomRef, chatId, messages]);
+
 
   if (!messages)
     return (
       <div className="flex h-full w-full max-w-[1000px]  flex-col items-center justify-center  rounded-lg bg-white shadow-md">
-        Nada ainda
+        Nenhuma mensagem encontrada
       </div>
     );
 
@@ -106,11 +112,12 @@ export function ChatWhatsapp({ chatId = "" }: ChatWhatsappProps) {
 
       <div className="bg-chatBackground flex w-full h-full flex-col justify-between pb-5 rounded-b-lg">
         <div
-          className="flex flex-col gap-2 overflow-y-scroll p-10 pt-2"
+          className="flex flex-col gap-2 overflow-y-auto p-10 pt-2"
         >
           {messages?.map((message) => (
             <Balloon key={message.id} message={message} />
           ))}
+          <div ref={bottomRef}></div>
         </div>
 
         <SendMessage chatId={chatId} phone={contact?.phone ?? ""} />

@@ -10,6 +10,7 @@ import { qr } from "./bot-to-client/qr";
 import { ready } from "./bot-to-client/ready";
 import { messageSend } from "./client-to-bot/message-send";
 import { logout } from "./client-to-bot/logout";
+import { deleteMessageEveryone } from "./client-to-bot/delete-message-everyone";
 
 const server = http.createServer();
 const io = new Server(server, { cors: { origin: "*" } });
@@ -37,6 +38,7 @@ io.on("connection", (socket) => {
   // Client to Bot
   logout(socket);
   messageSend(socket);
+  deleteMessageEveryone(socket);
 
 });
 
