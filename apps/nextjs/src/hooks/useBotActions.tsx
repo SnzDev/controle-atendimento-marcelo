@@ -297,6 +297,10 @@ body - main content of the notification
           variant: "destructive",
         });
       }
+
+      if (data.action === BotActionTypes.Ack) {
+        await apiUtils.chat.getMessagesByChatId.invalidate();
+      }
     },
     [findChatsFromInstance],
   );
