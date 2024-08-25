@@ -133,7 +133,7 @@ class Instance {
 
       const profilePicUrl = await this.client.getProfilePicUrl(
         this.client.info.wid._serialized
-      );
+      ).catch(() => "");
       const { platform, pushname, wid } = this.client.info;
       this.info = { platform, pushname, phone: wid.user, profilePicUrl };
 
@@ -160,7 +160,7 @@ class Instance {
         phone: chat.id._serialized,
         platform: data.deviceType,
         pushname: contact.pushname ?? contact.name,
-        profilePicUrl: await contact.getProfilePicUrl(),
+        profilePicUrl: await contact.getProfilePicUrl().catch(() => ""),
       };
       const s3Uploaded = await SaveIfHaveFileS3(data);
 
@@ -199,7 +199,7 @@ class Instance {
         phone: contact.isGroup ? data.id.remote : contact.number,
         platform: contact.isGroup ? 'group' : data.deviceType,
         pushname: contact.isGroup ? contact.pushname ?? contact.name : contact.pushname,
-        profilePicUrl: await contact.getProfilePicUrl(),
+        profilePicUrl: await contact.getProfilePicUrl().catch(() => ""),
       };
       const s3Uploaded = await SaveIfHaveFileS3(data);
 
@@ -220,7 +220,7 @@ class Instance {
             phone: author.number,
             platform: data.deviceType,
             pushname: author.pushname,
-            profilePicUrl: await author.getProfilePicUrl(),
+            profilePicUrl: await author.getProfilePicUrl().catch(() => ""),
           };
           response.authorInfo = authorInfo;
         }
