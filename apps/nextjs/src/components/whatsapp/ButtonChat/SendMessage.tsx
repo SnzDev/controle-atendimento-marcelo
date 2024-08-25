@@ -36,6 +36,7 @@ export function SendMessage({ phone, chatId }: SendMessageProps) {
 
       const info: Message = {
         fromMe: true, ack: 0, body: `*${data?.user.name}*: ${handleInputMessage}`,
+        serialized: "",
         chatId,
         fileKey: null,
         from: "",
