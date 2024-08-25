@@ -202,47 +202,6 @@ body - main content of the notification
         });
       }
       if (data.action === BotActionTypes.MessageGroup) {
-
-
-        apiUtils.whatsapp.getGroupChats.setData(undefined, (prev) => {
-          const newValue = prev ? [...prev] : [];
-
-          const groupIndex = newValue.findIndex(
-            (chat) => chat.contactId === data.payload.message.id.remote,
-          );
-          if (!groupIndex) return prev;
-
-
-          const dataPayload = {
-            ...newValue[groupIndex],
-            lastMessage: {
-              fromMe: data.payload.message.fromMe,
-              id: "",
-              createdAt: new Date(),
-              body: data.payload.message.body,
-              ack: data.payload.message.ack,
-              type: data.payload.message.type,
-              chatId: newValue[groupIndex]?.id ?? "",
-              fileKey: data.payload.message.fileKey ?? null,
-              from: data.payload.fromInfo.phone,
-              isGif: data.payload.message.isGif ?? false,
-              isRevoked: false,
-              location: data.payload.message.location ?? null,
-              mimetype: "",
-              protocol: "",
-              timestamp: data.payload.message.timestamp,
-              to: data.payload.toInfo.phone,
-              updatedAt: new Date(),
-              vcard: data.payload.message.vCards ?? null,
-            },
-          }
-
-          //@ts-expect-error - data is not null
-          newValue[groupIndex] = {
-            ...dataPayload,
-          };
-          return newValue;
-        });
         await apiUtils.whatsapp.getGroupChats.invalidate();
         await apiUtils.chat.getMessagesByChatId.invalidate();
         if (data.payload.message.fromMe || !data.payload.authorInfo) return;
