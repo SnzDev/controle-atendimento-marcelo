@@ -65,7 +65,6 @@ export const messageGroup = (socket: Socket) => {
         protocol: data.message.id.id,
       },
     );
-    botAction.pub();
     const parse = messageSchema.safeParse(data);
     const instance = await prisma.whatsappInstance.findMany();
 
@@ -101,6 +100,6 @@ export const messageGroup = (socket: Socket) => {
       mimeType: parse.data.mimeType,
       isGif: parse.data.message.isGif
     });
-
+    botAction.pub();
   });
 }
