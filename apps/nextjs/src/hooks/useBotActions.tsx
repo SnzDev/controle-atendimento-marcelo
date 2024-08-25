@@ -257,7 +257,7 @@ body - main content of the notification
           description: (
             <div className="flex gap-2">
               <Avatar>
-                <AvatarImage src={data.payload.fromInfo.profilePicUrl} />
+                <AvatarImage src={data.payload.authorInfo.profilePicUrl} />
                 <AvatarFallback>
                   {data.payload.authorInfo?.pushname}
                 </AvatarFallback>
