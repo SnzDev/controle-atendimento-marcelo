@@ -31,6 +31,7 @@ interface CreateOrUpdateMessage {
 }
 
 export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
+  if (!props.id.id) return;
   const message = await prisma.whatsappMessages.findFirst({
     where: {
       protocol: props.id.id
@@ -38,7 +39,8 @@ export const createOrUpdateMessage = async (props: CreateOrUpdateMessage) => {
   });
   const body = ['chat', 'document', 'image'].includes(props.type) ? props.body : '';
 
-  if (message && props.id.id) return await prisma.whatsappMessages.update({
+
+  if (message) return await prisma.whatsappMessages.update({
     where: { id: props.id.id },
     data: {
       protocol: props.id.id,

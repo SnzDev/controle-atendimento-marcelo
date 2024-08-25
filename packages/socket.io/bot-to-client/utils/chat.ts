@@ -8,7 +8,7 @@ const MAX_TRIES = 3;
 interface HasChatProps {
   contactId: string;
   instanceId: string;
-  fromMe: boolean;
+  fromMe?: boolean;
   isGroup?: boolean;
 }
 export const getHasChat = async ({ contactId, instanceId, fromMe, isGroup }: HasChatProps) => {

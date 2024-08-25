@@ -66,8 +66,8 @@ export const messageCreate = (socket: Socket) => {
     const fromInfo = await createOrUpdateContact(parse.data.fromInfo);
     const toInfo = await createOrUpdateContact(parse.data.toInfo);
 
-    const hasChat = await getHasChat({ contactId: toInfo.id, instanceId: instance[0].id })
-
+    const hasChat = await getHasChat({ contactId: toInfo.id, instanceId: instance[0].id, })
+    if (!hasChat) return;
     await createOrUpdateMessage({
       id: {
         id: parse.data.message.id.id
@@ -82,7 +82,7 @@ export const messageCreate = (socket: Socket) => {
       type: parse.data.message.type,
       fromContactId: fromInfo.id,
       toContactId: toInfo.id,
-      chatId: hasChat.id,
+      chatId: hasChat?.id,
       mimeType: parse.data.mimeType,
       isGif: parse.data.message.isGif
     });
