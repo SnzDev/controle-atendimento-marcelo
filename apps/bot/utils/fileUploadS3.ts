@@ -1,7 +1,7 @@
 import { Client } from "minio";
 
 // Set your bucket name
-const endPoint = "localhost";
+const endPoint = process.env.S3_ENDPOINT ?? "localhost";
 const port = 9000;
 const bucketName = process.env.S3_BUCKET ?? "morpheus";
 const accessKey = process.env.S3_ACCESS_KEY_ID ?? "4ce753c0b96c69c08e6dac5e02d20989";
