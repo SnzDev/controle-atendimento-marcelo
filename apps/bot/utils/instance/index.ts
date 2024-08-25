@@ -146,6 +146,7 @@ class Instance {
     });
 
     this.client.on("message", async (data) => {
+      console.log('message_receive');
 
       if (
         !data.id.remote.includes("@c.us")
@@ -179,12 +180,11 @@ class Instance {
 
     this.client.on("message_create", async (data) => {
       console.log('message_create');
-      console.log(!data.id.remote.includes("@c.us") &&
-        !data.id.remote.includes("@g.us"), { remote: data.id.remote });
-      if (
-        !data.id.remote.includes("@c.us") &&
-        !data.id.remote.includes("@g.us")
-      )
+      const isIndividualChat = data.id.remote.includes("@c.us");
+      const isGroupChat = data.id.remote.includes("@g.us");
+      const isFromMe = data.fromMe;
+
+      if ((!isIndividualChat && !isGroupChat) || (isIndividualChat && !isFromMe))
         return;
 
       const chat = await data.getChat();
