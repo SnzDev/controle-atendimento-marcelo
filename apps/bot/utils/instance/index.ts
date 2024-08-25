@@ -146,13 +146,12 @@ class Instance {
     });
 
     this.client.on("message", async (data) => {
-      console.log('message_receive');
 
       if (
         !data.id.remote.includes("@c.us")
       )
         return;
-
+      console.log('message_receive');
       const chat = await data.getChat();
 
       const contact = await chat.getContact();
@@ -179,13 +178,13 @@ class Instance {
     });
 
     this.client.on("message_create", async (data) => {
-      console.log('message_create');
       const isIndividualChat = data.id.remote.includes("@c.us");
       const isGroupChat = data.id.remote.includes("@g.us");
       const isFromMe = data.fromMe;
 
       if ((!isIndividualChat && !isGroupChat) || (isIndividualChat && !isFromMe))
         return;
+      console.log('message_create');
 
       const chat = await data.getChat();
       const isGroup = chat.isGroup;
